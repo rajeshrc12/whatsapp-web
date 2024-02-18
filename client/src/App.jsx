@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import WABG from "./images/whatsapp_back.jpeg";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { io } from "socket.io-client";
+const socket = io("ws://localhost:3002");
 const App = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
@@ -10,20 +11,22 @@ const App = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const sendMessage = async (e) => {
     e.preventDefault();
-    const message = e.target[0].value.trim();
+    const message = e.target[1].value.trim();
     if (message) {
       const resp = await axios.post("http://localhost:3001/sendmessage", {
         message,
         receiptUser: selectedUser,
         currentUser: currentUser.name,
       });
-      console.log(resp);
-      getCurrentUserData();
+      if (resp.status === 200) {
+        getCurrentUserData();
+        socket.emit("server", resp.config.data);
+      }
     } else alert("Enter message");
   };
   const getAllUsers = async () => {
     const resp = await axios.post("http://localhost:3001/users", {
-      user: currentUser.name,
+      user: sessionStorage.getItem("whatsappUser"),
     });
     setUsers(resp.data);
   };
@@ -34,13 +37,22 @@ const App = () => {
     setCurrentUser(resp.data);
   };
   useEffect(() => {
-    if (currentUser) getAllUsers();
-  }, [currentUser]);
-  useEffect(() => {
-    if (sessionStorage.getItem("whatsappUser")) getCurrentUserData();
-    else navigate("/");
+    if (sessionStorage.getItem("whatsappUser")) {
+      getCurrentUserData();
+      getAllUsers();
+    } else navigate("/");
   }, []);
-  console.log(currentUser);
+  useEffect(() => {
+    socket.on("client", (arg) => {
+      getCurrentUserData();
+    });
+  }, [socket]);
+  const isPrintMessage = (from, to) => {
+    if (currentUser.name === from || currentUser.name === to) {
+      if (selectedUser === from || selectedUser === to) return true;
+      else return false;
+    } else return false;
+  };
   return (
     <div className="grid grid-cols-4 h-screen">
       <div className="col-span-1 h-full">
@@ -61,7 +73,9 @@ const App = () => {
           <div className="h-[90vh] overflow-y-scroll">
             {users.map((user) => (
               <div
-                className="cursor-pointer p-5 border border-t-0 border-gray-300"
+                className={`cursor-pointer p-5 border border-t-0 border-gray-300 ${
+                  user.name === selectedUser && "bg-red-200"
+                }`}
                 key={user.name}
                 onClick={() => setSelectedUser(user.name)}
               >
@@ -74,24 +88,116 @@ const App = () => {
       <div className="col-span-3 h-full">
         {selectedUser ? (
           <div
-            className="flex flex-col justify-between h-full bg-red-400"
+            className="flex flex-col justify-between h-full"
             style={{ backgroundImage: `url('${WABG}')` }}
           >
-            <div className="p-3 bg-[#f0f2f5]">{selectedUser}</div>
+            <div className="flex justify-between p-3 bg-[#f0f2f5]">
+              <div>{selectedUser}</div>
+              <div>
+                <button
+                  onClick={async () => {
+                    sessionStorage.removeItem("whatsappUser");
+                    navigate("/");
+                    const response = await axios.get(
+                      "http://localhost:3001/clean"
+                    );
+                    console.log(response);
+                  }}
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
             <div className="h-[82vh] overflow-y-scroll">
               <div className="flex flex-col">
-                {currentUser.chat.map((chat) => (
-                  <div
-                    className={`flex justify-${chat.mine ? "end" : "start"}`}
-                  >
-                    <div className={`p-1 w-[40vw] bg-white m-2 rounded-lg`}>
-                      {chat.message}
-                    </div>
-                  </div>
-                ))}
+                {currentUser.chat.map(
+                  (chat) =>
+                    isPrintMessage(chat.from, chat.to) && (
+                      <div
+                        key={String(chat.updatedAt)}
+                        className={`flex justify-${
+                          chat.mine ? "end" : "start"
+                        }`}
+                      >
+                        {chat.type === "image" ? (
+                          <div
+                            className={`p-1 w-[40vw] bg-white m-2 rounded-lg cursor-pointer`}
+                            onClick={async () => {
+                              const fileId = chat.message; // Replace with your ObjectId
+                              try {
+                                const response = await axios.get(
+                                  `http://localhost:3001/download/${fileId}`,
+                                  { responseType: "blob" }
+                                );
+                                console.log(response);
+                                const url = window.URL.createObjectURL(
+                                  new Blob([response.data])
+                                );
+                                const link = document.createElement("a");
+                                link.href = url;
+                                const ilink = document.createElement("img");
+                                ilink.src = url;
+                                console.log(link);
+                                const filename =
+                                  response.headers["content-type"];
+                                console.log(filename);
+                                link.setAttribute("download", filename); // Set the file name here
+
+                                document.body.appendChild(link);
+                                link.click();
+                              } catch (error) {
+                                console.error("Error downloading file:", error);
+                              }
+                            }}
+                          >
+                            {chat.message}
+                          </div>
+                        ) : (
+                          <div
+                            className={`p-1 w-[40vw] bg-white m-2 rounded-lg`}
+                          >
+                            {chat.message}
+                          </div>
+                        )}
+                      </div>
+                    )
+                )}
               </div>
             </div>
             <form onSubmit={sendMessage} className="flex p-3 bg-[#f0f2f5]">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  e.preventDefault();
+                  const formData = new FormData();
+                  formData.append("file", e.target.files[0]);
+                  formData.append(
+                    "userData",
+                    JSON.stringify({
+                      currentUser: currentUser.name,
+                      receiptUser: selectedUser,
+                    })
+                  );
+                  try {
+                    const response = await axios.post(
+                      "http://localhost:3001/upload",
+                      formData,
+                      {
+                        headers: {
+                          "Content-Type": "multipart/form-data",
+                        },
+                      }
+                    );
+                    getCurrentUserData();
+                    console.log("File uploaded successfully");
+                    console.log(response.data); // This can contain any response from the backend
+                  } catch (error) {
+                    console.error("Error uploading file:", error);
+                  }
+                  console.log(formData, e.target.files[0]);
+                }}
+              />
               <input
                 type="text"
                 name="message"

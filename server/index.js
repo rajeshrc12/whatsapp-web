@@ -187,22 +187,24 @@ app.get("/clean", async (req, res) => {
 
 app.get("/download/:id", async (req, res) => {
   try {
+    // const downloadStream = bucket.openDownloadStream(fileObjectId);
+    // downloadStream.on("error", (err) => {
+    //   res.status(404).json({ message: "File not found" });
+    // });
+    // downloadStream.on("end", () => {
+    //   console.log("File download finished");
+    // });
+    // const arr = file.filename.split(".");
+    // console.log(file.filename, arr[arr.length - 1]);
+    // res.set("Content-Type", file.filename);
+    // // Set filename in the response body
+    // res.set("Content-Disposition", `attachment; filename="${file.filename}"`);
+    // downloadStream.pipe(res);
     const fileId = req.params.id;
     const fileObjectId = new ObjectId(fileId);
     const file = await fsfiles.findOne({ _id: fileObjectId });
-    const downloadStream = bucket.openDownloadStream(fileObjectId);
-    downloadStream.on("error", (err) => {
-      res.status(404).json({ message: "File not found" });
-    });
-
-    downloadStream.on("end", () => {
-      console.log("File download finished");
-    });
-    const arr = file.filename.split(".");
-    console.log(file.filename, arr[arr.length - 1]);
-    res.set("Content-Type", file.filename);
-    // Set filename in the response body
-    res.set("Content-Disposition", `attachment; filename="${file.filename}"`);
+    console.log(file);
+    const downloadStream = bucket.openDownloadStreamByName(file.filename);
     downloadStream.pipe(res);
   } catch (error) {
     console.error("Error downloading file:", error);

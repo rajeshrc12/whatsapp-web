@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import WABG from "./images/whatsapp_back.jpeg";
+import Profile from "./images/profile.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
@@ -9,6 +10,7 @@ const App = () => {
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
+  const [msgImage, setMsgImage] = useState("");
   const sendMessage = async (e) => {
     e.preventDefault();
     const message = e.target[1].value.trim();
@@ -34,8 +36,33 @@ const App = () => {
     const resp = await axios.post("http://localhost:3001/user", {
       user: sessionStorage.getItem("whatsappUser"),
     });
-    setCurrentUser(resp.data);
+    const chatNew = [];
+    try {
+      for (const chat of resp.data.chat) {
+        if (chat.type === "image") {
+          const response = await axios.get(
+            `http://localhost:3001/download/${chat.message}`,
+            {
+              responseType: "blob",
+            }
+          );
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          chatNew.push({
+            ...chat,
+            message: url,
+          });
+        } else {
+          chatNew.push(chat);
+        }
+      }
+      setCurrentUser({ ...resp.data, chat: chatNew });
+      console.log(chatNew);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error;
+    }
   };
+
   useEffect(() => {
     if (sessionStorage.getItem("whatsappUser")) {
       getCurrentUserData();
@@ -120,37 +147,9 @@ const App = () => {
                         }`}
                       >
                         {chat.type === "image" ? (
-                          <div
-                            className={`p-1 w-[40vw] bg-white m-2 rounded-lg cursor-pointer`}
-                            onClick={async () => {
-                              const fileId = chat.message; // Replace with your ObjectId
-                              try {
-                                const response = await axios.get(
-                                  `http://localhost:3001/download/${fileId}`,
-                                  { responseType: "blob" }
-                                );
-                                console.log(response);
-                                const url = window.URL.createObjectURL(
-                                  new Blob([response.data])
-                                );
-                                const link = document.createElement("a");
-                                link.href = url;
-                                const ilink = document.createElement("img");
-                                ilink.src = url;
-                                console.log(link);
-                                const filename =
-                                  response.headers["content-type"];
-                                console.log(filename);
-                                link.setAttribute("download", filename); // Set the file name here
-
-                                document.body.appendChild(link);
-                                link.click();
-                              } catch (error) {
-                                console.error("Error downloading file:", error);
-                              }
-                            }}
-                          >
-                            {chat.message}
+                          <div>
+                            {console.log(chat)}
+                            <img src={chat.message} height={200} width={200} />
                           </div>
                         ) : (
                           <div

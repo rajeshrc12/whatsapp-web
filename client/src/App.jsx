@@ -4,13 +4,17 @@ import Profile from "./images/profile.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { IoMdClose } from "react-icons/io";
+import { FaCircleChevronLeft } from "react-icons/fa6";
+import { FaCircleChevronRight } from "react-icons/fa6";
 const socket = io("ws://localhost:3002");
 const App = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
-  const [msgImage, setMsgImage] = useState("");
+  const [mediaCarousel, setMediaCarousel] = useState(false);
+  const [mediaCarouselIndex, setMediaCarouselIndex] = useState(0);
   const sendMessage = async (e) => {
     e.preventDefault();
     const message = e.target[1].value.trim();
@@ -83,13 +87,17 @@ const App = () => {
     switch (chat.type) {
       case "image":
         return (
-          <div>
+          <div onClick={() => setMediaCarousel(!mediaCarousel)}>
             <img src={chat.message} height={200} width={200} />
           </div>
         );
       case "video":
         return (
-          <video controls width="250">
+          <video
+            controls
+            width="250"
+            onClick={() => setMediaCarousel(!mediaCarousel)}
+          >
             <source src={chat.message} type="video/webm" />
             <source src={chat.message} type="video/mp4" />
             Download the
@@ -107,6 +115,7 @@ const App = () => {
         );
     }
   };
+  console.log(mediaCarouselIndex, currentUser?.chat?.length);
   return (
     <div className="grid grid-cols-4 h-screen">
       <div className="col-span-1 h-full">
@@ -224,6 +233,61 @@ const App = () => {
           <div>No user selected</div>
         )}
       </div>
+      {mediaCarousel && (
+        <div className="fixed top-0 left-0 bg-white h-screen w-screen flex flex-col justify-between">
+          <div className="flex justify-end">
+            <IoMdClose
+              className="p-2"
+              size={30}
+              onClick={() => setMediaCarousel(!mediaCarousel)}
+            />
+          </div>
+          <div className="flex justify-between items-center">
+            <div>
+              <FaCircleChevronLeft
+                size={30}
+                onClick={() => {
+                  if (mediaCarouselIndex > 0) {
+                    setMediaCarouselIndex(mediaCarouselIndex - 1);
+                  } else setMediaCarouselIndex(0);
+                }}
+              />
+            </div>
+            <div>
+              {mediaCarouselIndex < currentUser.chat.length &&
+                renderMessage(currentUser.chat[mediaCarouselIndex])}
+            </div>
+            <div>
+              <FaCircleChevronRight
+                size={30}
+                onClick={() => {
+                  if (mediaCarouselIndex >= currentUser.chat.length - 1) {
+                    setMediaCarouselIndex(0);
+                    setMediaCarousel(!mediaCarousel);
+                  } else {
+                    setMediaCarouselIndex(mediaCarouselIndex + 1);
+                  }
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex justify-center">
+            {currentUser.chat.map(
+              (chat, index) =>
+                isPrintMessage(chat.from, chat.to) && (
+                  <div
+                    className={`w-10 h-10 ${
+                      index === mediaCarouselIndex ? "border border-black" : ""
+                    }`}
+                    key={String(chat.updatedAt)}
+                  >
+                    {renderMessage(chat)}
+                  </div>
+                )
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

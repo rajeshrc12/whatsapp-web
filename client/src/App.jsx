@@ -7,6 +7,9 @@ import { io } from "socket.io-client";
 import { IoMdClose } from "react-icons/io";
 import { FaCircleChevronLeft } from "react-icons/fa6";
 import { FaCircleChevronRight } from "react-icons/fa6";
+import { TiArrowForward } from "react-icons/ti";
+import { MdOutlineInsertEmoticon } from "react-icons/md";
+import Popper from "./components/Popper";
 const socket = io("ws://localhost:3002");
 const App = () => {
   const navigate = useNavigate();
@@ -115,7 +118,21 @@ const App = () => {
         );
     }
   };
-  console.log(mediaCarouselIndex, currentUser?.chat?.length);
+  const updateEmoji = async (id, emoji) => {
+    console.log({
+      chatId: id,
+      emoji,
+      currentUser: currentUser.name,
+      selectedUser,
+    });
+    const resp = await axios.post("http://localhost:3001/updateEmoji", {
+      chatId: id,
+      emoji,
+      currentUser: currentUser.name,
+      selectedUser,
+    });
+    console.log(resp.data);
+  };
   return (
     <div className="grid grid-cols-4 h-screen">
       <div className="col-span-1 h-full">
@@ -177,12 +194,48 @@ const App = () => {
                   (chat) =>
                     isPrintMessage(chat.from, chat.to) && (
                       <div
-                        key={String(chat.updatedAt)}
+                        key={chat._id}
                         className={`flex justify-${
                           chat.mine ? "end" : "start"
                         }`}
                       >
-                        {renderMessage(chat)}
+                        <div className="flex items-center">
+                          <div>
+                            <Popper
+                              content={
+                                <div className="flex bg-white">
+                                  <div
+                                    onClick={(e) =>
+                                      updateEmoji(chat._id, "&#128514;")
+                                    }
+                                  >
+                                    &#128514;
+                                  </div>
+                                  <div
+                                    onClick={(e) =>
+                                      updateEmoji(chat._id, "&#128512;")
+                                    }
+                                  >
+                                    &#128512;
+                                  </div>
+                                </div>
+                              }
+                            >
+                              <MdOutlineInsertEmoticon size={20} />
+                            </Popper>
+                          </div>
+                          <div>
+                            <TiArrowForward size={20} />
+                          </div>
+                          <div className="relative">
+                            {renderMessage(chat)}
+                            {chat.emoji && (
+                              <div className="absolute bottom-0 right-0">
+                                &#128512;
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )
                 )}

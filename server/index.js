@@ -79,6 +79,7 @@ app.post("/users", async (req, res) => {
   }
 });
 const sendMessage = async ({ message, receiptUser, currentUser, type }) => {
+  const messageId = new ObjectId();
   const bulkOperations = [
     {
       updateOne: {
@@ -86,9 +87,11 @@ const sendMessage = async ({ message, receiptUser, currentUser, type }) => {
         update: {
           $push: {
             chat: {
+              _id: messageId,
               from: currentUser,
               to: receiptUser,
               message,
+              emoji: null,
               type,
               mine: true,
               createdAt: new Date(),
@@ -105,9 +108,11 @@ const sendMessage = async ({ message, receiptUser, currentUser, type }) => {
         update: {
           $push: {
             chat: {
+              _id: messageId,
               from: currentUser,
               to: receiptUser,
               message,
+              emoji: null,
               type,
               mine: false,
               createdAt: new Date(),
@@ -198,6 +203,46 @@ app.get("/download/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+app.post("/updateEmoji", async (req, res) => {
+  try {
+    const { chatId, emoji, currentUser, selectedUser } = req.body;
+    const response1 = await users.updateOne(
+      {
+        name: currentUser,
+        "chat._id": chatId,
+      },
+      {
+        $set: {
+          "chat.$.emoji": emoji,
+        },
+      }
+    );
+    const response2 = await users.updateOne(
+      {
+        name: selectedUser,
+        "chat._id": chatId,
+      },
+      {
+        $set: {
+          "chat.$.emoji": emoji,
+        },
+      }
+    );
+    console.log(response1, response2, {
+      chatId,
+      emoji,
+      currentUser,
+      selectedUser,
+    });
+    if (response1 && response2) res.status(200).send("Emoji updated");
+    else res.status(500).send("Emoji not updated");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
+
 // Start the main Express app
 app.listen(port, () => {
   console.log(`API server listening at http://localhost:${port}`);

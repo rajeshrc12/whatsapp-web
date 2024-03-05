@@ -152,6 +152,7 @@ app.post("/user", async (req, res) => {
 app.post("/upload", upload.single("file"), async (req, res) => {
   const file = req.file;
   const { receiptUser, currentUser } = JSON.parse(req.body.userData);
+  console.log("ooo", file.mimetype.split("/")[0]);
   if (file) {
     try {
       // Create a file in GridFS
@@ -159,13 +160,12 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
       // Pipe the file buffer to the GridFS upload stream
       const resp = await uploadStream.end(file.buffer);
-
       if (resp.filename) {
         const response = sendMessage({
           receiptUser,
           currentUser,
           message: String(resp.id),
-          type: "image",
+          type: file.mimetype.split("/")[0],
         });
         if (response) res.status(200).send("File uploaded");
         else res.status(500).send("Error occured while file uploading");
@@ -187,19 +187,6 @@ app.get("/clean", async (req, res) => {
 
 app.get("/download/:id", async (req, res) => {
   try {
-    // const downloadStream = bucket.openDownloadStream(fileObjectId);
-    // downloadStream.on("error", (err) => {
-    //   res.status(404).json({ message: "File not found" });
-    // });
-    // downloadStream.on("end", () => {
-    //   console.log("File download finished");
-    // });
-    // const arr = file.filename.split(".");
-    // console.log(file.filename, arr[arr.length - 1]);
-    // res.set("Content-Type", file.filename);
-    // // Set filename in the response body
-    // res.set("Content-Disposition", `attachment; filename="${file.filename}"`);
-    // downloadStream.pipe(res);
     const fileId = req.params.id;
     const fileObjectId = new ObjectId(fileId);
     const file = await fsfiles.findOne({ _id: fileObjectId });

@@ -39,7 +39,7 @@ const App = () => {
     const chatNew = [];
     try {
       for (const chat of resp.data.chat) {
-        if (chat.type === "image") {
+        if (chat.type === "image" || chat.type === "video") {
           const response = await axios.get(
             `http://localhost:3001/download/${chat.message}`,
             {
@@ -56,13 +56,12 @@ const App = () => {
         }
       }
       setCurrentUser({ ...resp.data, chat: chatNew });
-      console.log(chatNew);
     } catch (error) {
       console.error("Error fetching user data:", error);
       throw error;
     }
   };
-
+  console.log(currentUser);
   useEffect(() => {
     if (sessionStorage.getItem("whatsappUser")) {
       getCurrentUserData();
@@ -79,6 +78,34 @@ const App = () => {
       if (selectedUser === from || selectedUser === to) return true;
       else return false;
     } else return false;
+  };
+  const renderMessage = (chat) => {
+    switch (chat.type) {
+      case "image":
+        return (
+          <div>
+            <img src={chat.message} height={200} width={200} />
+          </div>
+        );
+      case "video":
+        return (
+          <video controls width="250">
+            <source src={chat.message} type="video/webm" />
+            <source src={chat.message} type="video/mp4" />
+            Download the
+            <a href={chat.message}>WEBM</a>
+            or
+            <a href={chat.message}>MP4</a>
+            video.
+          </video>
+        );
+      default:
+        return (
+          <div className={`p-1 w-[40vw] bg-white m-2 rounded-lg`}>
+            {chat.message}
+          </div>
+        );
+    }
   };
   return (
     <div className="grid grid-cols-4 h-screen">
@@ -146,18 +173,7 @@ const App = () => {
                           chat.mine ? "end" : "start"
                         }`}
                       >
-                        {chat.type === "image" ? (
-                          <div>
-                            {console.log(chat)}
-                            <img src={chat.message} height={200} width={200} />
-                          </div>
-                        ) : (
-                          <div
-                            className={`p-1 w-[40vw] bg-white m-2 rounded-lg`}
-                          >
-                            {chat.message}
-                          </div>
-                        )}
+                        {renderMessage(chat)}
                       </div>
                     )
                 )}
@@ -166,7 +182,6 @@ const App = () => {
             <form onSubmit={sendMessage} className="flex p-3 bg-[#f0f2f5]">
               <input
                 type="file"
-                accept="image/*"
                 onChange={async (e) => {
                   e.preventDefault();
                   const formData = new FormData();

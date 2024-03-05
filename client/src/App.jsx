@@ -119,18 +119,13 @@ const App = () => {
     }
   };
   const updateEmoji = async (id, emoji) => {
-    console.log({
-      chatId: id,
-      emoji,
-      currentUser: currentUser.name,
-      selectedUser,
-    });
     const resp = await axios.post("http://localhost:3001/updateEmoji", {
       chatId: id,
       emoji,
       currentUser: currentUser.name,
       selectedUser,
     });
+    getCurrentUserData();
     console.log(resp.data);
   };
   return (
@@ -206,17 +201,31 @@ const App = () => {
                                 <div className="flex bg-white">
                                   <div
                                     onClick={(e) =>
-                                      updateEmoji(chat._id, "&#128514;")
+                                      updateEmoji(chat._id, "0x1F600")
                                     }
                                   >
-                                    &#128514;
+                                    {String.fromCodePoint("0x1F600")}
                                   </div>
                                   <div
                                     onClick={(e) =>
-                                      updateEmoji(chat._id, "&#128512;")
+                                      updateEmoji(chat._id, "0x1F601")
                                     }
                                   >
-                                    &#128512;
+                                    {String.fromCodePoint("0x1F601")}
+                                  </div>
+                                  <div
+                                    onClick={(e) =>
+                                      updateEmoji(chat._id, "0x1F602")
+                                    }
+                                  >
+                                    {String.fromCodePoint("0x1F602")}
+                                  </div>
+                                  <div
+                                    onClick={(e) =>
+                                      updateEmoji(chat._id, "0x1F607")
+                                    }
+                                  >
+                                    {String.fromCodePoint("0x1F607")}
                                   </div>
                                 </div>
                               }
@@ -231,7 +240,7 @@ const App = () => {
                             {renderMessage(chat)}
                             {chat.emoji && (
                               <div className="absolute bottom-0 right-0">
-                                &#128512;
+                                {String.fromCodePoint(chat.emoji)}
                               </div>
                             )}
                           </div>

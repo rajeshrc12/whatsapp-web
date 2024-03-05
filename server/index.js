@@ -210,31 +210,26 @@ app.post("/updateEmoji", async (req, res) => {
     const response1 = await users.updateOne(
       {
         name: currentUser,
-        "chat._id": chatId,
+        "chat._id": new ObjectId(chatId),
       },
       {
         $set: {
-          "chat.$.emoji": emoji,
+          "chat.$.emoji": emoji, // Replace "yourEmojiHere" with the actual emoji you want to set.
         },
       }
     );
     const response2 = await users.updateOne(
       {
         name: selectedUser,
-        "chat._id": chatId,
+        "chat._id": new ObjectId(chatId),
       },
       {
         $set: {
-          "chat.$.emoji": emoji,
+          "chat.$.emoji": emoji, // Replace "yourEmojiHere" with the actual emoji you want to set.
         },
       }
     );
-    console.log(response1, response2, {
-      chatId,
-      emoji,
-      currentUser,
-      selectedUser,
-    });
+    console.log(response1, response2);
     if (response1 && response2) res.status(200).send("Emoji updated");
     else res.status(500).send("Emoji not updated");
   } catch (error) {

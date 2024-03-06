@@ -32,6 +32,7 @@ const App = () => {
         message,
         receiptUser: selectedUser,
         currentUser: currentUser.name,
+        type: "text",
       });
       if (resp.status === 200) {
         getCurrentUserData();
@@ -74,7 +75,6 @@ const App = () => {
       throw error;
     }
   };
-  console.log(forwardUserList, forwardChat);
   useEffect(() => {
     if (sessionStorage.getItem("whatsappUser")) {
       getCurrentUserData();
@@ -274,6 +274,7 @@ const App = () => {
                 type="file"
                 onChange={async (e) => {
                   e.preventDefault();
+                  console.log(e.target.files[0]);
                   const formData = new FormData();
                   formData.append("file", e.target.files[0]);
                   formData.append(
@@ -375,7 +376,10 @@ const App = () => {
             <div className="p-3 text-xl flex gap-5 bg-[#008069] text-white">
               <IoMdClose
                 size={25}
-                onClick={() => document.getElementById("forwardModal").close()}
+                onClick={() => {
+                  document.getElementById("forwardModal").close();
+                  setForwardUserList([]);
+                }}
               />
               Forward message to
             </div>
@@ -386,7 +390,7 @@ const App = () => {
               />
             </div>
             <div className="text-lg p-3">RECENT CHATS</div>
-            <div className="h-[35vh] p-3 overflow-y-scroll">
+            <form className="h-[35vh] p-3 overflow-y-scroll">
               {users.map((user) => (
                 <SelectContact
                   key={user._id}
@@ -395,7 +399,7 @@ const App = () => {
                   forwardUserList={forwardUserList}
                 />
               ))}
-            </div>
+            </form>
             <div className="flex gap-2 p-2">
               <div>
                 <img
@@ -418,7 +422,25 @@ const App = () => {
                 </div>
                 <div>
                   <svg
-                    onClick={() => console.log(forwardChat, currentUser.name)}
+                    onClick={async () => {
+                      const firstUser = forwardUserList[0];
+                      for (const name of forwardUserList) {
+                        const resp = await axios.post(
+                          "http://localhost:3001/sendmessage",
+                          {
+                            message: forwardChat.message,
+                            receiptUser: name,
+                            currentUser: currentUser.name,
+                            type: forwardChat.type,
+                          }
+                        );
+                        console.log(resp);
+                      }
+                      document.getElementById("forwardModal").close();
+                      getCurrentUserData();
+                      setForwardUserList([]);
+                      setSelectedUser(firstUser);
+                    }}
                     viewBox="-4 -4 32 32"
                     height="40"
                     width="40"

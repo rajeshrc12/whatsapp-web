@@ -128,13 +128,13 @@ const sendMessage = async ({ message, receiptUser, currentUser, type }) => {
   return result;
 };
 app.post("/sendmessage", async (req, res) => {
-  const { message, receiptUser, currentUser } = req.body;
+  const { message, receiptUser, currentUser, type } = req.body;
   if (message) {
     const result = sendMessage({
       message,
       receiptUser,
       currentUser,
-      type: "text",
+      type,
     });
     if (result) res.status(200).send(result);
     else res.status(500).send("No user found");
@@ -157,7 +157,7 @@ app.post("/user", async (req, res) => {
 app.post("/upload", upload.single("file"), async (req, res) => {
   const file = req.file;
   const { receiptUser, currentUser } = JSON.parse(req.body.userData);
-  console.log("ooo", file.mimetype.split("/")[0]);
+  console.log("ooo", file, { receiptUser, currentUser });
   if (file) {
     try {
       // Create a file in GridFS

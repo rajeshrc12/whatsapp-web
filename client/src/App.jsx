@@ -9,7 +9,8 @@ import { FaCircleChevronLeft } from "react-icons/fa6";
 import { FaCircleChevronRight } from "react-icons/fa6";
 import { TiArrowForward } from "react-icons/ti";
 import { MdOutlineInsertEmoticon } from "react-icons/md";
-import Popper from "./components/Popper";
+import moment from "moment";
+import AudioRecorder from "./components/AudioRecorder";
 const socket = io("ws://localhost:3002");
 const App = () => {
   const navigate = useNavigate();
@@ -112,8 +113,9 @@ const App = () => {
         );
       default:
         return (
-          <div className={`p-1 w-[40vw] bg-white m-2 rounded-lg`}>
+          <div className={`p-1 max-w-[40vw] bg-white m-2 rounded-lg`}>
             {chat.message}
+            {moment(chat.updatedAt).format("LT")}
           </div>
         );
     }
@@ -196,9 +198,15 @@ const App = () => {
                       >
                         <div className="flex items-center">
                           <div>
-                            <Popper
-                              content={
-                                <div className="flex bg-white">
+                            <div className="dropdown dropdown-top">
+                              <div tabIndex={0}>
+                                <MdOutlineInsertEmoticon size={20} />
+                              </div>
+                              <div
+                                tabIndex={0}
+                                className="dropdown-content z-[1] menu left-[-3rem] !bottom-[2rem] p-2 shadow bg-base-100 rounded-box"
+                              >
+                                <div className="flex justify-between gap-1 p-1">
                                   <div
                                     onClick={(e) =>
                                       updateEmoji(chat._id, "0x1F600")
@@ -228,10 +236,8 @@ const App = () => {
                                     {String.fromCodePoint("0x1F607")}
                                   </div>
                                 </div>
-                              }
-                            >
-                              <MdOutlineInsertEmoticon size={20} />
-                            </Popper>
+                              </div>
+                            </div>
                           </div>
                           <div>
                             <TiArrowForward size={20} />

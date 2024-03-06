@@ -17,12 +17,14 @@ import SelectContact from "./components/SelectContact";
 const socket = io("ws://localhost:3002");
 const App = () => {
   const navigate = useNavigate();
+  const [forward, setForward] = useState(false);
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [mediaCarousel, setMediaCarousel] = useState(false);
   const [mediaCarouselIndex, setMediaCarouselIndex] = useState(0);
   const [forwardUserList, setForwardUserList] = useState([]);
+  const [forwardChatList, setForwardChatList] = useState([]);
   const [forwardChat, setForwardChat] = useState({});
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -134,6 +136,7 @@ const App = () => {
     });
     getCurrentUserData();
   };
+  console.log(forwardChatList);
   return (
     <div className="grid grid-cols-4 h-screen">
       <div className="col-span-1 h-full">
@@ -195,73 +198,104 @@ const App = () => {
                     isPrintMessage(chat.from, chat.to) && (
                       <div
                         key={chat._id}
-                        className={`flex justify-${
-                          chat.mine ? "end" : "start"
-                        }`}
+                        className="flex justify-between items-center hover:bg-[#e0e4e4]"
+                        onClick={() => {
+                          const isChatExist = forwardChatList.find(
+                            (fchat) => fchat._id === chat._id
+                          );
+                          if (!isChatExist)
+                            setForwardChatList([...forwardChatList, chat]);
+                          else {
+                            setForwardChatList(
+                              forwardChatList.filter(
+                                (fchat) => fchat._id !== chat._id
+                              )
+                            );
+                          }
+                        }}
                       >
-                        <div className="flex items-center">
-                          <div>
-                            <div className="dropdown dropdown-top">
-                              <div tabIndex={0}>
-                                <MdOutlineInsertEmoticon size={20} />
-                              </div>
-                              <div
-                                tabIndex={0}
-                                className="dropdown-content z-[1] menu left-[-3rem] !bottom-[2rem] p-2 shadow bg-base-100 rounded-box"
-                              >
-                                <div className="flex justify-between gap-1 p-1">
-                                  <div
-                                    onClick={(e) =>
-                                      updateEmoji(chat._id, "0x1F600")
-                                    }
-                                  >
-                                    {String.fromCodePoint("0x1F600")}
-                                  </div>
-                                  <div
-                                    onClick={(e) =>
-                                      updateEmoji(chat._id, "0x1F601")
-                                    }
-                                  >
-                                    {String.fromCodePoint("0x1F601")}
-                                  </div>
-                                  <div
-                                    onClick={(e) =>
-                                      updateEmoji(chat._id, "0x1F602")
-                                    }
-                                  >
-                                    {String.fromCodePoint("0x1F602")}
-                                  </div>
-                                  <div
-                                    onClick={(e) =>
-                                      updateEmoji(chat._id, "0x1F607")
-                                    }
-                                  >
-                                    {String.fromCodePoint("0x1F607")}
+                        <div>
+                          <input
+                            type="checkbox"
+                            checked={
+                              forwardChatList.find(
+                                (fchat) => fchat._id === chat._id
+                              )
+                                ? true
+                                : false
+                            }
+                          />
+                        </div>
+                        <div
+                          key={chat._id}
+                          className={`flex justify-${
+                            chat.mine ? "end" : "start"
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <div>
+                              <div className="dropdown dropdown-top">
+                                <div tabIndex={0}>
+                                  <MdOutlineInsertEmoticon size={20} />
+                                </div>
+                                <div
+                                  tabIndex={0}
+                                  className="dropdown-content z-[1] menu left-[-3rem] !bottom-[2rem] p-2 shadow bg-base-100 rounded-box"
+                                >
+                                  <div className="flex justify-between gap-1 p-1">
+                                    <div
+                                      onClick={(e) =>
+                                        updateEmoji(chat._id, "0x1F600")
+                                      }
+                                    >
+                                      {String.fromCodePoint("0x1F600")}
+                                    </div>
+                                    <div
+                                      onClick={(e) =>
+                                        updateEmoji(chat._id, "0x1F601")
+                                      }
+                                    >
+                                      {String.fromCodePoint("0x1F601")}
+                                    </div>
+                                    <div
+                                      onClick={(e) =>
+                                        updateEmoji(chat._id, "0x1F602")
+                                      }
+                                    >
+                                      {String.fromCodePoint("0x1F602")}
+                                    </div>
+                                    <div
+                                      onClick={(e) =>
+                                        updateEmoji(chat._id, "0x1F607")
+                                      }
+                                    >
+                                      {String.fromCodePoint("0x1F607")}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            <TiArrowForward
-                              size={20}
-                              onClick={() => {
-                                if (chat.type !== "text") {
-                                  document
-                                    .getElementById("forwardModal")
-                                    .showModal();
-                                  setForwardChat(chat);
-                                }
-                              }}
-                            />
-                          </div>
-                          <div className="relative">
-                            {renderMessage(chat)}
-                            {chat.emoji && (
-                              <div className="absolute bottom-0 right-0">
-                                {String.fromCodePoint(chat.emoji)}
-                              </div>
-                            )}
+                            <div>
+                              <TiArrowForward
+                                size={20}
+                                onClick={() => {
+                                  if (chat.type !== "text") {
+                                    document
+                                      .getElementById("forwardModal")
+                                      .showModal();
+                                    setForwardChat(chat);
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div className="relative">
+                              {renderMessage(chat)}
+                              {chat.emoji && (
+                                <div className="absolute bottom-0 right-0">
+                                  {String.fromCodePoint(chat.emoji)}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>

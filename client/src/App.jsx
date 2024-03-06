@@ -10,7 +10,10 @@ import { FaCircleChevronRight } from "react-icons/fa6";
 import { TiArrowForward } from "react-icons/ti";
 import { MdOutlineInsertEmoticon } from "react-icons/md";
 import moment from "moment";
-import AudioRecorder from "./components/AudioRecorder";
+import Modal from "./components/Modal";
+import SearchBar from "./components/SearchBar";
+import { FaArrowLeft } from "react-icons/fa6";
+import SelectContact from "./components/SelectContact";
 const socket = io("ws://localhost:3002");
 const App = () => {
   const navigate = useNavigate();
@@ -19,6 +22,8 @@ const App = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const [mediaCarousel, setMediaCarousel] = useState(false);
   const [mediaCarouselIndex, setMediaCarouselIndex] = useState(0);
+  const [forwardUserList, setForwardUserList] = useState([]);
+  const [forwardChat, setForwardChat] = useState({});
   const sendMessage = async (e) => {
     e.preventDefault();
     const message = e.target[1].value.trim();
@@ -57,7 +62,7 @@ const App = () => {
           const url = window.URL.createObjectURL(new Blob([response.data]));
           chatNew.push({
             ...chat,
-            message: url,
+            url,
           });
         } else {
           chatNew.push(chat);
@@ -69,7 +74,7 @@ const App = () => {
       throw error;
     }
   };
-  console.log(currentUser);
+  console.log(forwardUserList, forwardChat);
   useEffect(() => {
     if (sessionStorage.getItem("whatsappUser")) {
       getCurrentUserData();
@@ -92,7 +97,7 @@ const App = () => {
       case "image":
         return (
           <div onClick={() => setMediaCarousel(!mediaCarousel)}>
-            <img src={chat.message} height={200} width={200} />
+            <img src={chat.url} height={200} width={200} />
           </div>
         );
       case "video":
@@ -102,12 +107,12 @@ const App = () => {
             width="250"
             onClick={() => setMediaCarousel(!mediaCarousel)}
           >
-            <source src={chat.message} type="video/webm" />
-            <source src={chat.message} type="video/mp4" />
+            <source src={chat.url} type="video/webm" />
+            <source src={chat.url} type="video/mp4" />
             Download the
-            <a href={chat.message}>WEBM</a>
+            <a href={chat.url}>WEBM</a>
             or
-            <a href={chat.message}>MP4</a>
+            <a href={chat.url}>MP4</a>
             video.
           </video>
         );
@@ -128,7 +133,6 @@ const App = () => {
       selectedUser,
     });
     getCurrentUserData();
-    console.log(resp.data);
   };
   return (
     <div className="grid grid-cols-4 h-screen">
@@ -178,7 +182,6 @@ const App = () => {
                     const response = await axios.get(
                       "http://localhost:3001/clean"
                     );
-                    console.log(response);
                   }}
                 >
                   Clear
@@ -240,7 +243,17 @@ const App = () => {
                             </div>
                           </div>
                           <div>
-                            <TiArrowForward size={20} />
+                            <TiArrowForward
+                              size={20}
+                              onClick={() => {
+                                if (chat.type !== "text") {
+                                  document
+                                    .getElementById("forwardModal")
+                                    .showModal();
+                                  setForwardChat(chat);
+                                }
+                              }}
+                            />
                           </div>
                           <div className="relative">
                             {renderMessage(chat)}
@@ -281,12 +294,10 @@ const App = () => {
                       }
                     );
                     getCurrentUserData();
-                    console.log("File uploaded successfully");
-                    console.log(response.data); // This can contain any response from the backend
+                    // This can contain any response from the backend
                   } catch (error) {
                     console.error("Error uploading file:", error);
                   }
-                  console.log(formData, e.target.files[0]);
                 }}
               />
               <input
@@ -356,6 +367,87 @@ const App = () => {
           </div>
         </div>
       )}
+      <Modal
+        id="forwardModal"
+        width={30}
+        content={
+          <div className="flex flex-col">
+            <div className="p-3 text-xl flex gap-5 bg-[#008069] text-white">
+              <IoMdClose
+                size={25}
+                onClick={() => document.getElementById("forwardModal").close()}
+              />
+              Forward message to
+            </div>
+            <div className="p-3">
+              <SearchBar
+                placeholder={"Search..."}
+                icon={<FaArrowLeft size="20" />}
+              />
+            </div>
+            <div className="text-lg p-3">RECENT CHATS</div>
+            <div className="h-[35vh] p-3 overflow-y-scroll">
+              {users.map((user) => (
+                <SelectContact
+                  key={user._id}
+                  name={user.name}
+                  setForwardUserList={setForwardUserList}
+                  forwardUserList={forwardUserList}
+                />
+              ))}
+            </div>
+            <div className="flex gap-2 p-2">
+              <div>
+                <img
+                  src={forwardChat.url}
+                  height={90}
+                  width={90}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="w-full">
+                <textarea className="w-full h-full outline-none bg-gray-50 resize-none rounded-sm"></textarea>
+              </div>
+            </div>
+            {forwardUserList.length > 0 && (
+              <div className="flex justify-between p-3">
+                <div>
+                  {forwardUserList.map((user) => (
+                    <span key={user}>{user},</span>
+                  ))}
+                </div>
+                <div>
+                  <svg
+                    onClick={() => console.log(forwardChat, currentUser.name)}
+                    viewBox="-4 -4 32 32"
+                    height="40"
+                    width="40"
+                    preserveAspectRatio="xMidYMid meet"
+                    version="1.1"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <title>send</title>
+                    <rect
+                      x="-4"
+                      y="-4"
+                      width="32"
+                      height="32"
+                      fill="#00a884"
+                      rx="16"
+                      ry="16"
+                    ></rect>
+                    <path
+                      fill="#fff"
+                      transform="scale(0.7) translate(6,6)"
+                      d="M1.101,21.757L23.8,12.028L1.101,2.3l0.011,7.912l13.623,1.816L1.112,13.845 L1.101,21.757z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            )}
+          </div>
+        }
+      />
     </div>
   );
 };

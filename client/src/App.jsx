@@ -14,6 +14,7 @@ import Modal from "./components/Modal";
 import SearchBar from "./components/SearchBar";
 import { FaArrowLeft } from "react-icons/fa6";
 import SelectContact from "./components/SelectContact";
+import { FaChevronDown } from "react-icons/fa";
 const socket = io("ws://localhost:3002");
 const App = () => {
   const navigate = useNavigate();
@@ -198,40 +199,47 @@ const App = () => {
                     isPrintMessage(chat.from, chat.to) && (
                       <div
                         key={chat._id}
-                        className="flex justify-between items-center hover:bg-[#e0e4e4]"
-                        onClick={() => {
-                          const isChatExist = forwardChatList.find(
-                            (fchat) => fchat._id === chat._id
-                          );
-                          if (!isChatExist)
-                            setForwardChatList([...forwardChatList, chat]);
-                          else {
-                            setForwardChatList(
-                              forwardChatList.filter(
-                                (fchat) => fchat._id !== chat._id
+                        className={`flex px-5 py-2 justify-between items-center ${
+                          forward
+                            ? forwardChatList.find(
+                                (fchat) => fchat._id === chat._id
                               )
+                              ? "bg-[#e0e4e4] hover:bg-[#e0e4e4]"
+                              : ""
+                            : ""
+                        }`}
+                        onClick={() => {
+                          if (forward) {
+                            const isChatExist = forwardChatList.find(
+                              (fchat) => fchat._id === chat._id
                             );
+                            if (!isChatExist)
+                              setForwardChatList([...forwardChatList, chat]);
+                            else {
+                              setForwardChatList(
+                                forwardChatList.filter(
+                                  (fchat) => fchat._id !== chat._id
+                                )
+                              );
+                            }
                           }
                         }}
                       >
-                        <div>
-                          <input
-                            type="checkbox"
-                            checked={
-                              forwardChatList.find(
-                                (fchat) => fchat._id === chat._id
-                              )
-                                ? true
-                                : false
-                            }
-                          />
-                        </div>
-                        <div
-                          key={chat._id}
-                          className={`flex justify-${
-                            chat.mine ? "end" : "start"
-                          }`}
-                        >
+                        {forward && (
+                          <div>
+                            <input
+                              type="checkbox"
+                              checked={
+                                forwardChatList.find(
+                                  (fchat) => fchat._id === chat._id
+                                )
+                                  ? true
+                                  : false
+                              }
+                            />
+                          </div>
+                        )}
+                        <div key={chat._id} className={`flex justify-end`}>
                           <div className="flex items-center">
                             <div>
                               <div className="dropdown dropdown-top">
@@ -295,6 +303,17 @@ const App = () => {
                                   {String.fromCodePoint(chat.emoji)}
                                 </div>
                               )}
+                              <div className="absolute top-0 right-0">
+                                <div className="dropdown dropdown-end">
+                                  <div tabIndex={0}>
+                                    <FaChevronDown color="red" />
+                                  </div>
+                                  <div
+                                    tabIndex={0}
+                                    className="dropdown-content flex z-[1] menu shadow bg-base-100 rounded-lg"
+                                  ></div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>

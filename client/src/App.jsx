@@ -17,11 +17,13 @@ import SelectContact from "./components/SelectContact";
 import { FaChevronDown } from "react-icons/fa";
 import Reply from "./components/Reply";
 import ReplyMessage from "./components/ReplyMessage";
+import { BsFillPinFill } from "react-icons/bs";
 const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
   const navigate = useNavigate();
   const [forward, setForward] = useState(false);
+  const [pin, setPin] = useState({});
   const [reply, setReply] = useState(false);
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
@@ -67,6 +69,9 @@ const App = () => {
     const chatNew = [];
     try {
       for (const chat of resp.data.chat) {
+        if (chat.pin) {
+          setPin(chat);
+        }
         if (chat.type === "image" || chat.type === "video") {
           const response = await axios.get(
             `http://localhost:3001/download/${chat.message}`,
@@ -210,10 +215,17 @@ const App = () => {
                 </button>
               </div>
             </div>
-            <div className="h-[82vh] overflow-y-scroll">
+            {Object.keys(pin).length > 0 && (
+              <div className="flex items-center bg-white gap-3 p-3">
+                <div>
+                  <BsFillPinFill />
+                </div>
+                <div>{pin.message}</div>
+              </div>
+            )}
+            <div className="h-[75vh] overflow-y-scroll">
               <div className="flex flex-col">
                 {currentUser.chat.map((chat) => {
-                  console.log(prevDate, chat.updatedAt.slice(0, 10));
                   prevDate =
                     prevDate === chat.updatedAt.slice(0, 10)
                       ? null
@@ -357,6 +369,26 @@ const App = () => {
                                         }}
                                       >
                                         Reply
+                                      </div>
+                                      <div
+                                        className="pointer-cursor"
+                                        onClick={async () => {
+                                          console.log(
+                                            chat._id,
+                                            currentUser.name
+                                          );
+                                          const resp = await axios.post(
+                                            "http://localhost:3001/pin",
+                                            {
+                                              _id: chat._id,
+                                              name: currentUser.name,
+                                              unpin: pin,
+                                            }
+                                          );
+                                          getCurrentUserData();
+                                        }}
+                                      >
+                                        {pin._id === chat._id ? "Unpin" : "Pin"}
                                       </div>
                                     </div>
                                   </div>

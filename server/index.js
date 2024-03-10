@@ -103,6 +103,7 @@ const sendMessage = async ({
               reply,
               createdAt: new Date(),
               updatedAt: new Date(),
+              pin: false,
             },
           },
           $set: { updatedAt: new Date() },
@@ -125,6 +126,7 @@ const sendMessage = async ({
               reply,
               createdAt: new Date(),
               updatedAt: new Date(),
+              pin: false,
             },
           },
           $set: { updatedAt: new Date() },
@@ -171,6 +173,7 @@ app.post("/sendmessagebulkmultipleusers", async (req, res) => {
                   mine: false,
                   createdAt: new Date(),
                   updatedAt: new Date(),
+                  pin: false,
                 };
                 if (temp.url) delete temp.url;
                 return temp;
@@ -195,6 +198,7 @@ app.post("/sendmessagebulkmultipleusers", async (req, res) => {
                 emoji: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                pin: false,
               };
               if (temp.url) delete temp.url;
               return temp;
@@ -217,6 +221,39 @@ app.post("/user", async (req, res) => {
     else res.status(500).send("No user found");
   } else {
     res.status(500).send("user name required");
+  }
+});
+
+app.post("/pin", async (req, res) => {
+  const { pin, _id, name, unpin } = req.body;
+  console.log({ _id, name, unpin });
+  if (name && _id && unpin) {
+    const result = await users.updateOne(
+      {
+        name,
+        "chat._id": new ObjectId(_id),
+      },
+      {
+        $set: {
+          "chat.$.pin": true,
+        },
+      }
+    );
+    const result2 = await users.updateOne(
+      {
+        name,
+        "chat._id": new ObjectId(unpin._id),
+      },
+      {
+        $set: {
+          "chat.$.pin": false,
+        },
+      }
+    );
+    if (result) res.status(200).send(result);
+    else res.status(500).send("Failed to pin message");
+  } else {
+    res.status(500).send("pin, name required");
   }
 });
 

@@ -15,10 +15,14 @@ import SearchBar from "./components/SearchBar";
 import { FaArrowLeft } from "react-icons/fa6";
 import SelectContact from "./components/SelectContact";
 import { FaChevronDown } from "react-icons/fa";
+import Reply from "./components/Reply";
+import ReplyMessage from "./components/ReplyMessage";
 const socket = io("ws://localhost:3002");
+let prevDate = null;
 const App = () => {
   const navigate = useNavigate();
   const [forward, setForward] = useState(false);
+  const [reply, setReply] = useState(false);
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
@@ -29,13 +33,20 @@ const App = () => {
   const [forwardChat, setForwardChat] = useState({});
   const sendMessage = async (e) => {
     e.preventDefault();
+    setReply(false);
     const message = e.target[1].value.trim();
     if (message) {
       const resp = await axios.post("http://localhost:3001/sendmessage", {
         message,
         receiptUser: selectedUser,
         currentUser: currentUser.name,
-        type: "text",
+        type: reply ? "reply" : "text",
+        reply: reply
+          ? {
+              message,
+              content: forwardChat,
+            }
+          : null,
       });
       if (resp.status === 200) {
         getCurrentUserData();
@@ -119,6 +130,8 @@ const App = () => {
             video.
           </video>
         );
+      case "reply":
+        return <ReplyMessage chat={chat.reply} />;
       default:
         return (
           <div className={`p-1 max-w-[40vw] bg-white m-2 rounded-lg`}>
@@ -143,7 +156,6 @@ const App = () => {
   const closeForwardModal = () => {
     document.getElementById("forwardModal").close();
   };
-  console.log(forwardChatList);
   return (
     <div className="grid grid-cols-4 h-screen">
       <div className="col-span-1 h-full">
@@ -200,130 +212,152 @@ const App = () => {
             </div>
             <div className="h-[82vh] overflow-y-scroll">
               <div className="flex flex-col">
-                {currentUser.chat.map(
-                  (chat) =>
+                {currentUser.chat.map((chat) => {
+                  console.log(prevDate, chat.updatedAt.slice(0, 10));
+                  prevDate =
+                    prevDate === chat.updatedAt.slice(0, 10)
+                      ? null
+                      : chat.updatedAt.slice(0, 10);
+
+                  return (
                     isPrintMessage(chat.from, chat.to) && (
-                      <div
-                        key={chat._id}
-                        className={`flex px-5 py-2 justify-between items-center ${
-                          forward
-                            ? forwardChatList.find(
-                                (fchat) => fchat._id === chat._id
-                              )
-                              ? "bg-[#e0e4e4] hover:bg-[#e0e4e4]"
-                              : ""
-                            : ""
-                        }`}
-                        onClick={() => {
-                          if (forward) {
-                            const isChatExist = forwardChatList.find(
-                              (fchat) => fchat._id === chat._id
-                            );
-                            if (!isChatExist)
-                              setForwardChatList([...forwardChatList, chat]);
-                            else {
-                              setForwardChatList(
-                                forwardChatList.filter(
-                                  (fchat) => fchat._id !== chat._id
-                                )
-                              );
-                            }
-                          }
-                        }}
-                      >
-                        {forward && (
-                          <div>
-                            <input
-                              type="checkbox"
-                              checked={
-                                forwardChatList.find(
-                                  (fchat) => fchat._id === chat._id
-                                )
-                                  ? true
-                                  : false
-                              }
-                            />
+                      <div>
+                        {prevDate && (
+                          <div className="flex justify-center">
+                            <div className="bg-white p-3">{prevDate}</div>
                           </div>
                         )}
-                        <div key={chat._id} className={`flex justify-end`}>
-                          <div className="flex items-center">
+                        <div
+                          key={chat._id}
+                          className={`flex px-5 py-2 justify-between items-center ${
+                            forward
+                              ? forwardChatList.find(
+                                  (fchat) => fchat._id === chat._id
+                                )
+                                ? "bg-[#e0e4e4] hover:bg-[#e0e4e4]"
+                                : ""
+                              : ""
+                          }`}
+                          onClick={() => {
+                            if (forward) {
+                              const isChatExist = forwardChatList.find(
+                                (fchat) => fchat._id === chat._id
+                              );
+                              if (!isChatExist)
+                                setForwardChatList([...forwardChatList, chat]);
+                              else {
+                                setForwardChatList(
+                                  forwardChatList.filter(
+                                    (fchat) => fchat._id !== chat._id
+                                  )
+                                );
+                              }
+                            }
+                          }}
+                        >
+                          {forward && (
                             <div>
-                              <div className="dropdown dropdown-top">
-                                <div tabIndex={0}>
-                                  <MdOutlineInsertEmoticon size={20} />
-                                </div>
-                                <div
-                                  tabIndex={0}
-                                  className="dropdown-content z-[1] menu left-[-3rem] !bottom-[2rem] p-2 shadow bg-base-100 rounded-box"
-                                >
-                                  <div className="flex justify-between gap-1 p-1">
-                                    <div
-                                      onClick={(e) =>
-                                        updateEmoji(chat._id, "0x1F600")
-                                      }
-                                    >
-                                      {String.fromCodePoint("0x1F600")}
-                                    </div>
-                                    <div
-                                      onClick={(e) =>
-                                        updateEmoji(chat._id, "0x1F601")
-                                      }
-                                    >
-                                      {String.fromCodePoint("0x1F601")}
-                                    </div>
-                                    <div
-                                      onClick={(e) =>
-                                        updateEmoji(chat._id, "0x1F602")
-                                      }
-                                    >
-                                      {String.fromCodePoint("0x1F602")}
-                                    </div>
-                                    <div
-                                      onClick={(e) =>
-                                        updateEmoji(chat._id, "0x1F607")
-                                      }
-                                    >
-                                      {String.fromCodePoint("0x1F607")}
+                              <input
+                                type="checkbox"
+                                checked={
+                                  forwardChatList.find(
+                                    (fchat) => fchat._id === chat._id
+                                  )
+                                    ? true
+                                    : false
+                                }
+                              />
+                            </div>
+                          )}
+                          <div key={chat._id} className={`flex justify-end`}>
+                            <div className="flex items-center">
+                              <div>
+                                <div className="dropdown dropdown-top">
+                                  <div tabIndex={0}>
+                                    <MdOutlineInsertEmoticon size={20} />
+                                  </div>
+                                  <div
+                                    tabIndex={0}
+                                    className="dropdown-content z-[1] menu left-[-3rem] !bottom-[2rem] p-2 shadow bg-base-100 rounded-box"
+                                  >
+                                    <div className="flex justify-between gap-1 p-1">
+                                      <div
+                                        onClick={(e) =>
+                                          updateEmoji(chat._id, "0x1F600")
+                                        }
+                                      >
+                                        {String.fromCodePoint("0x1F600")}
+                                      </div>
+                                      <div
+                                        onClick={(e) =>
+                                          updateEmoji(chat._id, "0x1F601")
+                                        }
+                                      >
+                                        {String.fromCodePoint("0x1F601")}
+                                      </div>
+                                      <div
+                                        onClick={(e) =>
+                                          updateEmoji(chat._id, "0x1F602")
+                                        }
+                                      >
+                                        {String.fromCodePoint("0x1F602")}
+                                      </div>
+                                      <div
+                                        onClick={(e) =>
+                                          updateEmoji(chat._id, "0x1F607")
+                                        }
+                                      >
+                                        {String.fromCodePoint("0x1F607")}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                            <div>
-                              <TiArrowForward
-                                size={20}
-                                onClick={() => {
-                                  if (chat.type !== "text") {
-                                    showForwardModal();
-                                    setForwardChat(chat);
-                                  }
-                                }}
-                              />
-                            </div>
-                            <div className="relative">
-                              {renderMessage(chat)}
-                              {chat.emoji && (
-                                <div className="absolute bottom-0 right-0">
-                                  {String.fromCodePoint(chat.emoji)}
-                                </div>
-                              )}
-                              <div className="absolute top-0 right-0">
-                                <div className="dropdown dropdown-end">
-                                  <div tabIndex={0}>
-                                    <FaChevronDown color="red" />
+                              <div>
+                                <TiArrowForward
+                                  size={20}
+                                  onClick={() => {
+                                    if (chat.type !== "text") {
+                                      showForwardModal();
+                                      setForwardChat(chat);
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <div className="relative">
+                                {renderMessage(chat)}
+                                {chat.emoji && (
+                                  <div className="absolute bottom-0 right-0">
+                                    {String.fromCodePoint(chat.emoji)}
                                   </div>
-                                  <div
-                                    tabIndex={0}
-                                    className="dropdown-content flex z-[1] menu shadow bg-base-100 rounded-lg"
-                                  >
+                                )}
+                                <div className="absolute top-0 right-0">
+                                  <div className="dropdown dropdown-end">
+                                    <div tabIndex={0}>
+                                      <FaChevronDown color="red" />
+                                    </div>
                                     <div
-                                      className="pointer-cursor"
-                                      onClick={() => {
-                                        setForward(!forward);
-                                        setForwardChatList([]);
-                                      }}
+                                      tabIndex={0}
+                                      className="dropdown-content flex z-[1] menu shadow bg-base-100 rounded-lg"
                                     >
-                                      Forward
+                                      <div
+                                        className="pointer-cursor"
+                                        onClick={() => {
+                                          setForward(!forward);
+                                          setForwardChatList([]);
+                                        }}
+                                      >
+                                        Forward
+                                      </div>
+                                      <div
+                                        className="pointer-cursor"
+                                        onClick={() => {
+                                          setReply(true);
+                                          setForwardChat(chat);
+                                        }}
+                                      >
+                                        Reply
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -333,7 +367,8 @@ const App = () => {
                         </div>
                       </div>
                     )
-                )}
+                  );
+                })}
               </div>
             </div>
             {forward ? (
@@ -357,45 +392,57 @@ const App = () => {
                 </div>
               </div>
             ) : (
-              <form onSubmit={sendMessage} className="flex p-3 bg-[#f0f2f5]">
-                <input
-                  type="file"
-                  onChange={async (e) => {
-                    e.preventDefault();
-                    console.log(e.target.files[0]);
-                    const formData = new FormData();
-                    formData.append("file", e.target.files[0]);
-                    formData.append(
-                      "userData",
-                      JSON.stringify({
-                        currentUser: currentUser.name,
-                        receiptUser: selectedUser,
-                      })
-                    );
-                    try {
-                      const response = await axios.post(
-                        "http://localhost:3001/upload",
-                        formData,
-                        {
-                          headers: {
-                            "Content-Type": "multipart/form-data",
-                          },
+              <div>
+                {reply && (
+                  <div className="flex w-full justify-between items-center bg-red-50">
+                    <Reply chat={forwardChat} renderMessage={renderMessage} />
+                    <IoMdClose onClick={() => setReply(false)} />
+                  </div>
+                )}
+                <div>
+                  <form
+                    onSubmit={sendMessage}
+                    className="flex p-3 bg-[#f0f2f5]"
+                  >
+                    <input
+                      type="file"
+                      onChange={async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData();
+                        formData.append("file", e.target.files[0]);
+                        formData.append(
+                          "userData",
+                          JSON.stringify({
+                            currentUser: currentUser.name,
+                            receiptUser: selectedUser,
+                          })
+                        );
+                        try {
+                          const response = await axios.post(
+                            "http://localhost:3001/upload",
+                            formData,
+                            {
+                              headers: {
+                                "Content-Type": "multipart/form-data",
+                              },
+                            }
+                          );
+                          getCurrentUserData();
+                          // This can contain any response from the backend
+                        } catch (error) {
+                          console.error("Error uploading file:", error);
                         }
-                      );
-                      getCurrentUserData();
-                      // This can contain any response from the backend
-                    } catch (error) {
-                      console.error("Error uploading file:", error);
-                    }
-                  }}
-                />
-                <input
-                  type="text"
-                  name="message"
-                  className="outline-none w-full rounded-lg p-2"
-                />
-                <button className="p-2">send</button>
-              </form>
+                      }}
+                    />
+                    <input
+                      type="text"
+                      name="message"
+                      className="outline-none w-full rounded-lg p-2"
+                    />
+                    <button className="p-2">send</button>
+                  </form>
+                </div>
+              </div>
             )}
           </div>
         ) : (

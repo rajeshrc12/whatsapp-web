@@ -23,3 +23,4 @@ Create Poll
 Capture photo from system cam
 Select multiple media
 After selecting media photo it should in carousel and should be able to add message
+Moving to Message when click on reply

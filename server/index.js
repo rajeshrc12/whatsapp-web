@@ -78,7 +78,13 @@ app.post("/users", async (req, res) => {
     res.status(500).send("user name required");
   }
 });
-const sendMessage = async ({ message, receiptUser, currentUser, type }) => {
+const sendMessage = async ({
+  message,
+  receiptUser,
+  currentUser,
+  type,
+  reply,
+}) => {
   const messageId = new ObjectId();
   const bulkOperations = [
     {
@@ -94,6 +100,7 @@ const sendMessage = async ({ message, receiptUser, currentUser, type }) => {
               emoji: null,
               type,
               mine: true,
+              reply,
               createdAt: new Date(),
               updatedAt: new Date(),
             },
@@ -115,6 +122,7 @@ const sendMessage = async ({ message, receiptUser, currentUser, type }) => {
               emoji: null,
               type,
               mine: false,
+              reply,
               createdAt: new Date(),
               updatedAt: new Date(),
             },
@@ -128,13 +136,14 @@ const sendMessage = async ({ message, receiptUser, currentUser, type }) => {
   return result;
 };
 app.post("/sendmessage", async (req, res) => {
-  const { message, receiptUser, currentUser, type } = req.body;
+  const { message, receiptUser, currentUser, type, reply } = req.body;
   if (message) {
     const result = sendMessage({
       message,
       receiptUser,
       currentUser,
       type,
+      reply,
     });
     if (result) res.status(200).send(result);
     else res.status(500).send("No user found");

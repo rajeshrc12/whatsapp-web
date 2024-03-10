@@ -143,6 +143,63 @@ app.post("/sendmessage", async (req, res) => {
   }
 });
 
+app.post("/sendmessagebulkmultipleusers", async (req, res) => {
+  const { users: names, chats, currentUser } = req.body;
+  if (names.length && chats.length && currentUser) {
+    for (const user of names) {
+      users.updateOne(
+        { name: user },
+        {
+          $push: {
+            chat: {
+              $each: chats.map((chat) => {
+                const temp = {
+                  ...chat,
+                  _id: new ObjectId(),
+                  from: currentUser,
+                  to: user,
+                  emoji: null,
+                  mine: false,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                };
+                if (temp.url) delete temp.url;
+                return temp;
+              }),
+            },
+          },
+        }
+      );
+    }
+    users.updateOne(
+      { name: currentUser },
+      {
+        $push: {
+          chat: {
+            $each: chats.map((chat) => {
+              const temp = {
+                ...chat,
+                _id: new ObjectId(),
+                from: currentUser,
+                to: currentUser,
+                mine: true,
+                emoji: null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              };
+              if (temp.url) delete temp.url;
+              return temp;
+            }),
+          },
+        },
+      }
+    );
+    res.status(200).send("Message forwarded");
+  } else {
+    res.status(500).send("users,currentUser and chats required");
+  }
+});
+
 app.post("/user", async (req, res) => {
   const { user } = req.body;
   if (user) {

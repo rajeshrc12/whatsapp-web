@@ -137,6 +137,12 @@ const App = () => {
     });
     getCurrentUserData();
   };
+  const showForwardModal = () => {
+    document.getElementById("forwardModal").showModal();
+  };
+  const closeForwardModal = () => {
+    document.getElementById("forwardModal").close();
+  };
   console.log(forwardChatList);
   return (
     <div className="grid grid-cols-4 h-screen">
@@ -288,9 +294,7 @@ const App = () => {
                                 size={20}
                                 onClick={() => {
                                   if (chat.type !== "text") {
-                                    document
-                                      .getElementById("forwardModal")
-                                      .showModal();
+                                    showForwardModal();
                                     setForwardChat(chat);
                                   }
                                 }}
@@ -311,7 +315,17 @@ const App = () => {
                                   <div
                                     tabIndex={0}
                                     className="dropdown-content flex z-[1] menu shadow bg-base-100 rounded-lg"
-                                  ></div>
+                                  >
+                                    <div
+                                      className="pointer-cursor"
+                                      onClick={() => {
+                                        setForward(!forward);
+                                        setForwardChatList([]);
+                                      }}
+                                    >
+                                      Forward
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -322,45 +336,67 @@ const App = () => {
                 )}
               </div>
             </div>
-            <form onSubmit={sendMessage} className="flex p-3 bg-[#f0f2f5]">
-              <input
-                type="file"
-                onChange={async (e) => {
-                  e.preventDefault();
-                  console.log(e.target.files[0]);
-                  const formData = new FormData();
-                  formData.append("file", e.target.files[0]);
-                  formData.append(
-                    "userData",
-                    JSON.stringify({
-                      currentUser: currentUser.name,
-                      receiptUser: selectedUser,
-                    })
-                  );
-                  try {
-                    const response = await axios.post(
-                      "http://localhost:3001/upload",
-                      formData,
-                      {
-                        headers: {
-                          "Content-Type": "multipart/form-data",
-                        },
-                      }
+            {forward ? (
+              <div className="flex justify-between items-center p-3 bg-[#e5e7eb]">
+                <div className="flex items-center gap-5">
+                  <div>
+                    <IoMdClose
+                      size={25}
+                      onClick={() => {
+                        setForward(!forward);
+                        setForwardChatList([]);
+                      }}
+                    />
+                  </div>
+                  <div>{forwardChatList.length} Selected</div>
+                </div>
+                <div>
+                  <div>
+                    <TiArrowForward onClick={showForwardModal} size={25} />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={sendMessage} className="flex p-3 bg-[#f0f2f5]">
+                <input
+                  type="file"
+                  onChange={async (e) => {
+                    e.preventDefault();
+                    console.log(e.target.files[0]);
+                    const formData = new FormData();
+                    formData.append("file", e.target.files[0]);
+                    formData.append(
+                      "userData",
+                      JSON.stringify({
+                        currentUser: currentUser.name,
+                        receiptUser: selectedUser,
+                      })
                     );
-                    getCurrentUserData();
-                    // This can contain any response from the backend
-                  } catch (error) {
-                    console.error("Error uploading file:", error);
-                  }
-                }}
-              />
-              <input
-                type="text"
-                name="message"
-                className="outline-none w-full rounded-lg p-2"
-              />
-              <button className="p-2">send</button>
-            </form>
+                    try {
+                      const response = await axios.post(
+                        "http://localhost:3001/upload",
+                        formData,
+                        {
+                          headers: {
+                            "Content-Type": "multipart/form-data",
+                          },
+                        }
+                      );
+                      getCurrentUserData();
+                      // This can contain any response from the backend
+                    } catch (error) {
+                      console.error("Error uploading file:", error);
+                    }
+                  }}
+                />
+                <input
+                  type="text"
+                  name="message"
+                  className="outline-none w-full rounded-lg p-2"
+                />
+                <button className="p-2">send</button>
+              </form>
+            )}
           </div>
         ) : (
           <div>No user selected</div>
@@ -430,7 +466,7 @@ const App = () => {
               <IoMdClose
                 size={25}
                 onClick={() => {
-                  document.getElementById("forwardModal").close();
+                  closeForwardModal();
                   setForwardUserList([]);
                 }}
               />
@@ -453,19 +489,21 @@ const App = () => {
                 />
               ))}
             </form>
-            <div className="flex gap-2 p-2">
-              <div>
-                <img
-                  src={forwardChat.url}
-                  height={90}
-                  width={90}
-                  className="rounded-xl"
-                />
+            {Object.keys(forwardChat).length > 0 && (
+              <div className="flex gap-2 p-2">
+                <div>
+                  <img
+                    src={forwardChat.url}
+                    height={90}
+                    width={90}
+                    className="rounded-xl"
+                  />
+                </div>
+                <div className="w-full">
+                  <textarea className="w-full h-full outline-none bg-gray-50 resize-none rounded-sm"></textarea>
+                </div>
               </div>
-              <div className="w-full">
-                <textarea className="w-full h-full outline-none bg-gray-50 resize-none rounded-sm"></textarea>
-              </div>
-            </div>
+            )}
             {forwardUserList.length > 0 && (
               <div className="flex justify-between p-3">
                 <div>
@@ -476,23 +514,34 @@ const App = () => {
                 <div>
                   <svg
                     onClick={async () => {
-                      const firstUser = forwardUserList[0];
-                      for (const name of forwardUserList) {
+                      if (Object.keys(forwardChat).length > 0) {
+                        const firstUser = forwardUserList[0];
+                        for (const name of forwardUserList) {
+                          const resp = await axios.post(
+                            "http://localhost:3001/sendmessage",
+                            {
+                              message: forwardChat.message,
+                              receiptUser: name,
+                              currentUser: currentUser.name,
+                              type: forwardChat.type,
+                            }
+                          );
+                          console.log(resp);
+                        }
+                        setSelectedUser(firstUser);
+                      } else {
                         const resp = await axios.post(
-                          "http://localhost:3001/sendmessage",
+                          "http://localhost:3001/sendmessagebulkmultipleusers",
                           {
-                            message: forwardChat.message,
-                            receiptUser: name,
+                            users: forwardUserList,
+                            chats: forwardChatList,
                             currentUser: currentUser.name,
-                            type: forwardChat.type,
                           }
                         );
-                        console.log(resp);
                       }
-                      document.getElementById("forwardModal").close();
+                      closeForwardModal();
                       getCurrentUserData();
                       setForwardUserList([]);
-                      setSelectedUser(firstUser);
                     }}
                     viewBox="-4 -4 32 32"
                     height="40"

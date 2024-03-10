@@ -6,12 +6,14 @@ View media in carousel format
 Forward single media
 Forward bulk media
 Reply to media
-
 Pin media
-Delete media
-Group similar media
+Time and Text inside media
+Date wise media
+
 Blue tick
 Voice recording
+Delete media
+Group similar media
 Show list of reacted people
 Remove my reaction
 Send Contact
@@ -24,16 +26,14 @@ Message info
 Contract info - Profile pic , About , Media
 My profile
 
-Time and Text inside media
-Date wise media
-Search message
-Moving to Message when click on reply
-Status
-
 Creating Groups
 Group Messaging
 Add members to group
 Group members
+
+Search message
+Moving to Message when click on reply
+Status
 
 Audio and video call
 channel

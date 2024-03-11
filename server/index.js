@@ -257,6 +257,38 @@ app.post("/pin", async (req, res) => {
   }
 });
 
+app.post("/delete", async (req, res) => {
+  const { chatId, name, receiptUser } = req.body;
+  if (name && chatId && receiptUser) {
+    const result = await users.updateOne(
+      {
+        name,
+        "chat._id": new ObjectId(chatId),
+      },
+      {
+        $set: {
+          "chat.$.type": "delete",
+        },
+      }
+    );
+    const result2 = await users.updateOne(
+      {
+        name: receiptUser,
+        "chat._id": new ObjectId(chatId),
+      },
+      {
+        $set: {
+          "chat.$.type": "delete",
+        },
+      }
+    );
+    if (result) res.status(200).send(result);
+    else res.status(500).send("Failed to delete message");
+  } else {
+    res.status(500).send("chatId and name required");
+  }
+});
+
 app.post("/upload", upload.single("file"), async (req, res) => {
   const file = req.file;
   const { receiptUser, currentUser } = JSON.parse(req.body.userData);

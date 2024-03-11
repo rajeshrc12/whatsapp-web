@@ -10,10 +10,7 @@ Pin media
 Time and Text inside media
 Date wise media
 
-Blue tick
-Voice recording
 Delete media
-Group similar media
 Show list of reacted people
 Remove my reaction
 Send Contact
@@ -25,6 +22,7 @@ Starred messages
 Message info
 Contract info - Profile pic , About , Media
 My profile
+Group similar media
 
 Creating Groups
 Group Messaging
@@ -32,6 +30,8 @@ Add members to group
 Group members
 
 Search message
+Blue tick
+Voice recording
 Moving to Message when click on reply
 Status
 

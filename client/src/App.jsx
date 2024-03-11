@@ -18,6 +18,7 @@ import { FaChevronDown } from "react-icons/fa";
 import Reply from "./components/Reply";
 import ReplyMessage from "./components/ReplyMessage";
 import { BsFillPinFill } from "react-icons/bs";
+import { BiBlock } from "react-icons/bi";
 const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
@@ -137,6 +138,19 @@ const App = () => {
         );
       case "reply":
         return <ReplyMessage chat={chat.reply} />;
+      case "delete":
+        return (
+          <div className="flex p-1 italic gap-2 items-center bg-white rounded-lg">
+            <div>
+              <BiBlock />
+            </div>
+            <div>
+              {chat.mine
+                ? "You deleted this message"
+                : "This message was deleted"}
+            </div>
+          </div>
+        );
       default:
         return (
           <div className={`p-1 max-w-[40vw] bg-white m-2 rounded-lg`}>
@@ -283,116 +297,136 @@ const App = () => {
                           )}
                           <div key={chat._id} className={`flex justify-end`}>
                             <div className="flex items-center">
-                              <div>
-                                <div className="dropdown dropdown-top">
-                                  <div tabIndex={0}>
-                                    <MdOutlineInsertEmoticon size={20} />
-                                  </div>
-                                  <div
-                                    tabIndex={0}
-                                    className="dropdown-content z-[1] menu left-[-3rem] !bottom-[2rem] p-2 shadow bg-base-100 rounded-box"
-                                  >
-                                    <div className="flex justify-between gap-1 p-1">
-                                      <div
-                                        onClick={(e) =>
-                                          updateEmoji(chat._id, "0x1F600")
-                                        }
-                                      >
-                                        {String.fromCodePoint("0x1F600")}
+                              {chat.type !== "delete" && (
+                                <>
+                                  <div>
+                                    <div className="dropdown dropdown-top">
+                                      <div tabIndex={0}>
+                                        <MdOutlineInsertEmoticon size={20} />
                                       </div>
                                       <div
-                                        onClick={(e) =>
-                                          updateEmoji(chat._id, "0x1F601")
-                                        }
+                                        tabIndex={0}
+                                        className="dropdown-content z-[1] menu left-[-3rem] !bottom-[2rem] p-2 shadow bg-base-100 rounded-box"
                                       >
-                                        {String.fromCodePoint("0x1F601")}
-                                      </div>
-                                      <div
-                                        onClick={(e) =>
-                                          updateEmoji(chat._id, "0x1F602")
-                                        }
-                                      >
-                                        {String.fromCodePoint("0x1F602")}
-                                      </div>
-                                      <div
-                                        onClick={(e) =>
-                                          updateEmoji(chat._id, "0x1F607")
-                                        }
-                                      >
-                                        {String.fromCodePoint("0x1F607")}
+                                        <div className="flex justify-between gap-1 p-1">
+                                          <div
+                                            onClick={(e) =>
+                                              updateEmoji(chat._id, "0x1F600")
+                                            }
+                                          >
+                                            {String.fromCodePoint("0x1F600")}
+                                          </div>
+                                          <div
+                                            onClick={(e) =>
+                                              updateEmoji(chat._id, "0x1F601")
+                                            }
+                                          >
+                                            {String.fromCodePoint("0x1F601")}
+                                          </div>
+                                          <div
+                                            onClick={(e) =>
+                                              updateEmoji(chat._id, "0x1F602")
+                                            }
+                                          >
+                                            {String.fromCodePoint("0x1F602")}
+                                          </div>
+                                          <div
+                                            onClick={(e) =>
+                                              updateEmoji(chat._id, "0x1F607")
+                                            }
+                                          >
+                                            {String.fromCodePoint("0x1F607")}
+                                          </div>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
-                                </div>
-                              </div>
-                              <div>
-                                <TiArrowForward
-                                  size={20}
-                                  onClick={() => {
-                                    if (chat.type !== "text") {
-                                      showForwardModal();
-                                      setForwardChat(chat);
-                                    }
-                                  }}
-                                />
-                              </div>
+                                  <div>
+                                    <TiArrowForward
+                                      size={20}
+                                      onClick={() => {
+                                        if (chat.type !== "text") {
+                                          showForwardModal();
+                                          setForwardChat(chat);
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                </>
+                              )}
                               <div className="relative">
                                 {renderMessage(chat)}
-                                {chat.emoji && (
+                                {chat.emoji && chat.type !== "delete" && (
                                   <div className="absolute bottom-0 right-0">
                                     {String.fromCodePoint(chat.emoji)}
                                   </div>
                                 )}
-                                <div className="absolute top-0 right-0">
-                                  <div className="dropdown dropdown-end">
-                                    <div tabIndex={0}>
-                                      <FaChevronDown color="red" />
-                                    </div>
-                                    <div
-                                      tabIndex={0}
-                                      className="dropdown-content flex z-[1] menu shadow bg-base-100 rounded-lg"
-                                    >
-                                      <div
-                                        className="pointer-cursor"
-                                        onClick={() => {
-                                          setForward(!forward);
-                                          setForwardChatList([]);
-                                        }}
-                                      >
-                                        Forward
+                                {chat.type !== "delete" && (
+                                  <div className="absolute top-0 right-0">
+                                    <div className="dropdown dropdown-end">
+                                      <div tabIndex={0}>
+                                        <FaChevronDown color="red" />
                                       </div>
                                       <div
-                                        className="pointer-cursor"
-                                        onClick={() => {
-                                          setReply(true);
-                                          setForwardChat(chat);
-                                        }}
+                                        tabIndex={0}
+                                        className="dropdown-content flex z-[1] menu shadow bg-base-100 rounded-lg"
                                       >
-                                        Reply
-                                      </div>
-                                      <div
-                                        className="pointer-cursor"
-                                        onClick={async () => {
-                                          console.log(
-                                            chat._id,
-                                            currentUser.name
-                                          );
-                                          const resp = await axios.post(
-                                            "http://localhost:3001/pin",
-                                            {
-                                              _id: chat._id,
-                                              name: currentUser.name,
-                                              unpin: pin,
-                                            }
-                                          );
-                                          getCurrentUserData();
-                                        }}
-                                      >
-                                        {pin._id === chat._id ? "Unpin" : "Pin"}
+                                        <div
+                                          className="pointer-cursor"
+                                          onClick={() => {
+                                            setForward(!forward);
+                                            setForwardChatList([]);
+                                          }}
+                                        >
+                                          Forward
+                                        </div>
+                                        <div
+                                          className="pointer-cursor"
+                                          onClick={() => {
+                                            setReply(true);
+                                            setForwardChat(chat);
+                                          }}
+                                        >
+                                          Reply
+                                        </div>
+                                        <div
+                                          className="pointer-cursor"
+                                          onClick={async () => {
+                                            const resp = await axios.post(
+                                              "http://localhost:3001/pin",
+                                              {
+                                                _id: chat._id,
+                                                name: currentUser.name,
+                                                unpin: pin,
+                                              }
+                                            );
+                                            getCurrentUserData();
+                                          }}
+                                        >
+                                          {pin._id === chat._id
+                                            ? "Unpin"
+                                            : "Pin"}
+                                        </div>
+                                        <div
+                                          className="pointer-cursor"
+                                          onClick={async () => {
+                                            const resp = await axios.post(
+                                              "http://localhost:3001/delete",
+                                              {
+                                                chatId: chat._id,
+                                                name: currentUser.name,
+                                                receiptUser: selectedUser,
+                                              }
+                                            );
+                                            getCurrentUserData();
+                                          }}
+                                        >
+                                          Delete
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
-                                </div>
+                                )}
                               </div>
                             </div>
                           </div>

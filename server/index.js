@@ -338,28 +338,6 @@ app.get("/download/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-[
-  {
-    name: "abc",
-  },
-  {
-    name: "xyz",
-  },
-][
-  {
-    from: "abc",
-    to: "xyz",
-    _id: "id_123",
-    type: "text",
-    message: "Hello",
-    reactions: [
-      {
-        name: "rajesh",
-        reactionSymbol: ":)",
-      },
-    ],
-  }
-];
 app.post("/emoji", async (req, res) => {
   try {
     const { chatId, emoji, currentUser, selectedUser } = req.body;

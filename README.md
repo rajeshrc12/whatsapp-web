@@ -10,9 +10,9 @@ Pin media
 Time and Text inside media
 Date wise media
 Delete media
-
 Show list of reacted people
 Remove my reaction
+
 Create Poll
 Select multiple media
 After selecting media photo it should in carousel and should be able to add message
@@ -32,6 +32,8 @@ Blue tick
 Voice recording
 Moving to Message when click on reply
 Status
+Capture photo from system cam
+Send Contact
 
 Audio and video call
 channel
@@ -39,5 +41,3 @@ community
 Photo editor
 video editor
 Disappearing message
-Capture photo from system cam
-Send Contact

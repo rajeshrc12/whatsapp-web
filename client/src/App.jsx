@@ -170,11 +170,11 @@ const App = () => {
     });
     getCurrentUserData();
   };
-  const showForwardModal = () => {
-    document.getElementById("forwardModal").showModal();
+  const showModal = (id) => {
+    document.getElementById(id).showModal();
   };
-  const closeForwardModal = () => {
-    document.getElementById("forwardModal").close();
+  const closeModal = (id) => {
+    document.getElementById(id).close();
   };
   const renderEmojiPanel = (emoji) => {
     console.log(emoji);
@@ -384,7 +384,7 @@ const App = () => {
                                       size={20}
                                       onClick={() => {
                                         if (chat.type !== "text") {
-                                          showForwardModal();
+                                          showModal("forwardModal");
                                           setForwardChat(chat);
                                         }
                                       }}
@@ -511,7 +511,10 @@ const App = () => {
                 </div>
                 <div>
                   <div>
-                    <TiArrowForward onClick={showForwardModal} size={25} />
+                    <TiArrowForward
+                      onClick={() => showModal("forwardModal")}
+                      size={25}
+                    />
                   </div>
                 </div>
               </div>
@@ -526,15 +529,15 @@ const App = () => {
                 <div>
                   <form
                     onSubmit={sendMessage}
-                    className="flex p-3 bg-[#f0f2f5]"
+                    className="flex p-3 gap-3 bg-[#f0f2f5] w-full justify-between items-center"
                   >
-                    <div className="dropdown">
+                    <div className="dropdown dropdown-top">
                       <div tabIndex={0}>
                         <FaPlus />
                       </div>
                       <div
                         tabIndex={0}
-                        className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                        className="dropdown-content flex flex-col gap-2 z-[1] menu shadow bg-base-100 rounded-box"
                       >
                         <div>
                           <input
@@ -568,16 +571,24 @@ const App = () => {
                             }}
                           />
                         </div>
-                        <div>Poll</div>
+                        <div
+                          onClick={() => showModal("pollModal")}
+                          className="cursor-pointer"
+                        >
+                          Poll
+                        </div>
                       </div>
                     </div>
-
-                    <input
-                      type="text"
-                      name="message"
-                      className="outline-none w-full rounded-lg p-2"
-                    />
-                    <button className="p-2">send</button>
+                    <div className="w-full">
+                      <input
+                        type="text"
+                        name="message"
+                        className="outline-none w-full rounded-lg p-2"
+                      />
+                    </div>
+                    <div>
+                      <button className="p-2">send</button>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -651,7 +662,7 @@ const App = () => {
               <IoMdClose
                 size={25}
                 onClick={() => {
-                  closeForwardModal();
+                  closeModal("forwardModal");
                   setForwardUserList([]);
                 }}
               />
@@ -724,7 +735,7 @@ const App = () => {
                           }
                         );
                       }
-                      closeForwardModal();
+                      closeModal("forwardModal");
                       getCurrentUserData();
                       setForwardUserList([]);
                     }}
@@ -754,6 +765,79 @@ const App = () => {
                 </div>
               </div>
             )}
+          </div>
+        }
+      />
+      <Modal
+        id="pollModal"
+        width={30}
+        content={
+          <div className="flex flex-col gap-3">
+            <div className="bg-[#008069] flex p-3 gap-5 items-center">
+              <div>
+                <IoMdClose size={25} color="white" />
+              </div>
+              <div className="text-xl text-white">Create Poll</div>
+            </div>
+            <div className="p-3 text-xl text-[#3b4a54]">Question</div>
+            <div className="p-3 w-full">
+              <input
+                type="text"
+                className="w-full py-1 outline-none border-b-2"
+                placeholder="Ask question"
+              />
+            </div>
+            <div className="p-3 text-xl text-[#3b4a54]">Options</div>
+            <div className="p-3 flex flex-col gap-3 w-full h-[25vh] overflow-y-scroll">
+              <input
+                type="text"
+                className="w-full py-1 outline-none border-b-2"
+                placeholder="Ask question"
+              />
+              <input
+                type="text"
+                className="w-full py-1 outline-none border-b-2"
+                placeholder="Ask question"
+              />
+              <input
+                type="text"
+                className="w-full py-1 outline-none border-b-2"
+                placeholder="Ask question"
+              />
+            </div>
+            <div className="p-3 flex justify-between items-center">
+              <div>Allow multiple answers</div>
+              <div>
+                <input type="checkbox" className="toggle toggle-sm" checked />
+              </div>
+            </div>
+            <div className="flex p-3 justify-end">
+              <svg
+                onClick={async () => {}}
+                viewBox="-4 -4 32 32"
+                height="40"
+                width="40"
+                preserveAspectRatio="xMidYMid meet"
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <title>send</title>
+                <rect
+                  x="-4"
+                  y="-4"
+                  width="32"
+                  height="32"
+                  fill="#00a884"
+                  rx="16"
+                  ry="16"
+                ></rect>
+                <path
+                  fill="#fff"
+                  transform="scale(0.7) translate(6,6)"
+                  d="M1.101,21.757L23.8,12.028L1.101,2.3l0.011,7.912l13.623,1.816L1.112,13.845 L1.101,21.757z"
+                ></path>
+              </svg>
+            </div>
           </div>
         }
       />

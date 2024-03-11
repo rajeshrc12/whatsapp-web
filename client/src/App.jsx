@@ -19,6 +19,7 @@ import Reply from "./components/Reply";
 import ReplyMessage from "./components/ReplyMessage";
 import { BsFillPinFill } from "react-icons/bs";
 import { BiBlock } from "react-icons/bi";
+import { FaPlus } from "react-icons/fa";
 const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
@@ -160,8 +161,8 @@ const App = () => {
         );
     }
   };
-  const updateEmoji = async (id, emoji) => {
-    const resp = await axios.post("http://localhost:3001/updateEmoji", {
+  const addEmoji = async (id, emoji) => {
+    const resp = await axios.post("http://localhost:3001/emoji", {
       chatId: id,
       emoji,
       currentUser: currentUser.name,
@@ -174,6 +175,43 @@ const App = () => {
   };
   const closeForwardModal = () => {
     document.getElementById("forwardModal").close();
+  };
+  const renderEmojiPanel = (emoji) => {
+    console.log(emoji);
+    return (
+      <div role="tablist" className="tabs tabs-bordered">
+        <input
+          type="radio"
+          name="my_tabs_1"
+          role="tab"
+          className="tab"
+          aria-label="All"
+          checked
+        />
+        <div role="tabpanel" className="tab-content w-full">
+          {emoji.map((emoji, i) => (
+            <div className="flex justify-between">
+              <div>{emoji.emojiUser}</div>
+              <div>{String.fromCodePoint(emoji.emojiSymbol)}</div>
+            </div>
+          ))}
+        </div>
+        {emoji.map((emoji, i) => (
+          <>
+            <input
+              type="radio"
+              name={`my_tabs_1`}
+              role="tab"
+              className="tab"
+              aria-label={String.fromCodePoint(emoji.emojiSymbol)}
+            />
+            <div role="tabpanel" className="tab-content w-full">
+              Tab content {i + 1}
+            </div>
+          </>
+        ))}
+      </div>
+    );
   };
   return (
     <div className="grid grid-cols-4 h-screen">
@@ -300,7 +338,7 @@ const App = () => {
                               {chat.type !== "delete" && (
                                 <>
                                   <div>
-                                    <div className="dropdown dropdown-top">
+                                    <div className="dropdown dropdown-right">
                                       <div tabIndex={0}>
                                         <MdOutlineInsertEmoticon size={20} />
                                       </div>
@@ -311,28 +349,28 @@ const App = () => {
                                         <div className="flex justify-between gap-1 p-1">
                                           <div
                                             onClick={(e) =>
-                                              updateEmoji(chat._id, "0x1F600")
+                                              addEmoji(chat._id, "0x1F600")
                                             }
                                           >
                                             {String.fromCodePoint("0x1F600")}
                                           </div>
                                           <div
                                             onClick={(e) =>
-                                              updateEmoji(chat._id, "0x1F601")
+                                              addEmoji(chat._id, "0x1F601")
                                             }
                                           >
                                             {String.fromCodePoint("0x1F601")}
                                           </div>
                                           <div
                                             onClick={(e) =>
-                                              updateEmoji(chat._id, "0x1F602")
+                                              addEmoji(chat._id, "0x1F602")
                                             }
                                           >
                                             {String.fromCodePoint("0x1F602")}
                                           </div>
                                           <div
                                             onClick={(e) =>
-                                              updateEmoji(chat._id, "0x1F607")
+                                              addEmoji(chat._id, "0x1F607")
                                             }
                                           >
                                             {String.fromCodePoint("0x1F607")}
@@ -356,16 +394,31 @@ const App = () => {
                               )}
                               <div className="relative">
                                 {renderMessage(chat)}
-                                {chat.emoji && chat.type !== "delete" && (
-                                  <div className="flex gap-1 absolute p-1 rounded-2xl bottom-[-1rem] right-0 bg-white">
-                                    <div>
-                                      {chat.emoji.map((emoji) =>
-                                        String.fromCodePoint(emoji.emojiSymbol)
-                                      )}
+                                {chat.emoji.length > 0 &&
+                                  chat.type !== "delete" && (
+                                    <div className="absolute p-1 rounded-2xl bottom-[-1rem] right-0 bg-white">
+                                      <div className="dropdown">
+                                        <div tabIndex={0}>
+                                          <div className="flex gap-1">
+                                            <div>
+                                              {chat.emoji.map((emoji) =>
+                                                String.fromCodePoint(
+                                                  emoji.emojiSymbol
+                                                )
+                                              )}
+                                            </div>
+                                            <div>{chat.emoji.length}</div>
+                                          </div>
+                                        </div>
+                                        <div
+                                          tabIndex={0}
+                                          className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box"
+                                        >
+                                          {renderEmojiPanel(chat.emoji)}
+                                        </div>
+                                      </div>
                                     </div>
-                                    <div>{chat.emoji.length}</div>
-                                  </div>
-                                )}
+                                  )}
                                 {chat.type !== "delete" && (
                                   <div className="absolute top-0 right-0">
                                     <div className="dropdown dropdown-end">
@@ -475,36 +528,50 @@ const App = () => {
                     onSubmit={sendMessage}
                     className="flex p-3 bg-[#f0f2f5]"
                   >
-                    <input
-                      type="file"
-                      onChange={async (e) => {
-                        e.preventDefault();
-                        const formData = new FormData();
-                        formData.append("file", e.target.files[0]);
-                        formData.append(
-                          "userData",
-                          JSON.stringify({
-                            currentUser: currentUser.name,
-                            receiptUser: selectedUser,
-                          })
-                        );
-                        try {
-                          const response = await axios.post(
-                            "http://localhost:3001/upload",
-                            formData,
-                            {
-                              headers: {
-                                "Content-Type": "multipart/form-data",
-                              },
-                            }
-                          );
-                          getCurrentUserData();
-                          // This can contain any response from the backend
-                        } catch (error) {
-                          console.error("Error uploading file:", error);
-                        }
-                      }}
-                    />
+                    <div className="dropdown">
+                      <div tabIndex={0}>
+                        <FaPlus />
+                      </div>
+                      <div
+                        tabIndex={0}
+                        className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                      >
+                        <div>
+                          <input
+                            type="file"
+                            onChange={async (e) => {
+                              e.preventDefault();
+                              const formData = new FormData();
+                              formData.append("file", e.target.files[0]);
+                              formData.append(
+                                "userData",
+                                JSON.stringify({
+                                  currentUser: currentUser.name,
+                                  receiptUser: selectedUser,
+                                })
+                              );
+                              try {
+                                const response = await axios.post(
+                                  "http://localhost:3001/upload",
+                                  formData,
+                                  {
+                                    headers: {
+                                      "Content-Type": "multipart/form-data",
+                                    },
+                                  }
+                                );
+                                getCurrentUserData();
+                                // This can contain any response from the backend
+                              } catch (error) {
+                                console.error("Error uploading file:", error);
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>Poll</div>
+                      </div>
+                    </div>
+
                     <input
                       type="text"
                       name="message"

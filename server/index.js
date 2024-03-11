@@ -338,40 +338,84 @@ app.get("/download/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-app.post("/updateEmoji", async (req, res) => {
+[
+  {
+    name: "abc",
+  },
+  {
+    name: "xyz",
+  },
+][
+  {
+    from: "abc",
+    to: "xyz",
+    _id: "id_123",
+    type: "text",
+    message: "Hello",
+    reactions: [
+      {
+        name: "rajesh",
+        reactionSymbol: ":)",
+      },
+    ],
+  }
+];
+app.post("/emoji", async (req, res) => {
   try {
     const { chatId, emoji, currentUser, selectedUser } = req.body;
-    const response1 = await users.updateOne(
+    // Update emojiSymbol if emojiUser already exists in chat.emoji
+    console.log({ chatId, emoji, currentUser, selectedUser });
+    const updateResult = await users.updateOne(
       {
         name: currentUser,
         "chat._id": new ObjectId(chatId),
+        "chat.emoji.emojiUser": currentUser,
       },
+      { $set: { "chat.$.emoji.$[elem].emojiSymbol": emoji } },
       {
-        $push: {
-          "chat.$.emoji": {
-            name: currentUser,
-            emojiSymbol: emoji,
-          },
-        },
+        arrayFilters: [{ "elem.emojiUser": currentUser }],
+        upsert: false, // Do not insert a new document if no match is found
       }
     );
-    const response2 = await users.updateOne(
+
+    // If no document was updated (meaning the emojiUser does not exist), add a new entry to chat.emoji
+    if (updateResult.matchedCount === 0 || updateResult.modifiedCount === 0) {
+      await users.updateOne(
+        { name: currentUser, "chat._id": new ObjectId(chatId) },
+        {
+          $addToSet: {
+            "chat.$.emoji": { emojiUser: currentUser, emojiSymbol: emoji },
+          },
+        }
+      );
+    }
+
+    const updateResult1 = await users.updateOne(
       {
         name: selectedUser,
         "chat._id": new ObjectId(chatId),
+        "chat.emoji.emojiUser": selectedUser,
       },
+      { $set: { "chat.$.emoji.$[elem].emojiSymbol": emoji } },
       {
-        $push: {
-          "chat.$.emoji": {
-            name: currentUser,
-            emojiSymbol: emoji,
-          },
-        },
+        arrayFilters: [{ "elem.emojiUser": selectedUser }],
+        upsert: false, // Do not insert a new document if no match is found
       }
     );
-    console.log(response1, response2);
-    if (response1 && response2) res.status(200).send("Emoji updated");
+
+    // If no document was updated (meaning the emojiUser does not exist), add a new entry to chat.emoji
+    if (updateResult1.matchedCount === 0 || updateResult1.modifiedCount === 0) {
+      await users.updateOne(
+        { name: selectedUser, "chat._id": new ObjectId(chatId) },
+        {
+          $addToSet: {
+            "chat.$.emoji": { emojiUser: selectedUser, emojiSymbol: emoji },
+          },
+        }
+      );
+    }
+    console.log(updateResult, updateResult1);
+    if (updateResult && updateResult1) res.status(200).send("Emoji updated");
     else res.status(500).send("Emoji not updated");
   } catch (error) {
     console.log(error);

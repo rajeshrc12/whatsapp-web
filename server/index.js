@@ -97,7 +97,7 @@ const sendMessage = async ({
               from: currentUser,
               to: receiptUser,
               message,
-              emoji: null,
+              emoji: [],
               type,
               mine: true,
               reply,
@@ -120,7 +120,7 @@ const sendMessage = async ({
               from: currentUser,
               to: receiptUser,
               message,
-              emoji: null,
+              emoji: [],
               type,
               mine: false,
               reply,
@@ -169,7 +169,7 @@ app.post("/sendmessagebulkmultipleusers", async (req, res) => {
                   _id: new ObjectId(),
                   from: currentUser,
                   to: user,
-                  emoji: null,
+                  emoji: [],
                   mine: false,
                   createdAt: new Date(),
                   updatedAt: new Date(),
@@ -195,7 +195,7 @@ app.post("/sendmessagebulkmultipleusers", async (req, res) => {
                 from: currentUser,
                 to: currentUser,
                 mine: true,
-                emoji: null,
+                emoji: [],
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 pin: false,
@@ -348,8 +348,11 @@ app.post("/updateEmoji", async (req, res) => {
         "chat._id": new ObjectId(chatId),
       },
       {
-        $set: {
-          "chat.$.emoji": emoji, // Replace "yourEmojiHere" with the actual emoji you want to set.
+        $push: {
+          "chat.$.emoji": {
+            name: currentUser,
+            emojiSymbol: emoji,
+          },
         },
       }
     );
@@ -359,8 +362,11 @@ app.post("/updateEmoji", async (req, res) => {
         "chat._id": new ObjectId(chatId),
       },
       {
-        $set: {
-          "chat.$.emoji": emoji, // Replace "yourEmojiHere" with the actual emoji you want to set.
+        $push: {
+          "chat.$.emoji": {
+            name: currentUser,
+            emojiSymbol: emoji,
+          },
         },
       }
     );

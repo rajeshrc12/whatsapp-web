@@ -357,8 +357,13 @@ const App = () => {
                               <div className="relative">
                                 {renderMessage(chat)}
                                 {chat.emoji && chat.type !== "delete" && (
-                                  <div className="absolute bottom-0 right-0">
-                                    {String.fromCodePoint(chat.emoji)}
+                                  <div className="flex gap-1 absolute p-1 rounded-2xl bottom-[-1rem] right-0 bg-white">
+                                    <div>
+                                      {chat.emoji.map((emoji) =>
+                                        String.fromCodePoint(emoji.emojiSymbol)
+                                      )}
+                                    </div>
+                                    <div>{chat.emoji.length}</div>
                                   </div>
                                 )}
                                 {chat.type !== "delete" && (

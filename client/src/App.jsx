@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import WABG from "./images/whatsapp_back.jpeg";
 import Profile from "./images/profile.png";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ import ReplyMessage from "./components/ReplyMessage";
 import { BsFillPinFill } from "react-icons/bs";
 import { BiBlock } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa";
+import { IoIosMenu } from "react-icons/io";
 const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
@@ -30,11 +31,17 @@ const App = () => {
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
+  const [question, setQuestion] = useState("");
+  const [answers, setAnswers] = useState({
+    answer1: { message: "", error: false },
+    answer2: { message: "", error: false },
+  });
   const [mediaCarousel, setMediaCarousel] = useState(false);
   const [mediaCarouselIndex, setMediaCarouselIndex] = useState(0);
   const [forwardUserList, setForwardUserList] = useState([]);
   const [forwardChatList, setForwardChatList] = useState([]);
   const [forwardChat, setForwardChat] = useState({});
+  const [questionCount, setQuestionCount] = useState(2);
   const sendMessage = async (e) => {
     e.preventDefault();
     setReply(false);
@@ -177,7 +184,6 @@ const App = () => {
     document.getElementById(id).close();
   };
   const renderEmojiPanel = (emoji) => {
-    console.log(emoji);
     return (
       <div role="tablist" className="tabs tabs-bordered">
         <input
@@ -212,6 +218,21 @@ const App = () => {
         ))}
       </div>
     );
+  };
+  useEffect(() => {
+    setAnswers({
+      ...answers,
+      ["answer" + questionCount]: { message: "", error: false },
+    });
+  }, [questionCount]);
+  const closePoll = () => {
+    setQuestion("");
+    setAnswers({
+      answer1: { message: "", error: false },
+      answer2: { message: "", error: false },
+    });
+    closeModal("pollModal");
+    closeModal("pollWarningModal");
   };
   return (
     <div className="grid grid-cols-4 h-screen">
@@ -772,48 +793,134 @@ const App = () => {
         id="pollModal"
         width={30}
         content={
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <div className="bg-[#008069] flex p-3 gap-5 items-center">
               <div>
-                <IoMdClose size={25} color="white" />
+                <IoMdClose
+                  size={25}
+                  color="white"
+                  onClick={() => {
+                    if (
+                      question.trim().length ||
+                      answers.answer1.message.trim().length ||
+                      answers.answer2.message.trim().length
+                    ) {
+                      showModal("pollWarningModal");
+                    } else {
+                      closePoll();
+                    }
+                  }}
+                />
               </div>
               <div className="text-xl text-white">Create Poll</div>
             </div>
             <div className="p-3 text-xl text-[#3b4a54]">Question</div>
             <div className="p-3 w-full">
               <input
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
                 type="text"
                 className="w-full py-1 outline-none border-b-2"
                 placeholder="Ask question"
               />
             </div>
-            <div className="p-3 text-xl text-[#3b4a54]">Options</div>
+            <div className="flex justify-between p-3">
+              <div className="text-xl text-[#3b4a54]">Options</div>
+              <button
+                onClick={() => {
+                  if (Object.values(answers).every((ans) => ans.message !== ""))
+                    setQuestionCount(questionCount + 1);
+                }}
+                className="bg-[#008069] text-white rounded-lg p-1"
+              >
+                Add
+              </button>
+            </div>
             <div className="p-3 flex flex-col gap-3 w-full h-[25vh] overflow-y-scroll">
-              <input
-                type="text"
-                className="w-full py-1 outline-none border-b-2"
-                placeholder="Ask question"
-              />
-              <input
-                type="text"
-                className="w-full py-1 outline-none border-b-2"
-                placeholder="Ask question"
-              />
-              <input
-                type="text"
-                className="w-full py-1 outline-none border-b-2"
-                placeholder="Ask question"
-              />
+              {Object.keys(answers).map((answer) => (
+                <>
+                  <div className="flex">
+                    <input
+                      value={answers[answer].message}
+                      onChange={(e) => {
+                        let isAnswerExist = false;
+                        if (e.target.value.trim()) {
+                          for (const ans of Object.entries(answers)) {
+                            const [key, value] = ans;
+                            if (value.message === e.target.value.trim()) {
+                              isAnswerExist = true;
+                            }
+                          }
+                        }
+                        const temp = JSON.parse(JSON.stringify(answers));
+                        for (const ans of Object.keys(answers)) {
+                          if (
+                            ans !== "answer1" &&
+                            ans !== "answer2" &&
+                            answers[ans].message === ""
+                          ) {
+                            delete temp[ans];
+                          }
+                        }
+                        setAnswers({
+                          ...temp,
+                          [answer]: {
+                            message: e.target.value.trim(),
+                            error: isAnswerExist,
+                          },
+                        });
+                      }}
+                      type="text"
+                      className={`w-full px-1 outline-none ${
+                        answers[answer].error && "border-[#ea0038]"
+                      } border-b-2`}
+                      placeholder="Ask question"
+                    />
+                    <IoIosMenu />
+                  </div>
+                  <div className="text-[#ea0038] text-sm">
+                    {answers[answer].error && "This is already an option"}
+                  </div>
+                </>
+              ))}
             </div>
             <div className="p-3 flex justify-between items-center">
               <div>Allow multiple answers</div>
               <div>
-                <input type="checkbox" className="toggle toggle-sm" checked />
+                <input type="checkbox" className="toggle toggle-sm" />
               </div>
             </div>
             <div className="flex p-3 justify-end">
               <svg
-                onClick={async () => {}}
+                style={{
+                  opacity:
+                    question &&
+                    Object.values(answers).every(
+                      (ans) => ans.message.trim() !== "" && !ans.error
+                    )
+                      ? "1"
+                      : "0.5",
+                }}
+                className={
+                  question &&
+                  Object.values(answers).every(
+                    (ans) => ans.message.trim() !== "" && !ans.error
+                  )
+                    ? "cursor-pointer"
+                    : "cursor-not-allowed"
+                }
+                onClick={async () => {
+                  if (
+                    question &&
+                    Object.values(answers).every(
+                      (ans) => ans.message.trim() !== "" && !ans.error
+                    )
+                  ) {
+                    console.log("valid");
+                  } else {
+                    console.log("invalid");
+                  }
+                }}
                 viewBox="-4 -4 32 32"
                 height="40"
                 width="40"
@@ -837,6 +944,32 @@ const App = () => {
                   d="M1.101,21.757L23.8,12.028L1.101,2.3l0.011,7.912l13.623,1.816L1.112,13.845 L1.101,21.757z"
                 ></path>
               </svg>
+            </div>
+          </div>
+        }
+      />
+      <Modal
+        id="pollWarningModal"
+        width={40}
+        content={
+          <div className="flex flex-col p-5 gap-5">
+            <div className="text-xl">Leave poll ?</div>
+            <div className="">Your edits wont't be saved</div>
+            <div className="flex justify-end items-center gap-2">
+              <button
+                onClick={() => {
+                  closePoll();
+                }}
+                className="text-[#ea0038] rounded-[5rem] px-5 py-2 border"
+              >
+                Leave
+              </button>
+              <button
+                onClick={() => closeModal("pollWarningModal")}
+                className="bg-[#008069] text-white rounded-[5rem] px-5 py-2"
+              >
+                Keep editing
+              </button>
             </div>
           </div>
         }

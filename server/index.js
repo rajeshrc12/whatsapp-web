@@ -9,17 +9,7 @@ const app = express();
 const port = 3001; // Port for MongoDB API
 const socketPort = 3002; // Port for Socket.IO server
 
-// Configure storage for Multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Make sure this folder exists
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
-  },
-});
-
-const upload = multer({ storage: storage });
+const upload = multer();
 require("dotenv").config();
 app.use(cors());
 app.use(bodyParser.json());
@@ -301,10 +291,10 @@ app.post("/delete", async (req, res) => {
   }
 });
 
-app.post("/upload", upload.array("files"), async (req, res) => {
-  const files = req.files;
+app.post("/upload", upload.single("file"), async (req, res) => {
+  const file = req.file;
   const { receiptUser, currentUser } = JSON.parse(req.body.userData);
-  if (files) {
+  if (file) {
     try {
       // Create a file in GridFS
       const uploadStream = bucket.openUploadStream(file.originalname);

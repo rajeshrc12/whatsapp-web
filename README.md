@@ -20,7 +20,6 @@ Starred messages
 Message info
 Contract info - Profile pic , About , Media
 My profile
-Group similar media
 
 Creating Groups
 Group Messaging
@@ -42,3 +41,5 @@ Photo editor
 video editor
 Disappearing message
 Draggable Poll answers
+Single vote selection
+Group similar media

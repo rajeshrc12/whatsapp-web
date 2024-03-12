@@ -74,6 +74,7 @@ const App = () => {
     });
     setUsers(resp.data);
   };
+  console.log(currentUser);
   const getCurrentUserData = async () => {
     const resp = await axios.post("http://localhost:3001/user", {
       user: sessionStorage.getItem("whatsappUser"),
@@ -126,6 +127,7 @@ const App = () => {
   const renderMessage = (chat) => {
     switch (chat.type) {
       case "image":
+        console.log(chat.url);
         return (
           <div onClick={() => setMediaCarousel(!mediaCarousel)}>
             <img src={chat.url} height={200} width={200} />
@@ -575,29 +577,29 @@ const App = () => {
                           <input
                             type="file"
                             multiple
-                            onChange={async (e) => {
+                            onChange={(e) => {
                               e.preventDefault();
-                              const formData = new FormData();
-                              for (const file of e.target.files) {
-                                formData.append("files", file);
-                              }
-                              formData.append(
-                                "userData",
-                                JSON.stringify({
-                                  currentUser: currentUser.name,
-                                  receiptUser: selectedUser,
-                                })
-                              );
                               try {
-                                const response = await axios.post(
-                                  "http://localhost:3001/upload",
-                                  formData,
-                                  {
-                                    headers: {
-                                      "Content-Type": "multipart/form-data",
-                                    },
-                                  }
-                                );
+                                for (const file of e.target.files) {
+                                  const formData = new FormData();
+                                  formData.append("file", file);
+                                  formData.append(
+                                    "userData",
+                                    JSON.stringify({
+                                      currentUser: currentUser.name,
+                                      receiptUser: selectedUser,
+                                    })
+                                  );
+                                  axios.post(
+                                    "http://localhost:3001/upload",
+                                    formData,
+                                    {
+                                      headers: {
+                                        "Content-Type": "multipart/form-data",
+                                      },
+                                    }
+                                  );
+                                }
                                 getCurrentUserData();
                                 // This can contain any response from the backend
                               } catch (error) {

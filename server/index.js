@@ -174,6 +174,7 @@ app.post("/sendmessagebulkmultipleusers", async (req, res) => {
                   createdAt: new Date(),
                   updatedAt: new Date(),
                   pin: false,
+                  reply: null,
                 };
                 if (temp.url) delete temp.url;
                 return temp;
@@ -199,6 +200,7 @@ app.post("/sendmessagebulkmultipleusers", async (req, res) => {
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 pin: false,
+                reply: null,
               };
               if (temp.url) delete temp.url;
               return temp;

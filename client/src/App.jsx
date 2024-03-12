@@ -32,6 +32,7 @@ const App = () => {
   const [currentUser, setCurrentUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [question, setQuestion] = useState("");
+  const [multiAnswer, setMultiAnswer] = useState(false);
   const [answers, setAnswers] = useState({
     answer1: { message: "", error: false },
     answer2: { message: "", error: false },
@@ -156,6 +157,27 @@ const App = () => {
               {chat.mine
                 ? "You deleted this message"
                 : "This message was deleted"}
+            </div>
+          </div>
+        );
+      case "poll":
+        return (
+          <div className="flex flex-col bg-white w-80">
+            <div className="font-bold px-3">{chat.message.question}</div>
+            <div className="px-3">
+              {chat.message.multiAnswer ? "Select one or more" : "Select one"}
+            </div>
+            <div className="flex gap-3 justify-between px-3">
+              <div>
+                <input type="checkbox" />
+              </div>
+              <div className="w-full">
+                <div className="flex justify-between">
+                  <div>Yes</div>
+                  <div>0</div>
+                </div>
+                <progress className="progress" value={0} max="100"></progress>
+              </div>
             </div>
           </div>
         );
@@ -887,7 +909,12 @@ const App = () => {
             <div className="p-3 flex justify-between items-center">
               <div>Allow multiple answers</div>
               <div>
-                <input type="checkbox" className="toggle toggle-sm" />
+                <input
+                  type="checkbox"
+                  checked={multiAnswer}
+                  onChange={(e) => setMultiAnswer(e.target.checked)}
+                  className="toggle toggle-sm"
+                />
               </div>
             </div>
             <div className="flex p-3 justify-end">
@@ -916,9 +943,28 @@ const App = () => {
                       (ans) => ans.message.trim() !== "" && !ans.error
                     )
                   ) {
-                    console.log("valid");
-                  } else {
-                    console.log("invalid");
+                    const resp = await axios.post(
+                      "http://localhost:3001/sendmessage",
+                      {
+                        message: {
+                          question,
+                          answers: Object.entries(answers).map((ans) => {
+                            const [key, value] = ans;
+                            return {
+                              [key]: value.message,
+                              users: [],
+                            };
+                          }),
+                          multiAnswer,
+                        },
+                        receiptUser: selectedUser,
+                        currentUser: currentUser.name,
+                        type: "poll",
+                        reply: null,
+                      }
+                    );
+                    closeModal("pollModal");
+                    console.log(resp);
                   }
                 }}
                 viewBox="-4 -4 32 32"

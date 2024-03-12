@@ -21,6 +21,7 @@ import { BsFillPinFill } from "react-icons/bs";
 import { BiBlock } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
+import PollMessage from "./components/PollMessage";
 const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
@@ -37,6 +38,7 @@ const App = () => {
     answer1: { message: "", error: false },
     answer2: { message: "", error: false },
   });
+  const [pollAnswer, setPollAnswer] = useState({});
   const [mediaCarousel, setMediaCarousel] = useState(false);
   const [mediaCarouselIndex, setMediaCarouselIndex] = useState(0);
   const [forwardUserList, setForwardUserList] = useState([]);
@@ -162,24 +164,11 @@ const App = () => {
         );
       case "poll":
         return (
-          <div className="flex flex-col bg-white w-80">
-            <div className="font-bold px-3">{chat.message.question}</div>
-            <div className="px-3">
-              {chat.message.multiAnswer ? "Select one or more" : "Select one"}
-            </div>
-            <div className="flex gap-3 justify-between px-3">
-              <div>
-                <input type="checkbox" />
-              </div>
-              <div className="w-full">
-                <div className="flex justify-between">
-                  <div>Yes</div>
-                  <div>0</div>
-                </div>
-                <progress className="progress" value={0} max="100"></progress>
-              </div>
-            </div>
-          </div>
+          <PollMessage
+            chat={chat}
+            currentUser={currentUser.name}
+            selectedUser={selectedUser}
+          />
         );
       default:
         return (
@@ -951,7 +940,7 @@ const App = () => {
                           answers: Object.entries(answers).map((ans) => {
                             const [key, value] = ans;
                             return {
-                              [key]: value.message,
+                              answer: value.message,
                               users: [],
                             };
                           }),

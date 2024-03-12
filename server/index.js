@@ -402,6 +402,60 @@ app.post("/emoji", async (req, res) => {
     res.status(500).send(error);
   }
 });
+app.post("/vote", async (req, res) => {
+  const { currentUser, selectedUser, chatId, answer, action } = req.body;
+  if (currentUser && selectedUser && chatId && answer) {
+    const query = {
+      name: currentUser,
+      "chat._id": new ObjectId(chatId),
+      "chat.message.answers.answer": answer,
+    };
+
+    // Update command to add userData to the users array
+    const updateDocument = {};
+    if (action === "add")
+      updateDocument["$push"] = {
+        "chat.$.message.answers.$[answerObj].users": currentUser,
+      };
+    else
+      updateDocument["$pull"] = {
+        "chat.$.message.answers.$[answerObj].users": currentUser,
+      };
+
+    // ArrayFilters to identify the specific answer to update
+    const options = {
+      arrayFilters: [{ "answerObj.answer": answer }],
+    };
+    const result = await users.updateOne(query, updateDocument, options);
+
+    const query1 = {
+      name: selectedUser,
+      "chat._id": new ObjectId(chatId),
+      "chat.message.answers.answer": answer,
+    };
+
+    // Update command to add userData to the users array
+    const updateDocument1 = {};
+    if (action === "add")
+      updateDocument1["$push"] = {
+        "chat.$.message.answers.$[answerObj].users": currentUser,
+      };
+    else
+      updateDocument1["$pull"] = {
+        "chat.$.message.answers.$[answerObj].users": currentUser,
+      };
+
+    // ArrayFilters to identify the specific answer to update
+    const options1 = {
+      arrayFilters: [{ "answerObj.answer": answer }],
+    };
+    const result1 = await users.updateOne(query1, updateDocument1, options1);
+    if (result && result1) res.status(200).send({ result, result1 });
+    else res.status(500).send("Failed to pin message");
+  } else {
+    res.status(500).send("currentUser, selectedUser, chatId, answer required");
+  }
+});
 
 // Start the main Express app
 app.listen(port, () => {

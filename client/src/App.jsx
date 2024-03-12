@@ -574,10 +574,13 @@ const App = () => {
                         <div>
                           <input
                             type="file"
+                            multiple
                             onChange={async (e) => {
                               e.preventDefault();
                               const formData = new FormData();
-                              formData.append("file", e.target.files[0]);
+                              for (const file of e.target.files) {
+                                formData.append("files", file);
+                              }
                               formData.append(
                                 "userData",
                                 JSON.stringify({

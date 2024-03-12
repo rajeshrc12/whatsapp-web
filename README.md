@@ -13,9 +13,9 @@ Delete media
 Show list of reacted people
 Remove my reaction
 Create Poll
-
 Select multiple media
 After selecting media photo it should in carousel and should be able to add message
+
 Starred messages
 Contract info - Profile pic , About , Media
 My profile
@@ -25,15 +25,16 @@ Group Messaging
 Add members to group
 Group members
 
-Search message
-Blue tick
 Voice recording
-Moving to Message when click on reply
 Status
 Capture photo from system cam
-Send Contact
-Message info
+Search message
+Moving to Message when click on reply
 Single vote selection
+
+Blue tick
+Message info
+Send Contact
 
 Audio and video call
 channel
@@ -42,4 +43,3 @@ Photo editor
 video editor
 Disappearing message
 Draggable Poll answers
-Group similar media

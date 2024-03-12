@@ -22,6 +22,7 @@ import { BiBlock } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
 import PollMessage from "./components/PollMessage";
+import InputFileIcon from "./components/InputFileIcon";
 const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
@@ -45,6 +46,9 @@ const App = () => {
   const [forwardChatList, setForwardChatList] = useState([]);
   const [forwardChat, setForwardChat] = useState({});
   const [questionCount, setQuestionCount] = useState(2);
+  const [files, setFiles] = useState([]);
+  const [blobFiles, setBolbFiles] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(0);
   const sendMessage = async (e) => {
     e.preventDefault();
     setReply(false);
@@ -247,6 +251,7 @@ const App = () => {
     closeModal("pollModal");
     closeModal("pollWarningModal");
   };
+  console.log(files);
   return (
     <div className="grid grid-cols-4 h-screen">
       <div className="col-span-1 h-full">
@@ -573,41 +578,19 @@ const App = () => {
                         tabIndex={0}
                         className="dropdown-content flex flex-col gap-2 z-[1] menu shadow bg-base-100 rounded-box"
                       >
-                        <div>
-                          <input
-                            type="file"
-                            multiple
-                            onChange={(e) => {
-                              e.preventDefault();
-                              try {
-                                for (const file of e.target.files) {
-                                  const formData = new FormData();
-                                  formData.append("file", file);
-                                  formData.append(
-                                    "userData",
-                                    JSON.stringify({
-                                      currentUser: currentUser.name,
-                                      receiptUser: selectedUser,
-                                    })
-                                  );
-                                  axios.post(
-                                    "http://localhost:3001/upload",
-                                    formData,
-                                    {
-                                      headers: {
-                                        "Content-Type": "multipart/form-data",
-                                      },
-                                    }
-                                  );
-                                }
-                                getCurrentUserData();
-                                // This can contain any response from the backend
-                              } catch (error) {
-                                console.error("Error uploading file:", error);
-                              }
-                            }}
-                          />
-                        </div>
+                        <InputFileIcon
+                          files={files}
+                          setFiles={setFiles}
+                          blobFiles={blobFiles}
+                          setBolbFiles={setBolbFiles}
+                          icon={
+                            <div className="flex items-center">
+                              <FaPlus />
+                              <div>Document</div>
+                            </div>
+                          }
+                          callback={() => showModal("mediaModal")}
+                        />
                         <div
                           onClick={() => showModal("pollModal")}
                           className="cursor-pointer"
@@ -1010,6 +993,127 @@ const App = () => {
               >
                 Keep editing
               </button>
+            </div>
+          </div>
+        }
+      />
+      <Modal
+        id="mediaModal"
+        width={100}
+        content={
+          <div className="flex flex-col p-3 bg-[#e9edef] gap-5">
+            <div>
+              <IoMdClose
+                size={25}
+                onClick={() => {
+                  closeModal("mediaModal");
+                  setFiles([]);
+                  setBolbFiles([]);
+                }}
+              />
+            </div>
+            <div className="flex justify-center w-full">
+              <div
+                style={{
+                  backgroundImage: `url(${files[selectedImage]})`,
+                  backgroundSize: "contain",
+                  height: "50vh",
+                  width: "50vw",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center center",
+                }}
+              ></div>
+            </div>
+            <div className="flex items-center border p-2 gap-2 bg-white rounded-lg">
+              <input type="text" className="outline-none bg-white w-full" />
+              <MdOutlineInsertEmoticon />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex w-full justify-center">
+                {files.map((file, index) => (
+                  <div
+                    onClick={() => setSelectedImage(index)}
+                    style={{
+                      backgroundImage: `url(${file})`,
+                      backgroundSize: "cover",
+                    }}
+                    className={`${
+                      index === selectedImage ? "border-2 border-[#00a884]" : ""
+                    } m-1 h-14 w-14 flex items-center relative rounded-lg`}
+                  >
+                    <IoMdClose
+                      size={5}
+                      className="absolute top-0 right-0 cursor-pointer"
+                      onClick={() => setFiles(files.filter((f) => f !== file))}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center">
+                <div className="border border-gray-300 rounded-lg m-1 h-14 w-14 flex justify-center items-center">
+                  <InputFileIcon
+                    files={files}
+                    setFiles={setFiles}
+                    blobFiles={blobFiles}
+                    setBolbFiles={setBolbFiles}
+                    icon={<FaPlus />}
+                  />
+                </div>
+                <div>
+                  <svg
+                    className="cursor-pointer"
+                    onClick={() => {
+                      try {
+                        for (const file of blobFiles) {
+                          const formData = new FormData();
+                          formData.append("file", file);
+                          formData.append(
+                            "userData",
+                            JSON.stringify({
+                              currentUser: currentUser.name,
+                              receiptUser: selectedUser,
+                            })
+                          );
+                          axios.post("http://localhost:3001/upload", formData, {
+                            headers: {
+                              "Content-Type": "multipart/form-data",
+                            },
+                          });
+                        }
+                        getCurrentUserData();
+                        closeModal("mediaModal");
+                        setFiles([]);
+                        setBolbFiles([]);
+                        // This can contain any response from the backend
+                      } catch (error) {
+                        console.error("Error uploading file:", error);
+                      }
+                    }}
+                    viewBox="-4 -4 32 32"
+                    height="40"
+                    width="40"
+                    preserveAspectRatio="xMidYMid meet"
+                    version="1.1"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <title>send</title>
+                    <rect
+                      x="-4"
+                      y="-4"
+                      width="32"
+                      height="32"
+                      fill="#00a884"
+                      rx="16"
+                      ry="16"
+                    ></rect>
+                    <path
+                      fill="#fff"
+                      transform="scale(0.7) translate(6,6)"
+                      d="M1.101,21.757L23.8,12.028L1.101,2.3l0.011,7.912l13.623,1.816L1.112,13.845 L1.101,21.757z"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
         }

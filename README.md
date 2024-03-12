@@ -17,7 +17,6 @@ Create Poll
 Select multiple media
 After selecting media photo it should in carousel and should be able to add message
 Starred messages
-Message info
 Contract info - Profile pic , About , Media
 My profile
 
@@ -33,6 +32,8 @@ Moving to Message when click on reply
 Status
 Capture photo from system cam
 Send Contact
+Message info
+Single vote selection
 
 Audio and video call
 channel
@@ -41,5 +42,4 @@ Photo editor
 video editor
 Disappearing message
 Draggable Poll answers
-Single vote selection
 Group similar media

@@ -32,6 +32,7 @@ const App = () => {
   const [pin, setPin] = useState({});
   const [reply, setReply] = useState(false);
   const [users, setUsers] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [currentUser, setCurrentUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [question, setQuestion] = useState("");
@@ -82,6 +83,13 @@ const App = () => {
     });
     setUsers(resp.data);
   };
+  const getAllGroups = async () => {
+    const resp = await axios.get(
+      "http://localhost:3001/group/" + sessionStorage.getItem("whatsappUser")
+    );
+    setGroups(resp.data);
+    console.log(resp);
+  };
   const getCurrentUserData = async () => {
     const resp = await axios.post("http://localhost:3001/user", {
       user: sessionStorage.getItem("whatsappUser"),
@@ -118,6 +126,7 @@ const App = () => {
     if (sessionStorage.getItem("whatsappUser")) {
       getCurrentUserData();
       getAllUsers();
+      getAllGroups();
     } else navigate("/");
   }, []);
   useEffect(() => {
@@ -134,7 +143,6 @@ const App = () => {
   const renderMessage = (chat) => {
     switch (chat.type) {
       case "image":
-        console.log(chat.url);
         return (
           <div onClick={() => setMediaCarousel(!mediaCarousel)}>
             <img src={chat.url} height={200} width={200} />
@@ -271,7 +279,7 @@ const App = () => {
       formData.append(
         "userData",
         JSON.stringify({
-          users: groupCreationContacts,
+          users: [...groupCreationContacts, currentUser.name],
           name: e.target[0].value.trim(),
         })
       );
@@ -280,11 +288,8 @@ const App = () => {
           "Content-Type": "multipart/form-data",
         },
       });
+      setLeftPanel("");
     } else alert("Enter group name");
-
-    console.log(e.target[0].value);
-    console.log(groupCreationContacts);
-    console.log(blobFiles[0]);
   };
   const renderLeftPanel = () => {
     switch (leftPanel) {
@@ -353,16 +358,22 @@ const App = () => {
             <div
               className="rounded-full flex justify-center items-center h-[30vh] w-[15vw]"
               style={{
-                backgroundImage: `url(${Profile})`,
+                backgroundImage: `url(${
+                  typeof blobFiles[0] === "object"
+                    ? URL.createObjectURL(blobFiles[0])
+                    : Profile
+                })`,
                 backgroundSize: "cover",
-                opacity: "0.5",
+                opacity: typeof blobFiles[0] === "object" ? "1" : "0.5",
               }}
             >
-              <InputFileIcon
-                multiple={false}
-                icon={<div className="text-white">Add Image</div>}
-                setBolbFiles={setBolbFiles}
-              />
+              {typeof blobFiles[0] !== "object" && (
+                <InputFileIcon
+                  multiple={false}
+                  icon={<div className="text-white">Add Image</div>}
+                  setBolbFiles={setBolbFiles}
+                />
+              )}
             </div>
             <div className="p-5">
               <form onSubmit={submitGroup}>
@@ -405,6 +416,17 @@ const App = () => {
             </div>
             <div className="h-[90vh] overflow-y-scroll">
               {users.map((user) => (
+                <div
+                  className={`cursor-pointer p-10 border border-t-0 border-gray-300 ${
+                    user.name === selectedUser && "bg-red-200"
+                  }`}
+                  key={user.name}
+                  onClick={() => setSelectedUser(user.name)}
+                >
+                  {user.name}
+                </div>
+              ))}
+              {groups.map((user) => (
                 <div
                   className={`cursor-pointer p-10 border border-t-0 border-gray-300 ${
                     user.name === selectedUser && "bg-red-200"
@@ -926,7 +948,6 @@ const App = () => {
                               type: forwardChat.type,
                             }
                           );
-                          console.log(resp);
                         }
                         setSelectedUser(firstUser);
                       } else {
@@ -1125,7 +1146,6 @@ const App = () => {
                       }
                     );
                     closeModal("pollModal");
-                    console.log(resp);
                   }
                 }}
                 viewBox="-4 -4 32 32"

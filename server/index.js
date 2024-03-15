@@ -84,13 +84,19 @@ app.post("/group", upload.single("file"), async (req, res) => {
     const file = req.file;
     const { name, users } = JSON.parse(req.body.userData);
     if (name && users.length) {
-      const result = await groups.insertOne({
-        name,
-        users,
-        chat: [],
-      });
-      if (result) res.status(200).send("New group created");
-      else res.status(500).send("Group not created");
+      const uploadStream = bucket.openUploadStream(file.originalname);
+      // Pipe the file buffer to the GridFS upload stream
+      const resp = await uploadStream.end(file.buffer);
+      if (resp.filename) {
+        const result = await groups.insertOne({
+          name,
+          users,
+          imageId: String(resp.id),
+          chat: [],
+        });
+        if (result) res.status(200).send("New group created");
+        else res.status(500).send("Group not created");
+      }
     } else {
       res.status(200).send("Provide group name, users");
     }
@@ -98,6 +104,15 @@ app.post("/group", upload.single("file"), async (req, res) => {
     console.log(error);
     res.status(500).send(error);
   }
+});
+app.get("/group/:name", async (req, res) => {
+  const name = req.params.name;
+  console.log(name);
+  if (name) {
+    const result = await groups.find({ users: name }).toArray();
+    if (result) res.status(200).send(result);
+    else res.status(500).send("No groups found");
+  } else res.status(500).send("Provide group name, users");
 });
 const sendMessage = async ({
   message,
@@ -344,7 +359,8 @@ app.get("/clean", async (req, res) => {
   const response1 = await users.deleteMany({});
   const response2 = await fschunks.deleteMany({});
   const response3 = await fsfiles.deleteMany({});
-  res.send({ response1, response2, response3 });
+  const response4 = await groups.deleteMany({});
+  res.send({ response1, response2, response3, response4 });
 });
 
 app.get("/download/:id", async (req, res) => {

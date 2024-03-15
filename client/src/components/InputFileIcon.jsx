@@ -7,6 +7,7 @@ const InputFileIcon = ({
   setBolbFiles = () => {},
   blobFiles = [],
   callback = () => {},
+  multiple = true,
 }) => {
   return (
     <div>
@@ -14,7 +15,7 @@ const InputFileIcon = ({
         {icon}
       </label>
       <input
-        multiple
+        multiple={multiple}
         id="file-input"
         onChange={(e) => {
           e.preventDefault();

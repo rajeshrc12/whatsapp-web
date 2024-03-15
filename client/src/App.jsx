@@ -23,6 +23,7 @@ import { FaPlus } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
 import PollMessage from "./components/PollMessage";
 import InputFileIcon from "./components/InputFileIcon";
+import { BsThreeDotsVertical } from "react-icons/bs";
 const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
@@ -40,6 +41,7 @@ const App = () => {
     answer2: { message: "", error: false },
   });
   const [pollAnswer, setPollAnswer] = useState({});
+  const [leftPanel, setLeftPanel] = useState("");
   const [mediaCarousel, setMediaCarousel] = useState(false);
   const [mediaCarouselIndex, setMediaCarouselIndex] = useState(0);
   const [forwardUserList, setForwardUserList] = useState([]);
@@ -50,6 +52,7 @@ const App = () => {
   const [blobFiles, setBolbFiles] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [contactInfo, setContactInfo] = useState("");
+  const [searchContacts, setSearchContacts] = useState("");
   const sendMessage = async (e) => {
     e.preventDefault();
     setReply(false);
@@ -79,7 +82,6 @@ const App = () => {
     });
     setUsers(resp.data);
   };
-  console.log(currentUser);
   const getCurrentUserData = async () => {
     const resp = await axios.post("http://localhost:3001/user", {
       user: sessionStorage.getItem("whatsappUser"),
@@ -260,39 +262,168 @@ const App = () => {
     closeModal("pollModal");
     closeModal("pollWarningModal");
   };
-  return (
-    <div className={`grid grid-cols-${contactInfo ? 8 : 4} h-screen`}>
-      <div className={`col-span-${contactInfo ? 2 : 1} h-full`}>
-        <div className="flex flex-col justify-between h-full">
-          <div className="flex justify-between p-3 bg-[#f0f2f5]">
-            <div>{currentUser.name}</div>
-            <div>
-              <button
-                onClick={() => {
-                  sessionStorage.removeItem("whatsappUser");
-                  navigate("/");
-                }}
-              >
-                Logout
+  const [groupCreationContacts, setGroupCreationContacts] = useState([]);
+  const submitGroup = async (e) => {
+    e.preventDefault();
+    if (e.target[0].value.trim()) {
+      const formData = new FormData();
+      formData.append("file", blobFiles.length ? blobFiles[0] : null);
+      formData.append(
+        "userData",
+        JSON.stringify({
+          users: groupCreationContacts,
+          name: e.target[0].value.trim(),
+        })
+      );
+      axios.post("http://localhost:3001/group", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } else alert("Enter group name");
+
+    console.log(e.target[0].value);
+    console.log(groupCreationContacts);
+    console.log(blobFiles[0]);
+  };
+  const renderLeftPanel = () => {
+    switch (leftPanel) {
+      case "addGroupMembers":
+        return (
+          <div className="flex flex-col h-full">
+            <div className="h-[10vh] border">Add group members</div>
+            <div className=" h-[15vh] overflow-y-scroll">
+              <div className="flex flex-col justify-center p-2">
+                {groupCreationContacts.map((contact) => (
+                  <div className="w-full flex py-2 px-1 m-1 border rounded-lg">
+                    <div className="w-full">
+                      <img src={Profile} height={20} width={20} />
+                    </div>
+                    <div>{contact}</div>
+                    <div>
+                      <IoMdClose
+                        onClick={() =>
+                          setGroupCreationContacts(
+                            groupCreationContacts.filter((c) => c !== contact)
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col justify-center h-[10vh] p-2">
+              <input
+                type="text"
+                className="w-full outline-none border-b-[1px]"
+                placeholder="Search name or number"
+                onChange={(e) => setSearchContacts(e.target.value)}
+              />
+            </div>
+            <div className="h-[60vh] border overflow-y-scroll">
+              {users
+                .filter((user) => user.name?.includes(searchContacts))
+                .map((user) => (
+                  <div
+                    className={`cursor-pointer p-5 border border-t-0 border-gray-300`}
+                    key={user.name}
+                    onClick={() => {
+                      if (!groupCreationContacts.includes(user.name))
+                        setGroupCreationContacts([
+                          ...groupCreationContacts,
+                          user.name,
+                        ]);
+                    }}
+                  >
+                    {user.name}
+                  </div>
+                ))}
+            </div>
+            <div className="h-[10vh] border">
+              <button onClick={() => setLeftPanel("addGroupDetails")}>
+                next
               </button>
             </div>
           </div>
-          <div className="h-[90vh] overflow-y-scroll">
-            {users.map((user) => (
-              <div
-                className={`cursor-pointer p-5 border border-t-0 border-gray-300 ${
-                  user.name === selectedUser && "bg-red-200"
-                }`}
-                key={user.name}
-                onClick={() => setSelectedUser(user.name)}
-              >
-                {user.name}
-              </div>
-            ))}
+        );
+      case "addGroupDetails":
+        return (
+          <div className="flex flex-col border-r-2 h-screen justify-center">
+            <div
+              className="rounded-full flex justify-center items-center h-[30vh] w-[15vw]"
+              style={{
+                backgroundImage: `url(${Profile})`,
+                backgroundSize: "cover",
+                opacity: "0.5",
+              }}
+            >
+              <InputFileIcon
+                multiple={false}
+                icon={<div className="text-white">Add Image</div>}
+                setBolbFiles={setBolbFiles}
+              />
+            </div>
+            <div className="p-5">
+              <form onSubmit={submitGroup}>
+                <input
+                  type="text"
+                  placeholder="Group Subject"
+                  className="w-full outline-none border-b-[1px]"
+                />
+                <button type="submit">Next</button>
+              </form>
+            </div>
           </div>
-        </div>
-      </div>
-      <div className={`col-span-${contactInfo ? 4 : 3} h-full`}>
+        );
+      default:
+        return (
+          <div className="flex flex-col justify-between h-full">
+            <div className="flex justify-between items-center p-3 bg-[#f0f2f5]">
+              <div>{currentUser.name}</div>
+              <div className="dropdown dropdown-end">
+                <div tabIndex={0}>
+                  <BsThreeDotsVertical className="cursor-pointer" />
+                </div>
+                <div
+                  tabIndex={0}
+                  className="dropdown-content z-[1] menu p-2 shadow bg-base-100 whitespace-nowrap"
+                >
+                  <button onClick={() => setLeftPanel("addGroupMembers")}>
+                    New group
+                  </button>
+                  <button
+                    onClick={() => {
+                      sessionStorage.removeItem("whatsappUser");
+                      navigate("/");
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="h-[90vh] overflow-y-scroll">
+              {users.map((user) => (
+                <div
+                  className={`cursor-pointer p-10 border border-t-0 border-gray-300 ${
+                    user.name === selectedUser && "bg-red-200"
+                  }`}
+                  key={user.name}
+                  onClick={() => setSelectedUser(user.name)}
+                >
+                  {user.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+    }
+  };
+  return (
+    <div className={`grid grid-cols-6 h-screen`}>
+      <div className={`col-span-2 h-full`}>{renderLeftPanel()}</div>
+      <div className={`col-span-4 h-full`}>
         {selectedUser ? (
           <div
             className="flex flex-col justify-between h-full"

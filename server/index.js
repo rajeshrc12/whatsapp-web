@@ -17,6 +17,7 @@ app.use(bodyParser.json());
 const client = new MongoClient(process.env.DB_URI);
 const database = client.db(process.env.DB_NAME);
 const users = database.collection("users");
+const groups = database.collection("groups");
 const fschunks = database.collection("fs.chunks");
 const fsfiles = database.collection("fs.files");
 // Create a GridFS bucket
@@ -76,6 +77,26 @@ app.post("/users", async (req, res) => {
     else res.status(200).send("No user found");
   } else {
     res.status(500).send("user name required");
+  }
+});
+app.post("/group", upload.single("file"), async (req, res) => {
+  try {
+    const file = req.file;
+    const { name, users } = JSON.parse(req.body.userData);
+    if (name && users.length) {
+      const result = await groups.insertOne({
+        name,
+        users,
+        chat: [],
+      });
+      if (result) res.status(200).send("New group created");
+      else res.status(500).send("Group not created");
+    } else {
+      res.status(200).send("Provide group name, users");
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
   }
 });
 const sendMessage = async ({

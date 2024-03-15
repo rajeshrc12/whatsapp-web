@@ -105,6 +105,34 @@ app.post("/group", upload.single("file"), async (req, res) => {
     res.status(500).send(error);
   }
 });
+app.patch("/group", async (req, res) => {
+  const { name, from, message, type, reply } = req.body;
+  if (message) {
+    const result = await groups.updateOne(
+      { name },
+      {
+        $push: {
+          chat: {
+            _id: new ObjectId(),
+            name,
+            from,
+            message,
+            emoji: [],
+            type,
+            reply,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            pin: false,
+          },
+        },
+      }
+    );
+    if (result) res.status(200).send(result);
+    else res.status(500).send("No user found");
+  } else {
+    res.status(500).send("user name required");
+  }
+});
 app.get("/group/:name", async (req, res) => {
   const name = req.params.name;
   console.log(name);

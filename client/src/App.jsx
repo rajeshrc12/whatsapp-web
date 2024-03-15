@@ -49,6 +49,7 @@ const App = () => {
   const [files, setFiles] = useState([]);
   const [blobFiles, setBolbFiles] = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [contactInfo, setContactInfo] = useState("");
   const sendMessage = async (e) => {
     e.preventDefault();
     setReply(false);
@@ -236,6 +237,14 @@ const App = () => {
       </div>
     );
   };
+  const renderContactInfo = useCallback(() => {
+    switch (contactInfo) {
+      case "details":
+        return <div></div>;
+      default:
+        return <div></div>;
+    }
+  });
   useEffect(() => {
     setAnswers({
       ...answers,
@@ -251,10 +260,9 @@ const App = () => {
     closeModal("pollModal");
     closeModal("pollWarningModal");
   };
-  console.log(files);
   return (
-    <div className="grid grid-cols-4 h-screen">
-      <div className="col-span-1 h-full">
+    <div className={`grid grid-cols-${contactInfo ? 8 : 4} h-screen`}>
+      <div className={`col-span-${contactInfo ? 2 : 1} h-full`}>
         <div className="flex flex-col justify-between h-full">
           <div className="flex justify-between p-3 bg-[#f0f2f5]">
             <div>{currentUser.name}</div>
@@ -284,14 +292,19 @@ const App = () => {
           </div>
         </div>
       </div>
-      <div className="col-span-3 h-full">
+      <div className={`col-span-${contactInfo ? 4 : 3} h-full`}>
         {selectedUser ? (
           <div
             className="flex flex-col justify-between h-full"
             style={{ backgroundImage: `url('${WABG}')` }}
           >
             <div className="flex justify-between p-3 bg-[#f0f2f5]">
-              <div>{selectedUser}</div>
+              <div
+                className="cursor-pointer"
+                onClick={() => setContactInfo(!contactInfo)}
+              >
+                {selectedUser}
+              </div>
               <div>
                 <button
                   onClick={async () => {
@@ -618,6 +631,46 @@ const App = () => {
           <div>No user selected</div>
         )}
       </div>
+      {contactInfo && (
+        <div className="col-span-2 h-screen overflow-y-scroll flex flex-col bg-gray-200">
+          <div className="flex flex-col p-20 items-center bg-white">
+            <div>
+              <img src={Profile} className="rounded-[30vh]" alt="" />
+            </div>
+            <div>{selectedUser}</div>
+          </div>
+          <div className="bg-white my-5 p-3">
+            <div>About</div>
+            <div>Available</div>
+          </div>
+          <div className="flex flex-col bg-white p-3">
+            <div className="flex justify-between">
+              <div>Media links and docs</div>
+              <div>
+                {
+                  currentUser?.chat?.filter(
+                    (c) => c.type === "video" || c.type === "image"
+                  ).length
+                }
+              </div>
+            </div>
+            <div className="flex w-full p-3">
+              {currentUser?.chat
+                ?.filter(
+                  (d, i) => i < 3 && (d.type === "video" || d.type === "image")
+                )
+                ?.map((i) => (
+                  <img src={i.url} height={100} width={100} className="p-5" />
+                ))}
+            </div>
+            <div>
+              <div>Starred message</div>
+              <div className="text-red-500">Delete chat</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {mediaCarousel && (
         <div className="fixed top-0 left-0 bg-white h-screen w-screen flex flex-col justify-between">
           <div className="flex justify-end">

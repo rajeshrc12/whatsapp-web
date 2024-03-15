@@ -15,7 +15,6 @@ Remove my reaction
 Create Poll
 Select multiple media
 After selecting media photo it should in carousel and should be able to add message
-
 Starred messages
 Contract info - Profile pic , About , Media
 My profile
@@ -35,6 +34,7 @@ Single vote selection
 Blue tick
 Message info
 Send Contact
+Block contact
 
 Audio and video call
 channel

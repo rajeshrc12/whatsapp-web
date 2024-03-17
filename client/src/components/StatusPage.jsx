@@ -1,7 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import ProfileImg from "../images/profile.png";
-import ProgessBar from "./ProgessBar";
+import Video from "../images/video.mp4";
+import Video1 from "../images/video1.mp4";
+import Profile from "../images/profile.png";
+import Profile1 from "../images/whatsapp_back.jpeg";
+
 import { CgSmileMouthOpen } from "react-icons/cg";
 import { IoDocumentOutline } from "react-icons/io5";
 import { IoMdSend } from "react-icons/io";
@@ -10,28 +13,49 @@ import { ImCross } from "react-icons/im";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 
-const StatusPage = ({ setMainMenuView }) => {
+const StatusPage = ({ setMiddlePanel, chat }) => {
   const [inputFocus, setInputFocus] = React.useState(false);
-  const [intervals, setIntervals] = useState([20, 30, 40, 60, 90, 98]);
-  // Example intervals array: [20, 30, 40] milliseconds
-  console.log(ProfileImg);
+  const [media, setMedia] = useState([
+    { type: "image", content: Profile },
+    { type: "image", content: Profile1 },
+    { type: "video", content: Video },
+    { type: "video", content: Video1 },
+  ]);
+  const [index, setIndex] = useState(0);
+  const addImages = async () => {
+    for (const [index, values] of media.entries()) {
+      console.log(values.content);
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          setIndex(index);
+          resolve();
+        }, 1000)
+      );
+    }
+  };
+  useEffect(() => {
+    addImages();
+  }, []);
+  const renderMedia = useCallback(() => {
+    switch (media[index].type) {
+      case "image":
+        return <img src={media[index].content} height={500} width={500} />;
+      case "video":
+        return <video src={media[index].content} controls width="250"></video>;
+      default:
+        return "Media not supported";
+    }
+  }, [index]);
   return (
-    <div className="flex justify-center bg-black relative">
+    <div className="flex justify-center relative">
       <div
         style={{
-          backgroundImage: `url('${ProfileImg}')`,
+          // backgroundImage: `url('${image}')`,
           width: "30vw",
           height: "100vh",
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${intervals.length}, 1fr)`,
-          }}
-        >
-          <ProgessBar intervals={intervals} />
-        </div>
+        <div>{renderMedia()}</div>
         <div className="absolute bottom-5 left-1/4 flex flex-col items-center">
           {inputFocus && (
             <div className="flex gap-5 m-3">
@@ -70,13 +94,13 @@ const StatusPage = ({ setMainMenuView }) => {
           </div>
         </div>
         <FaArrowLeft
-          onClick={() => setMainMenuView("")}
+          onClick={() => setMiddlePanel("")}
           className="absolute top-0 left-0 m-5"
           size={20}
           color="#ffffff"
         />
         <ImCross
-          onClick={() => setMainMenuView("")}
+          onClick={() => setMiddlePanel("")}
           className="absolute top-0 right-0 m-5"
           size={20}
           color="#ffffff"

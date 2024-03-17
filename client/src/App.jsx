@@ -18,7 +18,7 @@ import { FaChevronDown } from "react-icons/fa";
 import Reply from "./components/Reply";
 import ReplyMessage from "./components/ReplyMessage";
 import { BsFillPinFill } from "react-icons/bs";
-import { BiBlock } from "react-icons/bi";
+import { BiBlock, BiMicrophone } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
 import PollMessage from "./components/PollMessage";
@@ -28,6 +28,9 @@ const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
   const navigate = useNavigate();
+  const [recording, setRecording] = useState(false);
+  const [recorder, setRecorder] = useState(null);
+  const [audioURL, setAudioURL] = useState(null);
   const [forward, setForward] = useState(false);
   const [pin, setPin] = useState({});
   const [reply, setReply] = useState(false);
@@ -57,6 +60,7 @@ const App = () => {
   const sendMessage = async (e) => {
     e.preventDefault();
     setReply(false);
+    setRecording(false);
     const message = e.target[1].value.trim();
     if (message) {
       const resp = await axios.post("http://localhost:3001/sendmessage", {
@@ -88,7 +92,6 @@ const App = () => {
       "http://localhost:3001/group/" + sessionStorage.getItem("whatsappUser")
     );
     setGroups(resp.data);
-    console.log(resp);
   };
   const getCurrentUserData = async () => {
     const resp = await axios.post("http://localhost:3001/user", {
@@ -128,7 +131,28 @@ const App = () => {
       getAllUsers();
       getAllGroups();
     } else navigate("/");
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: true,
+        })
+        .then((stream) => {
+          const rec = new MediaRecorder(stream);
+          let chunks = [];
+          rec.ondataavailable = (e) => {
+            chunks.push(e.data);
+          };
+          rec.onstop = (e) => {
+            const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+            chunks = [];
+            const audio = URL.createObjectURL(blob);
+            setAudioURL(audio);
+          };
+          setRecorder(rec);
+        });
+    }
   }, []);
+  console.log(audioURL, currentUser);
   useEffect(() => {
     socket.on("client", (arg) => {
       getCurrentUserData();
@@ -766,12 +790,41 @@ const App = () => {
                       </div>
                     </div>
                     <div className="w-full">
-                      <input
-                        type="text"
-                        name="message"
-                        className="outline-none w-full rounded-lg p-2"
-                      />
+                      {recording ? (
+                        <div className="flex">
+                          <span className="loading loading-ring loading-lg"></span>
+                          <div>
+                            {audioURL && (
+                              <audio controls src={audioURL}></audio>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              recorder.stop();
+                              setAudioURL(null);
+                            }}
+                          >
+                            Stop
+                          </button>
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          name="message"
+                          className="outline-none w-full rounded-lg p-2"
+                        />
+                      )}
                     </div>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        recorder.start();
+                        setRecording(true);
+                      }}
+                    >
+                      <BiMicrophone />
+                    </button>
                     <div>
                       <button className="p-2">send</button>
                     </div>

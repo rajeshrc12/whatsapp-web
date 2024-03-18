@@ -12,9 +12,13 @@ import { FaArrowLeft } from "react-icons/fa";
 import { ImCross } from "react-icons/im";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
+import { BsSoundwave } from "react-icons/bs";
+import { BiPause, BiPlay } from "react-icons/bi";
 
 const StatusPage = ({ setMiddlePanel, chat }) => {
   const [inputFocus, setInputFocus] = React.useState(false);
+  const videoRef = useRef(null);
+  const [play, setPlay] = useState(true);
   const [media, setMedia] = useState([
     { type: "image", content: Profile },
     { type: "image", content: Profile1 },
@@ -24,7 +28,7 @@ const StatusPage = ({ setMiddlePanel, chat }) => {
   const [index, setIndex] = useState(0);
   const addImages = async () => {
     for (const [index, values] of media.entries()) {
-      console.log(values.content);
+      console.log(values.content, values.content.duration);
       await new Promise((resolve) =>
         setTimeout(() => {
           setIndex(index);
@@ -39,24 +43,53 @@ const StatusPage = ({ setMiddlePanel, chat }) => {
   const renderMedia = useCallback(() => {
     switch (media[index].type) {
       case "image":
-        return <img src={media[index].content} height={500} width={500} />;
+        return (
+          <img
+            src={media[index].content}
+            className="h-full w-full object-contain"
+          />
+        );
       case "video":
-        return <video src={media[index].content} controls width="250"></video>;
+        return (
+          <video
+            autoPlay
+            ref={videoRef}
+            src={media[index].content}
+            className="h-full w-full object-contain"
+          ></video>
+        );
       default:
         return "Media not supported";
     }
   }, [index]);
   return (
-    <div className="flex justify-center relative">
+    <div className="flex justify-center bg-black">
       <div
         style={{
           // backgroundImage: `url('${image}')`,
           width: "30vw",
           height: "100vh",
+          position: "relative",
         }}
       >
-        <div>{renderMedia()}</div>
-        <div className="absolute bottom-5 left-1/4 flex flex-col items-center">
+        {renderMedia()}
+        <div className="flex absolute top-5 right-10">
+          <BsSoundwave size={30} color="fff" />
+          <BiPlay
+            onClick={() => {
+              if (play) {
+                videoRef.current.pause();
+              } else {
+                videoRef.current.play();
+              }
+              setPlay(!play);
+            }}
+            size={30}
+            color="fff"
+          />
+        </div>
+
+        <div className="fixed bottom-5 left-1/4 flex flex-col items-center">
           {inputFocus && (
             <div className="flex gap-5 m-3">
               <CgSmileMouthOpen size={50} color="#a8a8a8" />
@@ -95,23 +128,23 @@ const StatusPage = ({ setMiddlePanel, chat }) => {
         </div>
         <FaArrowLeft
           onClick={() => setMiddlePanel("")}
-          className="absolute top-0 left-0 m-5"
+          className="fixed top-0 left-0 m-5"
           size={20}
           color="#ffffff"
         />
         <ImCross
           onClick={() => setMiddlePanel("")}
-          className="absolute top-0 right-0 m-5"
+          className="fixed top-0 right-0 m-5"
           size={20}
           color="#ffffff"
         />
         <IoIosArrowBack
-          className="absolute top-1/2 left-0 m-5"
+          className="fixed top-1/2 left-0 m-5"
           size={30}
           color="#ffffff"
         />
         <IoIosArrowForward
-          className="absolute top-1/2 right-0 m-5"
+          className="fixed top-1/2 right-0 m-5"
           size={30}
           color="#ffffff"
         />

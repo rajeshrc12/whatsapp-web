@@ -132,26 +132,26 @@ const App = () => {
       getAllUsers();
       getAllGroups();
     } else navigate("/");
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: true,
-        })
-        .then((stream) => {
-          const rec = new MediaRecorder(stream);
-          let chunks = [];
-          rec.ondataavailable = (e) => {
-            chunks.push(e.data);
-          };
-          rec.onstop = (e) => {
-            const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
-            chunks = [];
-            const audio = URL.createObjectURL(blob);
-            setAudioURL(audio);
-          };
-          setRecorder(rec);
-        });
-    }
+    // if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    //   navigator.mediaDevices
+    //     .getUserMedia({
+    //       audio: true,
+    //     })
+    //     .then((stream) => {
+    //       const rec = new MediaRecorder(stream);
+    //       let chunks = [];
+    //       rec.ondataavailable = (e) => {
+    //         chunks.push(e.data);
+    //       };
+    //       rec.onstop = (e) => {
+    //         const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+    //         chunks = [];
+    //         const audio = URL.createObjectURL(blob);
+    //         setAudioURL(audio);
+    //       };
+    //       setRecorder(rec);
+    //     });
+    // }
   }, []);
   console.log(audioURL, currentUser);
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import WABG from "./images/whatsapp_back.jpeg";
 import Profile from "./images/profile.png";
 import { useNavigate } from "react-router-dom";
@@ -19,16 +19,18 @@ import { FaChevronDown } from "react-icons/fa";
 import Reply from "./components/Reply";
 import ReplyMessage from "./components/ReplyMessage";
 import { BsFillPinFill } from "react-icons/bs";
-import { BiBlock, BiMicrophone, BiStats } from "react-icons/bi";
+import { BiBlock, BiCamera, BiMicrophone, BiStats } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
 import PollMessage from "./components/PollMessage";
 import InputFileIcon from "./components/InputFileIcon";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import Webcam from "react-webcam";
 const socket = io("ws://localhost:3002");
 let prevDate = null;
 const App = () => {
   const navigate = useNavigate();
+  const divRef = useRef();
   const [recording, setRecording] = useState(false);
   const [recorder, setRecorder] = useState(null);
   const [audioURL, setAudioURL] = useState(null);
@@ -523,7 +525,13 @@ const App = () => {
                   <div className="flex justify-between p-3 bg-[#f0f2f5]">
                     <div
                       className="cursor-pointer"
-                      onClick={() => setContactInfo(!contactInfo)}
+                      onClick={() => {
+                        divRef.current?.scrollIntoView();
+                        divRef.current.style.opacity = 0.5;
+                        setTimeout(() => {
+                          divRef.current.style.opacity = 1;
+                        }, 500);
+                      }}
                     >
                       {selectedUser}
                     </div>
@@ -551,7 +559,7 @@ const App = () => {
                   )}
                   <div className="h-[75vh] overflow-y-scroll">
                     <div className="flex flex-col">
-                      {currentUser.chat.map((chat) => {
+                      {currentUser.chat.map((chat, i) => {
                         prevDate =
                           prevDate === chat.updatedAt.slice(0, 10)
                             ? null
@@ -559,7 +567,7 @@ const App = () => {
 
                         return (
                           isPrintMessage(chat.from, chat.to) && (
-                            <div>
+                            <div ref={i === 0 ? divRef : null}>
                               {prevDate && (
                                 <div className="flex justify-center">
                                   <div className="bg-white p-3">{prevDate}</div>
@@ -850,9 +858,11 @@ const App = () => {
                                 blobFiles={blobFiles}
                                 setBolbFiles={setBolbFiles}
                                 icon={
-                                  <div className="flex items-center">
-                                    <FaPlus />
-                                    <div>Document</div>
+                                  <div>
+                                    <div className="flex">
+                                      <FaPlus />
+                                      Document
+                                    </div>
                                   </div>
                                 }
                                 callback={() => showModal("mediaModal")}
@@ -862,6 +872,14 @@ const App = () => {
                                 className="cursor-pointer"
                               >
                                 Poll
+                              </div>
+                              <div>
+                                <BiCamera
+                                  onClick={() => {
+                                    showModal("webCam");
+                                  }}
+                                />
+                                Camer
                               </div>
                             </div>
                           </div>
@@ -1474,6 +1492,39 @@ const App = () => {
                 </div>
               }
             />
+            {/* <Modal
+              id="webCam"
+              width={100}
+              content={
+                <div>
+                  <Webcam
+                    audio={false}
+                    height={720}
+                    screenshotFormat="image/jpeg"
+                    width={1280}
+                    videoConstraints={{
+                      width: 1280,
+                      height: 720,
+                      facingMode: "user",
+                    }}
+                  >
+                    {({ getScreenshot }) => (
+                      <button
+                        onClick={async () => {
+                          const imageSrc = await new Promise((resolve) => {
+                            getScreenshot();
+                            resolve();
+                          });
+                          console.log(imageSrc);
+                        }}
+                      >
+                        Capture photo
+                      </button>
+                    )}
+                  </Webcam>
+                </div>
+              }
+            /> */}
           </div>
         );
     }

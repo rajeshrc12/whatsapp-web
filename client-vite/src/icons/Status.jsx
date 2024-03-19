@@ -1,8 +1,9 @@
 import React from "react";
 import iconColors from "./colors";
-const Status = ({ onClick }) => {
+const Status = ({ onClick = () => {} }) => {
   return (
     <svg
+      className="cursor-pointer"
       onClick={onClick}
       viewBox="0 0 24 24"
       height="24"

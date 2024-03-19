@@ -1,18 +1,18 @@
 import React from "react";
 import iconColors from "./colors";
 
-const Menu = () => {
+const Menu = ({ onClick = () => {} }) => {
   return (
     <svg
+      onClick={onClick}
+      className="cursor-pointer"
       viewBox="0 0 24 24"
       height="24"
       width="24"
       preserveAspectRatio="xMidYMid meet"
-      class=""
       version="1.1"
       x="0px"
       y="0px"
-      enable-background="new 0 0 24 24"
     >
       <title>menu</title>
       <path

@@ -10,13 +10,10 @@ const Main = () => {
       <div className="row-span-1 h-full overflow-clip border-b-[1px]">
         <div className="grid grid-rows-2 h-full">
           <div className="px-5 flex justify-between items-center bg-panel-header-background">
-            <div>
-              <img
-                src={data.loggedInUser.url}
-                className="w-10"
-                style={{ borderRadius: "100%" }}
-                alt=""
-              />
+            <div className="avatar">
+              <div className="w-10 rounded-full">
+                <img src={data.loggedInUser.url} />
+              </div>
             </div>
             <div className="flex gap-3">
               <StatusIcon />

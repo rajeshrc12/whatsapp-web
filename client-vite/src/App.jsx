@@ -12,7 +12,7 @@ const App = () => {
       case "showRightPanel":
         return (
           <>
-            <div className="border col-span-3 overflow-y-scroll">
+            <div className="border col-span-3">
               <MiddlePanel />
             </div>
             <div className="border col-span-2 overflow-y-scroll">
@@ -22,7 +22,7 @@ const App = () => {
         );
       default:
         return (
-          <div className="border col-span-5 overflow-y-scroll">
+          <div className="border col-span-5">
             <MiddlePanel />
           </div>
         );

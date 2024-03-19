@@ -37,7 +37,7 @@ const MiddlePanel = () => {
       <div className={`row-span-${emojiPanel ? 3 : 10} bg-green-100`}></div>
       {emojiPanel && (
         <div className="row-span-7 bg-panel-header-background">
-          <EmojiPicker width={"100%"} height={"23rem"} />
+          <EmojiPicker width={"100%"} height={"57vh"} />
         </div>
       )}
       <div className="row-span-1 bg-panel-header-background h-full">
@@ -49,7 +49,7 @@ const MiddlePanel = () => {
             </div>
             <div
               tabIndex={0}
-              className="dropdown-content w-48 mb-3 px-5 flex z-[1] menu shadow bg-base-100 rounded-lg"
+              className="dropdown-content bg-white w-48 mb-3 px-5 flex z-[1] menu shadow rounded-lg"
             >
               <div className="flex gap-3 py-2">
                 <div>

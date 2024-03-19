@@ -1,14 +1,17 @@
 import rajeshProfile from "./rajesh.jpg";
 import maheshProfile from "./mahesh.jpeg";
 import ganeshProfile from "./ganesh.jpg";
+import i1 from "./i1.jpeg";
+import v1 from "./v1.mp4";
 import moment from "moment";
+const loggedInUser = {
+  name: "rajesh",
+  about: "I am using Whatsapp",
+  url: rajeshProfile,
+  mobile: "mob_rajesh",
+};
+
 const users = [
-  {
-    name: "rajesh",
-    about: "I am using Whatsapp",
-    url: rajeshProfile,
-    mobile: "mob_rajesh",
-  },
   {
     name: "mahesh",
     about: "No worries",
@@ -121,6 +124,9 @@ const chats = [
     updatedAt: moment().add(Math.floor(Math.random() * 10), "days"),
   },
 ];
-export default data = {
+const data = {
   users,
+  loggedInUser,
+  chats,
 };
+export default data;

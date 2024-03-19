@@ -15,7 +15,7 @@ const App = () => {
   }, [mainValue]);
   return (
     <div className="grid grid-cols-7 h-screen w-screen">
-      <div className="border col-span-2 overflow-y-scroll">
+      <div className="border col-span-2 overflow-hidden">
         <LeftPanel />
       </div>
       <div className="border col-span-3 overflow-y-scroll">

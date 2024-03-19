@@ -11,8 +11,9 @@ const LeftPanel = () => {
         return <div>status</div>;
       default:
         return (
-          <div>
-            <Status onClick={() => dispatch(left("status"))} />
+          <div className="grid h-full grid-rows-6">
+            <div className="border row-span-1">icons</div>
+            <div className="border row-span-5 overflow-y-scroll"></div>
           </div>
         );
     }

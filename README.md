@@ -27,7 +27,6 @@ Group members
 Voice recording
 Status
 Capture photo from system cam
-Search message
 Moving to Message when click on reply
 Single vote selection
 
@@ -35,6 +34,7 @@ Blue tick
 Message info
 Send Contact
 Block contact
+Search message
 
 Audio and video call
 channel

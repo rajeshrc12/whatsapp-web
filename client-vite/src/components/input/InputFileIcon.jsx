@@ -5,7 +5,7 @@ import { addFiles } from "../../state/files/filesSlice";
 const InputFileIcon = ({
   icon = <></>,
   callback = () => {},
-  multiple = false,
+  multiple = true,
 }) => {
   const dispatch = useDispatch();
   return (

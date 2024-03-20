@@ -12,11 +12,15 @@ const filesSlice = createSlice({
       const allFiles = [...state.blobFiles, ...action.payload];
       state.blobFiles = allFiles;
     },
-    deleteFiles: (state) => {
+    deleteAllFiles: (state) => {
       state = initialState;
+    },
+    deleteFileByIndex: (state, action) => {
+      state.blobFiles.splice(action.payload, 1);
     },
   },
 });
 
-export const { addFiles, deleteFiles } = filesSlice.actions;
+export const { addFiles, deleteAllFiles, deleteFileByIndex } =
+  filesSlice.actions;
 export default filesSlice.reducer;

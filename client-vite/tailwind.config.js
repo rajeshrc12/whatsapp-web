@@ -5,6 +5,7 @@ export default {
     extend: {
       colors: {
         "panel-header-background": "var(--panel-header-background)",
+        "panel-background-deeper": "var(--panel-background-deeper)",
       },
     },
   },

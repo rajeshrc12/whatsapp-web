@@ -5,5 +5,6 @@ const iconColors = {
   attachmentTypeCameraColor: "#ff2e74",
   attachmentTypeContactsColor: "#009de2",
   attachmentTypePollsColor: "#ffbc38",
+  buttonRoundBackground: "#00a884",
 };
 export default iconColors;

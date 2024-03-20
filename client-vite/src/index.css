@@ -3,6 +3,7 @@
 @tailwind utilities;
 :root {
   --panel-header-background: #f0f2f5;
+  --panel-background-deeper: #e9edef;
 }
 ::-webkit-scrollbar {
   width: 5px;

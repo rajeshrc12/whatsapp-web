@@ -5,11 +5,11 @@ const CancelIcon = ({ onClick = () => {} }) => {
   return (
     <svg
       onClick={onClick}
+      className="cursor-pointer"
       viewBox="0 0 24 24"
       height="24"
       width="24"
       preserveAspectRatio="xMidYMid meet"
-      class=""
       fill={iconColors.panelHeaderIcon}
     >
       <title>x</title>

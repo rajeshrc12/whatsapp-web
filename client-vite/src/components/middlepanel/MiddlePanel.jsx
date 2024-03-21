@@ -17,7 +17,6 @@ import ChatWindow from "./ChatWindow";
 
 const MiddlePanel = () => {
   const panel = useSelector((state) => state.panel);
-  console.log(panel.middle);
   const dispatch = useDispatch();
   const handleFilesPreview = () => dispatch(middle("filesPreview"));
   const render = useCallback(() => {

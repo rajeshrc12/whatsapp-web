@@ -8,10 +8,12 @@ import moment from "moment";
 const loggedInUser = {
   name: "rajesh",
   about: "I am using Whatsapp",
-  url: rajeshProfile,
+  url: maheshProfile,
   mobile: "mob_rajesh",
 };
 
+const images = [rajeshProfile, maheshProfile, ganeshProfile, i1, i2];
+const videos = [v1];
 const users = [
   {
     name: "mahesh",
@@ -162,5 +164,7 @@ const data = {
   users,
   loggedInUser,
   chats,
+  images,
+  videos,
 };
 export default data;

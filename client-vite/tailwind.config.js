@@ -7,6 +7,7 @@ export default {
         "panel-header-background": "var(--panel-header-background)",
         "panel-background-deeper": "var(--panel-background-deeper)",
         "outgoing-background": "var(--outgoing-background)",
+        "chevron-button-background": "var(--chevron-button-background)",
       },
     },
   },

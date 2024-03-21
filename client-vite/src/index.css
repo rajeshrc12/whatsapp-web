@@ -5,6 +5,7 @@
   --panel-header-background: #f0f2f5;
   --panel-background-deeper: #e9edef;
   --outgoing-background: #d9fdd3;
+  --chevron-button-background: rgba(17, 27, 33, 0.35);
 }
 * {
   scrollbar-width: thin;

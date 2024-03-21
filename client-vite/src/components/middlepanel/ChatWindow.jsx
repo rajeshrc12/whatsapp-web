@@ -1,7 +1,10 @@
 import React from "react";
 import data from "../../data/data";
+import { useDispatch } from "react-redux";
+import { main } from "../../state/panel/panelSlice";
 
 const ChatWindow = () => {
+  const dispatch = useDispatch();
   const chats = data.chats;
   const loggedInUser = data.loggedInUser;
   const renderChat = (chat) => {
@@ -19,13 +22,19 @@ const ChatWindow = () => {
   return (
     <div className="flex flex-col">
       {chats.map((chat) => {
-        console.log(chat.mobile, loggedInUser.mobile);
         return (
           <div
+            onClick={() => {
+              if (chat.type === "image" || chat.type === "video")
+                dispatch(main("mediaPreview"));
+            }}
             className={`flex ${
               chat.from === loggedInUser.mobile
                 ? "justify-end"
                 : "justify-start"
+            } ${
+              (chat.type === "image" || chat.type === "video") &&
+              "cursor-pointer"
             }`}
           >
             <div

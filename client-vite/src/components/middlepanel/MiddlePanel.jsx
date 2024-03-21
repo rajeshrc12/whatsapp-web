@@ -13,6 +13,7 @@ import data from "../../data/data";
 import { middle, right } from "../../state/panel/panelSlice";
 import { useDispatch, useSelector } from "react-redux";
 import FilesPreview from "../filespreview/FilesPreview";
+import ChatWindow from "./ChatWindow";
 
 const MiddlePanel = () => {
   const panel = useSelector((state) => state.panel);
@@ -30,10 +31,8 @@ const MiddlePanel = () => {
       default:
         return (
           <>
-            <div className="h-[80%] overflow-y-scroll">
-              {new Array(30).fill(0).map((d) => (
-                <div>hello</div>
-              ))}
+            <div className="h-[80%] p-2 bg-gray-50 overflow-y-scroll">
+              <ChatWindow />
             </div>
             <div className="h-[10%]">
               <div className="flex h-full justify-between items-center px-3 gap-5 bg-panel-header-background">

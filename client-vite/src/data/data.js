@@ -44,7 +44,7 @@ const chats = [
     pin: false,
     type: "text",
     message: "Hello mahesh",
-    updatedAt: moment().add(Math.floor(Math.random() * 10), "days"),
+    updatedAt: "31/12/2024",
   },
   {
     _id: "id" + Math.floor(Math.random() * 10000),
@@ -54,7 +54,7 @@ const chats = [
     pin: false,
     type: "image",
     message: i1,
-    updatedAt: moment().add(Math.floor(Math.random() * 10), "days"),
+    updatedAt: "31/12/2024",
   },
   {
     _id: "id" + Math.floor(Math.random() * 10000),
@@ -64,7 +64,7 @@ const chats = [
     pin: false,
     type: "video",
     message: v1,
-    updatedAt: moment().add(Math.floor(Math.random() * 10), "days"),
+    updatedAt: "30/12/2024",
   },
   {
     _id: "id" + Math.floor(Math.random() * 10000),
@@ -87,7 +87,7 @@ const chats = [
         },
       ],
     },
-    updatedAt: moment().add(Math.floor(Math.random() * 10), "days"),
+    updatedAt: "30/12/2024",
   },
   {
     _id: "id" + Math.floor(Math.random() * 10000),
@@ -110,7 +110,7 @@ const chats = [
         },
       ],
     },
-    updatedAt: moment().add(Math.floor(Math.random() * 10), "days"),
+    updatedAt: "30/12/2024",
   },
   {
     _id: "id" + Math.floor(Math.random() * 10000),
@@ -121,7 +121,7 @@ const chats = [
     type: "reply",
     chatId: "id_12345",
     message: "nice",
-    updatedAt: moment().add(Math.floor(Math.random() * 10), "days"),
+    updatedAt: "30/12/2024",
   },
 ];
 const data = {

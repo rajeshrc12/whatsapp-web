@@ -12,20 +12,19 @@ import InputFileIcon from "../input/InputFileIcon";
 import data from "../../data/data";
 import { middle, right } from "../../state/panel/panelSlice";
 import { useDispatch, useSelector } from "react-redux";
+import FilesPreview from "../filespreview/FilesPreview";
 
 const MiddlePanel = () => {
   const panel = useSelector((state) => state.panel);
-  console.log(panel.middleValue);
+  console.log(panel.middle);
   const dispatch = useDispatch();
   const handleFilesPreview = () => dispatch(middle("filesPreview"));
   const render = useCallback(() => {
-    switch (panel.middleValue) {
+    switch (panel.middle) {
       case "filesPreview":
         return (
-          <div className="h-[90%] overflow-y-scroll">
-            {new Array(30).fill(0).map((d) => (
-              <div>hello</div>
-            ))}
+          <div className="h-[90%]">
+            <FilesPreview />
           </div>
         );
       default:

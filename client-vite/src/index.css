@@ -4,6 +4,7 @@
 :root {
   --panel-header-background: #f0f2f5;
   --panel-background-deeper: #e9edef;
+  --outgoing-background: #d9fdd3;
 }
 * {
   scrollbar-width: thin;

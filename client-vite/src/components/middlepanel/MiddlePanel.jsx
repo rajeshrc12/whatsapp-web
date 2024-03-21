@@ -31,7 +31,7 @@ const MiddlePanel = () => {
       default:
         return (
           <>
-            <div className="h-[80%] p-2 bg-gray-50 overflow-y-scroll">
+            <div className="h-[80%] p-2 bg-green-200 overflow-y-scroll">
               <ChatWindow />
             </div>
             <div className="h-[10%]">

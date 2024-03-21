@@ -1,7 +1,7 @@
 import React from "react";
 import iconColors from "./colors";
 
-const Search = ({ onClick = () => {} }) => {
+const SearchIcon = ({ onClick = () => {} }) => {
   return (
     <svg
       onClick={onClick}
@@ -23,4 +23,4 @@ const Search = ({ onClick = () => {} }) => {
   );
 };
 
-export default Search;
+export default SearchIcon;

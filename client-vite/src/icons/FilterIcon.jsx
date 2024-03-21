@@ -1,7 +1,7 @@
 import React from "react";
 import iconColors from "./colors";
 
-const Filter = ({ onClick = () => {} }) => {
+const FilterIcon = ({ onClick = () => {} }) => {
   return (
     <svg
       onClick={onClick}
@@ -23,4 +23,4 @@ const Filter = ({ onClick = () => {} }) => {
   );
 };
 
-export default Filter;
+export default FilterIcon;

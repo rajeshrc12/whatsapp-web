@@ -5,3 +5,7 @@
   --panel-header-background: #f0f2f5;
   --panel-background-deeper: #e9edef;
 }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(200, 200, 200) #fff;
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import iconColors from "./colors";
-const Status = ({ onClick = () => {} }) => {
+const StatusIcon = ({ onClick = () => {} }) => {
   return (
     <svg
       className="cursor-pointer"
@@ -34,4 +34,4 @@ const Status = ({ onClick = () => {} }) => {
   );
 };
 
-export default Status;
+export default StatusIcon;

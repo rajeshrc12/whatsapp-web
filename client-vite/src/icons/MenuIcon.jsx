@@ -1,7 +1,7 @@
 import React from "react";
 import iconColors from "./colors";
 
-const Menu = ({ onClick = () => {} }) => {
+const MenuIcon = ({ onClick = () => {} }) => {
   return (
     <svg
       onClick={onClick}
@@ -23,4 +23,4 @@ const Menu = ({ onClick = () => {} }) => {
   );
 };
 
-export default Menu;
+export default MenuIcon;

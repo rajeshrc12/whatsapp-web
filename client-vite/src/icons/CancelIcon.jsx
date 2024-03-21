@@ -1,9 +1,10 @@
 import React from "react";
 import iconColors from "./colors";
 
-const CancelIcon = () => {
+const CancelIcon = ({ onClick = () => {} }) => {
   return (
     <svg
+      onClick={onClick}
       viewBox="0 0 24 24"
       height="24"
       width="24"

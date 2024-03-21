@@ -1,20 +1,51 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { FaFile } from "react-icons/fa6";
 import { deleteFileByIndex } from "../../state/files/filesSlice";
 import CancelIcon from "../../icons/CancelIcon";
+import { useDispatch } from "react-redux";
 
-const File = ({ index = 0 }) => {
+const File = ({
+  file,
+  index = 0,
+  selectedIndex = 0,
+  setSelectedIndex = () => {},
+}) => {
+  const dispatch = useDispatch();
+  const renderImage = useCallback(() => {
+    let fileType = file?.type?.split("/")[0];
+    if (fileType === "video" && !file?.type?.includes("mp4")) {
+      fileType = "";
+    }
+    switch (fileType) {
+      case "image":
+        return <></>;
+      case "video":
+        return (
+          <video className="h-full" src={URL.createObjectURL(file)}></video>
+        );
+      default:
+        return <FaFile color="gray" size={30} />;
+    }
+  }, [file]);
   return (
     <div
+      onClick={() => setSelectedIndex(index)}
       style={{
         flexBasis: "60px",
         flexGrow: "0",
         flexShrink: "0",
+        backgroundImage: `url(${
+          file?.type?.includes("image") ? URL.createObjectURL(file) : ""
+        })`,
+        backgroundSize: "contain",
       }}
-      className="border-[3px] border-[#00a884] rounded-lg flex justify-center items-center relative"
-      //#d1d7db
+      className={`${
+        selectedIndex === index
+          ? "border-[3px] border-[#00a884]"
+          : "border-[1px] border-[#d1d7db]"
+      } rounded-lg flex justify-center items-center relative`}
     >
-      <FaFile color="gray" size={30} />
+      {renderImage()}
       <div
         onClick={() => {
           dispatch(deleteFileByIndex(index));

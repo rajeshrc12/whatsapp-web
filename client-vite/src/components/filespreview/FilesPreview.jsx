@@ -1,15 +1,57 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import CancelIcon from "../../icons/CancelIcon";
 import data from "../../data/data";
 import PlusIcon from "../../icons/PlusIcon";
 import SendIcon from "../../icons/SendIcon";
 import InputFileIcon from "../input/InputFileIcon";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { middle } from "../../state/panel/panelSlice";
 import File from "./File";
+import { FaFile } from "react-icons/fa6";
 
 const FilesPreview = () => {
+  const files = useSelector((state) => state.files.blobFiles);
   const dispatch = useDispatch();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const renderFile = useCallback(() => {
+    if (files.length) {
+      const file = files[selectedIndex];
+      let fileType = file?.type?.split("/")[0];
+      if (fileType === "video" && !file?.type?.includes("mp4")) {
+        fileType = "";
+      }
+      switch (fileType) {
+        case "image":
+          return (
+            <div
+              style={{
+                backgroundImage: `url(${URL.createObjectURL(file)})`,
+                backgroundSize: "contain",
+              }}
+              className="h-3/4 w-80 flex justify-center items-center"
+            ></div>
+          );
+        case "video":
+          return (
+            <video
+              className="w-[12vw]"
+              controls
+              src={URL.createObjectURL(file)}
+            ></video>
+          );
+        default:
+          return (
+            <div className="h-3/4 w-80 flex flex-col justify-center items-center">
+              <FaFile color="gray" size={100} />
+              <div>No preview available</div>
+            </div>
+          );
+      }
+    }
+  }, [files, selectedIndex]);
+  useEffect(() => {
+    if (!files.length) dispatch(middle(""));
+  }, [files]);
   return (
     <div className="h-full bg-panel-header-background">
       <div className="h-[10%]">
@@ -17,19 +59,13 @@ const FilesPreview = () => {
           <div className="pl-5">
             <CancelIcon onClick={() => dispatch(middle(""))} />
           </div>
-          <div className="text-sm">name</div>
+          <div className="text-sm">{files[selectedIndex]?.name}</div>
           <div></div>
         </div>
       </div>
       <div className="h-[60%]">
         <div className="flex h-full justify-center items-center">
-          <div
-            style={{
-              backgroundImage: `url(${data.loggedInUser.url})`,
-              backgroundSize: "contain",
-            }}
-            className="h-3/4 w-80 flex justify-center items-center"
-          ></div>
+          {renderFile()}
         </div>
       </div>
       <div className="h-[10%]">
@@ -45,8 +81,13 @@ const FilesPreview = () => {
         <div className="flex h-full">
           <div className="w-[90%] overflow-x-scroll">
             <div className="flex h-full gap-5 p-5 relative justify-center">
-              {new Array(3).fill(0).map((d, index) => (
-                <File />
+              {files.map((file, index) => (
+                <File
+                  file={file}
+                  index={index}
+                  selectedIndex={selectedIndex}
+                  setSelectedIndex={setSelectedIndex}
+                />
               ))}
               <div
                 style={{

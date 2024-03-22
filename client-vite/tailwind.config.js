@@ -10,6 +10,10 @@ export default {
         "chevron-button-background": "var(--chevron-button-background)",
         "quick-action-button-background":
           "var(--quick-action-button-background)",
+        "poll-bar-fill-sender": "var(--poll-bar-fill-sender)",
+        "poll-bar-container-sender": "var(--poll-bar-container-sender)",
+        "poll-checkbox-default-border-color-sender":
+          "var(--poll-checkbox-default-border-color-sender)",
       },
     },
   },

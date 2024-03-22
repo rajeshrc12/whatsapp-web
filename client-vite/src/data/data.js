@@ -124,11 +124,11 @@ const chats = [
       answers: [
         {
           answer: "Good",
-          selectedUsers: ["mob_rajesh", "mob_rajesh"],
+          selectedUsers: ["mob_mahesh"],
         },
         {
           answer: "Bad",
-          selectedUsers: ["mob_rajesh", "mob_rajesh"],
+          selectedUsers: ["mob_rajesh", "mob_mahesh"],
         },
       ],
     },
@@ -143,15 +143,15 @@ const chats = [
     type: "poll",
     message: {
       question: "Choose fav. artist !",
-      type: "multi",
+      type: "multiple",
       answers: [
         {
           answer: "Justin",
-          selectedUsers: ["mob_rajesh", "mob_rajesh"],
+          selectedUsers: ["mob_mahesh", "mob_rajesh"],
         },
         {
           answer: "Weeknd",
-          selectedUsers: ["mob_rajesh", "mob_rajesh"],
+          selectedUsers: ["mob_mahesh"],
         },
       ],
     },

@@ -6,6 +6,7 @@ import EmojiMessageIcon from "../../icons/EmojiMessageIcon";
 import ForwardIcon from "../../icons/ForwardIcon";
 import TickIcon from "../../icons/TickIcon";
 import DownArrowIcon from "../../icons/DownArrowIcon";
+import Poll from "./Poll";
 
 const ChatWindow = () => {
   const dispatch = useDispatch();
@@ -19,6 +20,8 @@ const ChatWindow = () => {
         return <img src={chat.message} alt="" />;
       case "video":
         return <video src={chat.message} />;
+      case "poll":
+        return <Poll chat={chat.message} />;
       default:
         return <></>;
     }
@@ -43,8 +46,8 @@ const ChatWindow = () => {
               ${chat.type === "video" && "max-w-[30%]"} 
               ${chat.type === "text" && "max-w-[65%]"} 
               ${chat.type === "image" && "max-w-[45%]"} 
-              rounded-lg
-`}
+              ${chat.type === "poll" && "max-w-[45%]"} 
+              rounded-lg`}
               >
                 {chat.from !== loggedInUser.mobile && (
                   <div className="avatar">
@@ -94,7 +97,7 @@ const ChatWindow = () => {
                     >
                       {renderChat(chat)}
                     </div>
-                    <div>1.15PM</div>
+                    <div></div>
                     <div className="flex justify-end items-center gap-1">
                       <div className="text-[11px] text-[#667781]">1:14PM</div>
                       <div>

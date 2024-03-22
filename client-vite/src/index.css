@@ -7,6 +7,9 @@
   --outgoing-background: #d9fdd3;
   --chevron-button-background: rgba(17, 27, 33, 0.35);
   --quick-action-button-background: rgba(11, 20, 26, 0.2);
+  --poll-bar-container-sender: rgba(11, 20, 26, 0.1);
+  --poll-bar-fill-sender: #00a884;
+  --poll-checkbox-default-border-color-sender: #8696a0;
 }
 * {
   scrollbar-width: thin;

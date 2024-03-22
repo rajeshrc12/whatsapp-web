@@ -8,6 +8,8 @@ export default {
         "panel-background-deeper": "var(--panel-background-deeper)",
         "outgoing-background": "var(--outgoing-background)",
         "chevron-button-background": "var(--chevron-button-background)",
+        "quick-action-button-background":
+          "var(--quick-action-button-background)",
       },
     },
   },

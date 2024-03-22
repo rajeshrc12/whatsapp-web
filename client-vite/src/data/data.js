@@ -4,6 +4,7 @@ import ganeshProfile from "./ganesh.jpg";
 import i1 from "./i1.jpeg";
 import i2 from "./i2.jpeg";
 import v1 from "./v1.mp4";
+import v2 from "./v2.mp4";
 import moment from "moment";
 const loggedInUser = {
   name: "rajesh",
@@ -12,7 +13,15 @@ const loggedInUser = {
   mobile: "mob_rajesh",
 };
 
-const images = [rajeshProfile, maheshProfile, ganeshProfile, i1, i2];
+const images = [
+  { type: "image", message: rajeshProfile },
+  { type: "image", message: maheshProfile },
+  { type: "image", message: ganeshProfile },
+  { type: "image", message: i1 },
+  { type: "image", message: i2 },
+  { type: "video", message: v1 },
+  { type: "video", message: v2 },
+];
 const videos = [v1];
 const users = [
   {

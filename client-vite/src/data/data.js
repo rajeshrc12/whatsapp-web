@@ -171,8 +171,10 @@ const chats = [
     reactions: [],
     pin: false,
     type: "reply",
-    chatId: "id_12345",
-    message: "nice",
+    message: {
+      type: "text",
+      message: "Hello",
+    },
     updatedAt: "30/12/2024",
   },
 ];

@@ -8,6 +8,7 @@ import TickIcon from "../../icons/TickIcon";
 import DownArrowIcon from "../../icons/DownArrowIcon";
 import Poll from "./Poll";
 import ReactionTab from "./ReactionTab";
+import Reply from "./Reply";
 
 const ChatWindow = () => {
   const dispatch = useDispatch();
@@ -24,7 +25,7 @@ const ChatWindow = () => {
       case "poll":
         return <Poll chat={chat.message} />;
       case "reply":
-        return <></>;
+        return <Reply />;
       default:
         return <></>;
     }

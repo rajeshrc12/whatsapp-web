@@ -14,10 +14,13 @@ import { middle, right } from "../../state/panel/panelSlice";
 import { useDispatch, useSelector } from "react-redux";
 import FilesPreview from "../filespreview/FilesPreview";
 import ChatWindow from "./ChatWindow";
+import CancelIcon from "../../icons/CancelIcon";
 
 const MiddlePanel = () => {
   const panel = useSelector((state) => state.panel);
   const dispatch = useDispatch();
+  console.clear();
+  console.log(panel.middle);
   const handleFilesPreview = () => dispatch(middle("filesPreview"));
   const render = useCallback(() => {
     switch (panel.middle) {
@@ -30,9 +33,36 @@ const MiddlePanel = () => {
       default:
         return (
           <>
-            <div className="h-[80%] p-2 bg-green-200 overflow-y-scroll">
+            <div
+              className={`${
+                panel.middle === "reply" ? "h-[65%]" : "h-[80%]"
+              } p-2 bg-green-200 overflow-y-scroll`}
+            >
               <ChatWindow />
             </div>
+            {panel.middle && (
+              <div className="h-[15%] bg-panel-header-background p-2 flex justify-between gap-4">
+                <div className=" h-full bg-popup-panel-background text-xs w-full rounded-lg border-l-[4px] border-red-500 flex justify-between items-center p-2">
+                  <div>
+                    <div className="font-bold">Rajesh</div>
+                    <div>Hi</div>
+                  </div>
+                  <div
+                    className="w-[10vw] h-full"
+                    style={{
+                      backgroundImage: `url(${data.loggedInUser.url})`,
+                      backgroundSize: "contain",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "center",
+                    }}
+                  ></div>
+                </div>
+                <div className="flex items-center">
+                  <CancelIcon onClick={() => dispatch(middle(""))} />
+                </div>
+              </div>
+            )}
+
             <div className="h-[10%]">
               <div className="flex h-full justify-between items-center px-3 gap-5 bg-panel-header-background">
                 <div className="dropdown dropdown-top">

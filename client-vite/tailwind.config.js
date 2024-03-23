@@ -14,6 +14,7 @@ export default {
         "poll-bar-container-sender": "var(--poll-bar-container-sender)",
         "poll-checkbox-default-border-color-sender":
           "var(--poll-checkbox-default-border-color-sender)",
+        "popup-panel-background": "var(--popup-panel-background)",
       },
     },
   },

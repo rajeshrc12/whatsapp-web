@@ -16,7 +16,6 @@ const Poll = ({ chat }) => {
     setPeople(p);
     setAnswers(temp);
   }, [chat]);
-  console.log(chat.question, people);
   return (
     <div className="flex flex-col w-[20vw]">
       <div className="font-medium">{chat.question}</div>
@@ -27,10 +26,12 @@ const Poll = ({ chat }) => {
         {chat.answers.map((answer) => (
           <div className="flex w-full h-full items-center gap-2">
             <CheckBar
+              people={people}
               answer={answer.answer}
               answers={answers}
               setAnswers={setAnswers}
               selectedUsers={answer.selectedUsers}
+              type={chat.type}
             />
           </div>
         ))}

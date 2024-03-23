@@ -124,11 +124,11 @@ const chats = [
       answers: [
         {
           answer: "Good",
-          selectedUsers: ["mob_mahesh"],
+          selectedUsers: ["mob_rajesh", "mob_mahesh"],
         },
         {
           answer: "Bad",
-          selectedUsers: ["mob_rajesh", "mob_mahesh"],
+          selectedUsers: ["mob_rajesh"],
         },
       ],
     },

@@ -1,7 +1,7 @@
 import React from "react";
 import data from "../../data/data";
 import { useDispatch } from "react-redux";
-import { main } from "../../state/panel/panelSlice";
+import { middle } from "../../state/panel/panelSlice";
 import EmojiMessageIcon from "../../icons/EmojiMessageIcon";
 import ForwardIcon from "../../icons/ForwardIcon";
 import TickIcon from "../../icons/TickIcon";
@@ -22,6 +22,8 @@ const ChatWindow = () => {
         return <video src={chat.message} />;
       case "poll":
         return <Poll chat={chat.message} />;
+      case "reply":
+        return <></>;
       default:
         return <></>;
     }
@@ -92,7 +94,7 @@ const ChatWindow = () => {
                       className="relative"
                       onClick={() => {
                         if (chat.type === "image" || chat.type === "video")
-                          dispatch(main("mediaPreview"));
+                          dispatch(middle("mediaPreview"));
                       }}
                     >
                       {renderChat(chat)}
@@ -115,7 +117,14 @@ const ChatWindow = () => {
                           tabIndex={0}
                           className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box"
                         >
-                          <div>List</div>
+                          <div
+                            onClick={() => {
+                              console.log("reply");
+                              dispatch(middle("reply"));
+                            }}
+                          >
+                            Reply
+                          </div>
                         </div>
                       </div>
                     </div>

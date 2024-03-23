@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import ProgressBar from "../progressbar/ProgressBar";
 import CheckBar from "../checkbar/CheckBar";
 
 const Poll = ({ chat }) => {

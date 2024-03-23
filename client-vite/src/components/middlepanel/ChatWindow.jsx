@@ -1,7 +1,7 @@
 import React from "react";
 import data from "../../data/data";
 import { useDispatch } from "react-redux";
-import { middle } from "../../state/panel/panelSlice";
+import { main, middle } from "../../state/panel/panelSlice";
 import EmojiMessageIcon from "../../icons/EmojiMessageIcon";
 import ForwardIcon from "../../icons/ForwardIcon";
 import TickIcon from "../../icons/TickIcon";
@@ -94,7 +94,7 @@ const ChatWindow = () => {
                       className="relative"
                       onClick={() => {
                         if (chat.type === "image" || chat.type === "video")
-                          dispatch(middle("mediaPreview"));
+                          dispatch(main("mediaPreview"));
                       }}
                     >
                       {renderChat(chat)}
@@ -119,7 +119,6 @@ const ChatWindow = () => {
                         >
                           <div
                             onClick={() => {
-                              console.log("reply");
                               dispatch(middle("reply"));
                             }}
                           >

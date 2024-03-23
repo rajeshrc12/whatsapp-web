@@ -124,11 +124,15 @@ const chats = [
       answers: [
         {
           answer: "Good",
-          selectedUsers: ["mob_rajesh", "mob_mahesh"],
+          selectedUsers: [
+            { name: "mob_rajesh", emoji: ":D" },
+            { name: "mob_mahesh", emoji: ":D" },
+            { name: "mob_ganesh", emoji: ":/" },
+          ],
         },
         {
           answer: "Bad",
-          selectedUsers: ["mob_rajesh"],
+          selectedUsers: [{ name: "mob_mahesh", emoji: ":D" }],
         },
       ],
     },
@@ -147,11 +151,14 @@ const chats = [
       answers: [
         {
           answer: "Justin",
-          selectedUsers: ["mob_mahesh", "mob_rajesh"],
+          selectedUsers: [
+            { name: "mob_rajesh", emoji: ":D" },
+            { name: "mob_mahesh", emoji: ":D" },
+          ],
         },
         {
           answer: "Weeknd",
-          selectedUsers: ["mob_mahesh"],
+          selectedUsers: [{ name: "mob_mahesh", emoji: ":D" }],
         },
       ],
     },

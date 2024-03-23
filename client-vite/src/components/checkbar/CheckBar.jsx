@@ -41,7 +41,9 @@ const CheckBar = ({
         <div className="w-full h-2 rounded-lg bg-poll-bar-container-sender">
           <div
             style={{
-              width: selectedUsers.includes(data.loggedInUser.mobile)
+              width: selectedUsers.find(
+                (user) => user.name === data.loggedInUser.mobile
+              )
                 ? (selectedUsers.length / people) * 100 + "%"
                 : "0%",
             }}

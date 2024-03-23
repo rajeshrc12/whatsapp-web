@@ -7,6 +7,7 @@ import ForwardIcon from "../../icons/ForwardIcon";
 import TickIcon from "../../icons/TickIcon";
 import DownArrowIcon from "../../icons/DownArrowIcon";
 import Poll from "./Poll";
+import ReactionTab from "./ReactionTab";
 
 const ChatWindow = () => {
   const dispatch = useDispatch();
@@ -152,15 +153,19 @@ const ChatWindow = () => {
                     chat.from === loggedInUser.mobile ? "right-2" : "left-10"
                   }  bottom-[-30px]`}
                 >
-                  <div className="dropdown dropdown-bottom dropdown-end">
+                  <div
+                    className={`dropdown dropdown-bottom ${
+                      chat.from === loggedInUser.mobile ? "dropdown-end" : ""
+                    }`}
+                  >
                     <div tabIndex={0} className="cursor-pointer">
                       <div>{String.fromCodePoint("0x1F600")}</div>
                     </div>
                     <div
                       tabIndex={0}
-                      className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box"
+                      className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-80"
                     >
-                      <div>List</div>
+                      <ReactionTab />
                     </div>
                   </div>
                 </div>

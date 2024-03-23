@@ -11,6 +11,8 @@
   --poll-bar-fill-sender: #00a884;
   --poll-checkbox-default-border-color-sender: #8696a0;
   --popup-panel-background: rgba(11, 20, 26, 0.05);
+  --panel-background-colored: #008069;
+  --photopicker-overlay-background: rgba(84, 101, 111, 0.8);
 }
 * {
   scrollbar-width: thin;

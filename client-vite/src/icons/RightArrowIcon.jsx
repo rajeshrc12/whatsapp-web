@@ -1,6 +1,6 @@
 import React from "react";
 
-const RightArrowIcon = ({ onClick = () => {} }) => {
+const RightArrowIcon = ({ onClick = () => {}, color = "#fff" }) => {
   return (
     <svg
       onClick={onClick}
@@ -15,7 +15,7 @@ const RightArrowIcon = ({ onClick = () => {} }) => {
     >
       <title>chevron-right</title>
       <path
-        fill="#fff"
+        fill={color}
         d="M11,21.212L17.35,15L11,8.65l1.932-1.932L21.215,15l-8.282,8.282L11,21.212z"
       ></path>
     </svg>

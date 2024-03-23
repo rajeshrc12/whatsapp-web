@@ -19,8 +19,6 @@ import CancelIcon from "../../icons/CancelIcon";
 const MiddlePanel = () => {
   const panel = useSelector((state) => state.panel);
   const dispatch = useDispatch();
-  console.clear();
-  console.log(panel.middle);
   const handleFilesPreview = () => dispatch(middle("filesPreview"));
   const render = useCallback(() => {
     switch (panel.middle) {

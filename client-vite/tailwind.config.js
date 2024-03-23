@@ -15,6 +15,9 @@ export default {
         "poll-checkbox-default-border-color-sender":
           "var(--poll-checkbox-default-border-color-sender)",
         "popup-panel-background": "var(--popup-panel-background)",
+        "panel-background-colored": "var(--panel-background-colored)",
+        "photopicker-overlay-background":
+          "var(--photopicker-overlay-background)",
       },
     },
   },

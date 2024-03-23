@@ -1,8 +1,9 @@
 import React from "react";
 
-const TickIcon = (seen = false) => {
+const TickIcon = ({ seen = false, onClick = () => {} }) => {
   return (
     <svg
+      onClick={onClick}
       viewBox="0 0 16 11"
       height="11"
       width="16"

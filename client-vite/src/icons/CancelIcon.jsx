@@ -1,7 +1,10 @@
 import React from "react";
 import iconColors from "./colors";
 
-const CancelIcon = ({ onClick = () => {} }) => {
+const CancelIcon = ({
+  onClick = () => {},
+  color = `${iconColors.panelHeaderIcon}`,
+}) => {
   return (
     <svg
       onClick={onClick}
@@ -10,7 +13,7 @@ const CancelIcon = ({ onClick = () => {} }) => {
       height="24"
       width="24"
       preserveAspectRatio="xMidYMid meet"
-      fill={iconColors.panelHeaderIcon}
+      fill={color}
     >
       <title>x</title>
       <path d="M19.6004 17.2L14.3004 11.9L19.6004 6.60005L17.8004 4.80005L12.5004 10.2L7.20039 4.90005L5.40039 6.60005L10.7004 11.9L5.40039 17.2L7.20039 19L12.5004 13.7L17.8004 19L19.6004 17.2Z"></path>

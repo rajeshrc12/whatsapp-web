@@ -14,13 +14,11 @@ const loggedInUser = {
 };
 
 const images = [
-  { type: "image", message: rajeshProfile },
-  { type: "image", message: maheshProfile },
-  { type: "image", message: ganeshProfile },
-  { type: "image", message: i1 },
-  { type: "image", message: i2 },
-  { type: "video", message: v1 },
-  { type: "video", message: v2 },
+  { id: "1", type: "image", message: rajeshProfile },
+  { id: "2", type: "image", message: maheshProfile },
+  { id: "3", type: "image", message: ganeshProfile },
+  { id: "4", type: "image", message: i1 },
+  { id: "5", type: "image", message: i2 },
 ];
 const videos = [v1];
 const users = [

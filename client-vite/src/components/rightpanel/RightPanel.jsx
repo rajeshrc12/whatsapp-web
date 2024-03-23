@@ -125,18 +125,7 @@ const RightPanel = () => {
           </div>
         );
       case "mediaPreview":
-        return (
-          <div className="w-[30%] bg-panel-header-background">
-            <div className="h-[10%] bg-panel-background-colored flex">
-              <div className="flex items-center px-5">
-                <BackIcon color="#fff" />
-              </div>
-            </div>
-            <div className="h-[90%]">
-              <MediaPreviewTabs />
-            </div>
-          </div>
-        );
+        return <MediaPreviewTabs />;
       default:
         return <></>;
     }

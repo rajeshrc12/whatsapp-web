@@ -127,6 +127,18 @@ const ChatWindow = () => {
                             Reply
                           </div>
                         </div>
+                        <div
+                          tabIndex={0}
+                          className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box"
+                        >
+                          <div
+                            onClick={() => {
+                              dispatch(main("forwardModal"));
+                            }}
+                          >
+                            Forward
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -4,13 +4,17 @@ import MiddlePanel from "./components/middlepanel/MiddlePanel";
 import RightPanel from "./components/rightpanel/RightPanel";
 import { useSelector } from "react-redux";
 import MediaPreview from "./components/mainpanel/MediaPreview";
+import ForwardModal from "./components/forward/ForwardModal";
 
 const App = () => {
   const mainValue = useSelector((state) => state.panel.main);
+
   const render = useCallback(() => {
     switch (mainValue) {
       case "mediaPreview":
         return <MediaPreview />;
+      case "forwardModal":
+        return <ForwardModal />;
       default:
         return <></>;
     }

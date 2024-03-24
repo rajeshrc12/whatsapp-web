@@ -1,9 +1,9 @@
 import React from "react";
 import StatusIcon from "../../icons/StatusIcon.jsx";
 import MenuIcon from "../../icons/MenuIcon.jsx";
-import SearchIcon from "../../icons/FilterIcon.jsx";
-import FilterIcon from "../../icons/SearchIcon.jsx";
+import FilterIcon from "../../icons/FilterIcon.jsx";
 import data from "../../data/data.js";
+import InputWithSearchAndBackIcon from "../input/InputWithSearchAndBackIcon.jsx";
 const LeftPanel = () => {
   return (
     <div className="w-[30%]">
@@ -22,20 +22,11 @@ const LeftPanel = () => {
       </div>
       <div className="h-[10%]">
         <div className="flex h-full px-1 gap-2 justify-between items-center">
-          <div className="flex rounded-lg p-1 w-full bg-panel-header-background">
-            <div className="px-5">
-              <FilterIcon />
-            </div>
-            <div className="w-full">
-              <input
-                type="text"
-                placeholder="Search or start new chat"
-                className="outline-none bg-panel-header-background w-full"
-              />
-            </div>
+          <div className="w-full">
+            <InputWithSearchAndBackIcon />
           </div>
           <div>
-            <SearchIcon />
+            <FilterIcon />
           </div>
         </div>
       </div>

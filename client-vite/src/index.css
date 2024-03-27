@@ -13,6 +13,10 @@
   --popup-panel-background: rgba(11, 20, 26, 0.05);
   --panel-background-colored: #008069;
   --photopicker-overlay-background: rgba(84, 101, 111, 0.8);
+  --switch-track-checked-color: #b2dbd7;
+  --switch-track-color: #b2b2b2;
+  --switch-button-color: #ececec;
+  --input-border: #667781;
 }
 * {
   scrollbar-width: thin;

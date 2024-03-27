@@ -7,7 +7,6 @@ import InputWithSearchAndBackIcon from "../input/InputWithSearchAndBackIcon";
 import data from "../../data/data";
 import SendIcon from "../../icons/SendIcon";
 const ForwardModal = () => {
-  const [isOpen, setIsOpen] = useState(true);
   const dispatch = useDispatch();
   const onRequestClose = () => {
     dispatch(main(""));
@@ -78,7 +77,7 @@ const ForwardModal = () => {
           </div>
         </div>
       }
-      isOpen={isOpen}
+      isOpen={true}
       onRequestClose={onRequestClose}
       styles={{ width: "35vw", height: "95vh" }}
     />

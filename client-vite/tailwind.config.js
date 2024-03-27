@@ -18,6 +18,10 @@ export default {
         "panel-background-colored": "var(--panel-background-colored)",
         "photopicker-overlay-background":
           "var(--photopicker-overlay-background)",
+        "switch-track-checked-color": "var(--switch-track-checked-color)",
+        "switch-track-color": "var(--switch-track-color)",
+        "input-border": "var(--input-border)",
+        "switch-button-color": "var(--switch-button-color)",
       },
     },
   },

@@ -10,7 +10,7 @@ import PollIcon from "../../icons/PollIcon";
 import MicIcon from "../../icons/MicIcon";
 import InputFileIcon from "../input/InputFileIcon";
 import data from "../../data/data";
-import { middle, right } from "../../state/panel/panelSlice";
+import { main, middle, right } from "../../state/panel/panelSlice";
 import { useDispatch, useSelector } from "react-redux";
 import FilesPreview from "../filespreview/FilesPreview";
 import ChatWindow from "./ChatWindow";
@@ -107,7 +107,10 @@ const MiddlePanel = () => {
                       </div>
                       <div>Contact</div>
                     </div>
-                    <div className="flex gap-3 p-2 hover:bg-gray-100 cursor-pointer">
+                    <div
+                      onClick={() => dispatch(main("pollModal"))}
+                      className="flex gap-3 p-2 hover:bg-gray-100 cursor-pointer"
+                    >
                       <div>
                         <PollIcon />
                       </div>

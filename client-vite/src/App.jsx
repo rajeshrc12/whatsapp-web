@@ -5,6 +5,7 @@ import RightPanel from "./components/rightpanel/RightPanel";
 import { useSelector } from "react-redux";
 import MediaPreview from "./components/mainpanel/MediaPreview";
 import ForwardModal from "./components/forward/ForwardModal";
+import PollModal from "./components/poll/PollModal";
 
 const App = () => {
   const mainValue = useSelector((state) => state.panel.main);
@@ -15,6 +16,8 @@ const App = () => {
         return <MediaPreview />;
       case "forwardModal":
         return <ForwardModal />;
+      case "pollModal":
+        return <PollModal />;
       default:
         return <></>;
     }

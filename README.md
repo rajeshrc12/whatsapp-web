@@ -43,3 +43,10 @@ Photo editor
 video editor
 Disappearing message
 Draggable Poll answers
+
+============
+
+online/offline
+typing
+seen
+delivered

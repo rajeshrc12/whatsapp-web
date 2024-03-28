@@ -17,6 +17,7 @@ app.use(bodyParser.json());
 const client = new MongoClient(process.env.DB_URI);
 const database = client.db(process.env.DB_NAME);
 const users = database.collection("users");
+const chats = database.collection("chats");
 const groups = database.collection("groups");
 const fschunks = database.collection("fs.chunks");
 const fsfiles = database.collection("fs.files");
@@ -35,14 +36,86 @@ const io = new Server(ioServer, {
     methods: ["GET", "POST"], // Allow only GET and POST requests
   },
 });
-ioServer.listen(socketPort, () => {
+ioServer.listen(socketPort, async () => {
   console.log(`Socket.IO server listening at http://localhost:${socketPort}`);
 });
-
-io.on("connection", (socket) => {
-  socket.on("server", (args) => {
-    socket.broadcast.emit("client", args);
+let connectedUsers = [];
+io.on("connection", async (socket) => {
+  // socket.on("server", async (args) => {
+  //   const all = await io.fetchSockets();
+  //   console.log(args);
+  //   console.log(all.map((a) => a.handshake.query));
+  //   socket.broadcast.emit(
+  //     "client",
+  //     all.map((a) => a.handshake.query)
+  //   );
+  // });
+  // const all = await io.fetchSockets();
+  // socket.broadcast.emit(
+  //   "client",
+  //   all.map((a) => a.handshake.query)
+  // );
+  // socket.on("disconnect", (reason) => {
+  //   socket.broadcast.emit(
+  //     "client",
+  //     all.map((a) => a.handshake.query)
+  //   );
+  // });
+  const all = await io.fetchSockets();
+  console.clear();
+  connectedUsers = all.map((a) => {
+    return {
+      id: a.id,
+      name: a.handshake.query.username,
+    };
   });
+  socket.broadcast.emit("client", connectedUsers);
+  console.log("from connection function, connected users", connectedUsers);
+
+  socket.on("disconnect", () => {
+    connectedUsers = all
+      .filter((a) => a.id !== socket.id)
+      .map((a) => {
+        return {
+          id: a.id,
+          name: a.handshake.query.username,
+        };
+      });
+    console.log("from disconnect function, connected users", connectedUsers); // false
+    socket.broadcast.emit("client", connectedUsers);
+  });
+});
+
+app.post("/m", async (req, res) => {
+  try {
+    const result = await chats.insertOne({
+      from: req.body.from,
+      to: req.body.to,
+      message: req.body.message,
+    });
+    res.send(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
+app.get("/u", async (req, res) => {
+  try {
+    const registeredUsers = await users.find({}).toArray();
+    res.send({ registeredUsers, connectedUsers });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
+
+app.get("/connectedusers", async (req, res) => {
+  try {
+    res.send(connectedUsers);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
 });
 
 app.post("/", async (req, res) => {
@@ -66,8 +139,16 @@ app.post("/", async (req, res) => {
   }
 });
 
-app.get("/logout", async (req, res) => {
-  await client.close();
+app.get("/logout/:name", async (req, res) => {
+  if (connectedUsers.length) {
+    const name = req.params.name;
+    const socketId = connectedUsers.find((user) => user.name === name);
+    const sockets = io.sockets.sockets.get(socketId.id);
+    sockets.disconnect(true);
+  }
+  // connectedUsers = connectedUsers.filter((user) => user.name !== name);
+  // io.sockets.sockets[socketId.id].disconnect();
+  // await client.close();
 });
 
 app.post("/users", async (req, res) => {

@@ -41,12 +41,59 @@ ioServer.listen(socketPort, async () => {
 });
 let connectedUsers = [];
 io.on("connection", async (socket) => {
-  socket.on("server", (arg) => {
-    socket.broadcast.emit(arg.to, {
-      message: arg.message,
-      from: arg.from,
-      to: arg.to,
+  socket.on("server", async (args) => {
+    const isUserOnline = connectedUsers.find((user) => user.name === args.to);
+    if (isUserOnline) {
+      console.log("live transmitted");
+      socket.broadcast.emit(args.to, {
+        from: args.from,
+        message: args.message,
+        to: args.to,
+      });
+    }
+    const result = await chats.insertOne({
+      from: args.from,
+      to: args.to,
+      message: args.message,
     });
+  });
+  // const all = await io.fetchSockets();
+  // socket.broadcast.emit(
+  //   "client",
+  //   all.map((a) => a.handshake.query)
+  // );
+  // socket.on("disconnect", (reason) => {
+  //   socket.broadcast.emit(
+  //     "client",
+  //     all.map((a) => a.handshake.query)
+  //   );
+  // });
+
+  const all = await io.fetchSockets();
+  const isUserOnline = connectedUsers.find(
+    (user) => user.name === socket.handshake.query.username
+  );
+  console.log(socket.handshake.query.username);
+  if (!isUserOnline) {
+    connectedUsers = all.map((a) => {
+      return {
+        id: a.id,
+        name: a.handshake.query.username,
+      };
+    });
+    socket.broadcast.emit("onlineUsers", connectedUsers);
+  }
+  socket.on("disconnect", () => {
+    connectedUsers = all
+      .filter((a) => a.id !== socket.id)
+      .map((a) => {
+        return {
+          id: a.id,
+          name: a.handshake.query.username,
+        };
+      });
+    console.log("from disconnect function, connected users", connectedUsers); // false
+    socket.broadcast.emit("onlineUsers", connectedUsers);
   });
 });
 

@@ -11,14 +11,14 @@ const Login = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             type="text"
-            placeholder="username"
+            placeholder="name"
           />
         </div>
         <div>
           <button
             onClick={() => {
               if (name.trim()) {
-                sessionStorage.setItem("username", name.trim());
+                sessionStorage.setItem("name", name.trim());
                 navigate("/home");
               }
             }}

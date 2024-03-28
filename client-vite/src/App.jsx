@@ -1,208 +1,142 @@
-// import React, { useCallback, useEffect, useState } from "react";
-// import LeftPanel from "./components/leftpanel/LeftPanel";
-// import MiddlePanel from "./components/middlepanel/MiddlePanel";
-// import RightPanel from "./components/rightpanel/RightPanel";
-// import { useSelector } from "react-redux";
-// import MediaPreview from "./components/mainpanel/MediaPreview";
-// import ForwardModal from "./components/forward/ForwardModal";
-// import PollModal from "./components/poll/PollModal";
-
-// const App = () => {
-//   const mainValue = useSelector((state) => state.panel.main);
-
-//   const render = useCallback(() => {
-//     switch (mainValue) {
-//       case "mediaPreview":
-//         return <MediaPreview />;
-//       case "forwardModal":
-//         return <ForwardModal />;
-//       case "pollModal":
-//         return <PollModal />;
-//       default:
-//         return <></>;
-//     }
-//   }, [mainValue]);
-//   return (
-//     <div className="flex h-screen w-screen">
-//       <LeftPanel />
-//       <MiddlePanel />
-//       <RightPanel />
-//       {render()}
-//     </div>
-//   );
-// };
-
-// export default App;
-
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
 const App = () => {
-  const navigate = useNavigate();
+  const loggedInUser = sessionStorage.getItem("name");
+  const users = ["rajesh", "mahesh", "ganesh", "nagu"].filter(
+    (user) => user !== loggedInUser
+  );
   const [selectedUser, setSelectedUser] = useState({ name: "", status: "" });
-  const [users, setUsers] = useState([]);
   const [socket, setSocket] = useState(null);
-  const [message, setMessage] = useState("");
   const [chats, setChats] = useState([]);
-  useEffect(() => {
-    if (sessionStorage.getItem("username")) {
-      const getData = async () => {
-        const result = await axios.get("http://localhost:3001/u");
-        const registeredUsers = result.data.registeredUsers.filter(
-          (u) => u.name !== sessionStorage.getItem("username")
-        );
-        setChats(result.data.allChats);
-        setSelectedUser({
-          name: registeredUsers[0].name,
-          status: result.data.connectedUsers.find(
-            (user) => user.name === registeredUsers[0].name
-          )
-            ? "Online"
-            : "Offline",
-        });
-        setUsers(registeredUsers);
-        const soc = io("ws://localhost:3002", {
-          query: {
-            username: sessionStorage.getItem("username"),
-          },
-        });
-        setSocket(soc);
-      };
-      getData();
-    } else {
-      navigate("/");
+  const [value, setValue] = useState("");
+  const navigate = useNavigate();
+  const sendMessage = () => {
+    if (value.trim()) {
+      setValue("");
+      socket.emit("server", {
+        from: loggedInUser,
+        to: selectedUser.name,
+        message: value,
+      });
+      setChats([
+        ...chats,
+        {
+          from: loggedInUser,
+          to: selectedUser.name,
+          message: value,
+        },
+      ]);
     }
+  };
+  useEffect(() => {
+    const getData = async () => {
+      const soc = io("ws://localhost:3002", {
+        query: {
+          name: loggedInUser,
+        },
+      });
+      setSocket(soc);
+    };
+    if (loggedInUser) {
+      getData();
+    } else navigate("/");
   }, []);
   useEffect(() => {
     if (socket) {
-      socket.on(sessionStorage.getItem("username"), (arg) => {
-        console.log(chats);
-        setChats([
-          ...chats,
-          { from: arg.from, to: arg.to, message: arg.message },
-        ]);
-      });
-      socket.on("onlineUsers", (arg) => {
-        const newConnectedUsers = arg
-          .filter((a) => a.name !== sessionStorage.getItem("username"))
-          .map((a) => a.name);
-        if (newConnectedUsers.includes(selectedUser.name))
-          setSelectedUser({
-            ...selectedUser,
-            status: newConnectedUsers.includes(selectedUser.name)
-              ? "Online"
-              : "Offline",
-          });
+      socket.on(loggedInUser, (arg) => {
+        setChats([...chats, arg]);
       });
     }
   }, [socket, chats]);
   return (
-    <div className="flex justify-center items-center h-screen w-screen">
-      <div className="h-[80vh] w-full flex">
-        <div className="w-[40%] border">
-          <div className="h-full">
-            <div className="h-[20%] border">
-              {sessionStorage.getItem("username")}
-            </div>
-            <div className="h-[80%] border overflow-y-scroll">
-              {users.map((user) => (
-                <div
-                  key={user.name}
-                  className={`p-3 ${
-                    user.name === selectedUser.name
-                      ? "border border-red-500"
-                      : ""
-                  }`}
+    <div className="flex h-screen w-screen">
+      <div className="w-[40%]">
+        <div className="flex flex-col h-full">
+          <div className="h-[10%] border">
+            <div className="flex justify-between">
+              <div>{loggedInUser}</div>
+              <div>
+                <button
                   onClick={async () => {
-                    const response = await axios.get(
-                      "http://localhost:3001/connectedusers"
+                    navigate("/");
+                    sessionStorage.removeItem("name");
+                    await axios.get(
+                      `http://localhost:3001/logout/${loggedInUser}`
                     );
-                    const isSelectedUserOnline = response.data.find(
-                      (onlineUser) => onlineUser.name === user.name
-                    );
-                    setSelectedUser({
-                      name: user.name,
-                      status: isSelectedUserOnline ? "Online" : "Offline",
-                    });
                   }}
                 >
-                  {user.name}
-                </div>
-              ))}
+                  logout
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="w-[60%] border">
-          <div className="h-full">
-            <div className="h-[10%] border">
-              {" "}
-              <div>
-                {selectedUser.name}({selectedUser.status})
+          <div className="h-[90%] border overflow-y-scroll">
+            {users.map((user) => (
+              <div
+                key={user}
+                className={`p-3 ${user === selectedUser.name && "bg-red-300"}`}
+                onClick={() =>
+                  setSelectedUser({ name: user, status: "offline" })
+                }
+              >
+                {user}
               </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="w-[60%]">
+        {selectedUser.name ? (
+          <div className="flex flex-col h-full">
+            <div className="h-[10%] border">
+              {selectedUser.name}({selectedUser.status})
             </div>
             <div className="h-[80%] border overflow-y-scroll">
               {chats
                 .filter(
                   (chat) =>
-                    (chat.from === sessionStorage.getItem("username") &&
+                    (chat.from === loggedInUser &&
                       chat.to === selectedUser.name) ||
-                    (chat.to === sessionStorage.getItem("username") &&
+                    (chat.to === loggedInUser &&
                       chat.from === selectedUser.name)
                 )
                 .map((chat) => (
-                  <div className="border w-1/2" key={chat.message}>
-                    <div>{chat.from}</div>
-                    <div>{chat.message}</div>
+                  <div
+                    className={`flex ${
+                      chat.from === loggedInUser
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
+                    <div className="border w-1/3" key={chat.message}>
+                      <div>{chat.message}</div>
+                    </div>
                   </div>
                 ))}
             </div>
             <div className="h-[10%] border">
               <div className="flex h-full">
                 <input
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="message"
                   type="text"
                   className="w-full h-full"
-                  placeholder="message"
-                />
-                <button
-                  onClick={() => {
-                    if (message.trim()) {
-                      setMessage("");
-                      socket.emit("server", {
-                        from: sessionStorage.getItem("username"),
-                        to: selectedUser.name,
-                        message,
-                      });
-                      setChats([
-                        ...chats,
-                        {
-                          from: sessionStorage.getItem("username"),
-                          to: selectedUser.name,
-                          message,
-                        },
-                      ]);
-                    } else alert("enter messgae");
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      sendMessage();
+                    }
                   }}
-                >
-                  Send
-                </button>
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                />
+                <button onClick={sendMessage}>Send</button>
               </div>
             </div>
           </div>
-        </div>
-        <button
-          onClick={async () => {
-            navigate("/");
-            const name = sessionStorage.getItem("username");
-            sessionStorage.removeItem("username");
-            await axios.get(`http://localhost:3001/logout/${name}`);
-          }}
-        >
-          logout
-        </button>
+        ) : (
+          <div>No user selected</div>
+        )}
       </div>
     </div>
   );

@@ -38,11 +38,14 @@ import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 const App = () => {
   const navigate = useNavigate();
   const [selectedUser, setSelectedUser] = useState({ name: "", status: "" });
   const [users, setUsers] = useState([]);
   const [socket, setSocket] = useState(null);
+  const [message, setMessage] = useState("");
+  const [chats, setChats] = useState([]);
   useEffect(() => {
     if (sessionStorage.getItem("username")) {
       const getData = async () => {
@@ -64,7 +67,6 @@ const App = () => {
             username: sessionStorage.getItem("username"),
           },
         });
-        console.log("already connected users", result.data.connectedUsers);
         setSocket(soc);
       };
       getData();
@@ -72,9 +74,18 @@ const App = () => {
       navigate("/");
     }
   }, []);
+  console.log(chats);
   useEffect(() => {
     if (socket) {
-      socket.on("client", (arg) => {
+      socket.on(sessionStorage.getItem("username"), (arg) => {
+        console.log([...chats, { from: arg.from, message: arg.message }]);
+        setChats([...chats, { from: arg.from, message: arg.message }]);
+        setSelectedUser({
+          name: arg.from,
+          status: "Online",
+        });
+      });
+      socket.on("onlineUsers", (arg) => {
         const newConnectedUsers = arg
           .filter((a) => a.name !== sessionStorage.getItem("username"))
           .map((a) => a.name);
@@ -85,8 +96,6 @@ const App = () => {
             ? "Online"
             : "Offline",
         });
-
-        console.log("new connected users", newConnectedUsers);
       });
     }
   }, [socket]);
@@ -134,15 +143,37 @@ const App = () => {
                 {selectedUser.name}({selectedUser.status})
               </div>
             </div>
-            <div className="h-[80%] border overflow-y-scroll"></div>
+            <div className="h-[80%] border overflow-y-scroll">
+              {chats.map((chat) => (
+                <div className="border w-1/2" key={chat.message}>
+                  <div>{chat.from}</div>
+                  <div>{chat.message}</div>
+                </div>
+              ))}
+            </div>
             <div className="h-[10%] border">
               <div className="flex h-full">
                 <input
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   type="text"
                   className="w-full h-full"
                   placeholder="message"
                 />
-                <button>Send</button>
+                <button
+                  onClick={() => {
+                    if (message.trim()) {
+                      setMessage("");
+                      socket.emit("server", {
+                        from: sessionStorage.getItem("username"),
+                        to: selectedUser.name,
+                        message,
+                      });
+                    } else alert("enter messgae");
+                  }}
+                >
+                  Send
+                </button>
               </div>
             </div>
           </div>

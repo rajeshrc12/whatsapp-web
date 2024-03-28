@@ -49,4 +49,4 @@ Draggable Poll answers
 online/offline
 typing
 seen
-delivered
+unread message

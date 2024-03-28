@@ -41,15 +41,21 @@ ioServer.listen(socketPort, async () => {
 });
 let connectedUsers = [];
 io.on("connection", async (socket) => {
-  // socket.on("server", async (args) => {
-  //   const all = await io.fetchSockets();
-  //   console.log(args);
-  //   console.log(all.map((a) => a.handshake.query));
-  //   socket.broadcast.emit(
-  //     "client",
-  //     all.map((a) => a.handshake.query)
-  //   );
-  // });
+  socket.on("server", async (args) => {
+    const isUserOnline = connectedUsers.find((user) => user.name === args.to);
+    if (isUserOnline) {
+      socket.broadcast.emit(args.to, {
+        from: args.from,
+        message: args.message,
+      });
+    } else {
+      const result = await chats.insertOne({
+        from: args.from,
+        to: args.to,
+        message: args.message,
+      });
+    }
+  });
   // const all = await io.fetchSockets();
   // socket.broadcast.emit(
   //   "client",
@@ -61,17 +67,21 @@ io.on("connection", async (socket) => {
   //     all.map((a) => a.handshake.query)
   //   );
   // });
-  const all = await io.fetchSockets();
-  console.clear();
-  connectedUsers = all.map((a) => {
-    return {
-      id: a.id,
-      name: a.handshake.query.username,
-    };
-  });
-  socket.broadcast.emit("client", connectedUsers);
-  console.log("from connection function, connected users", connectedUsers);
 
+  const all = await io.fetchSockets();
+  const isUserOnline = connectedUsers.find(
+    (user) => user.name === socket.handshake.query.username
+  );
+  console.log(socket.handshake.query.username);
+  if (!isUserOnline) {
+    connectedUsers = all.map((a) => {
+      return {
+        id: a.id,
+        name: a.handshake.query.username,
+      };
+    });
+    socket.broadcast.emit("onlineUsers", connectedUsers);
+  }
   socket.on("disconnect", () => {
     connectedUsers = all
       .filter((a) => a.id !== socket.id)
@@ -82,7 +92,7 @@ io.on("connection", async (socket) => {
         };
       });
     console.log("from disconnect function, connected users", connectedUsers); // false
-    socket.broadcast.emit("client", connectedUsers);
+    socket.broadcast.emit("onlineUsers", connectedUsers);
   });
 });
 
@@ -144,7 +154,10 @@ app.get("/logout/:name", async (req, res) => {
     const name = req.params.name;
     const socketId = connectedUsers.find((user) => user.name === name);
     const sockets = io.sockets.sockets.get(socketId.id);
-    sockets.disconnect(true);
+    if (sockets) {
+      sockets.disconnect(true);
+      connectedUsers = connectedUsers.filter((user) => user.name !== name);
+    }
   }
   // connectedUsers = connectedUsers.filter((user) => user.name !== name);
   // io.sockets.sockets[socketId.id].disconnect();

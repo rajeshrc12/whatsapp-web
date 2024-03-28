@@ -53,6 +53,7 @@ const App = () => {
         const registeredUsers = result.data.registeredUsers.filter(
           (u) => u.name !== sessionStorage.getItem("username")
         );
+        setChats(result.data.allChats);
         setSelectedUser({
           name: registeredUsers[0].name,
           status: result.data.connectedUsers.find(
@@ -74,31 +75,29 @@ const App = () => {
       navigate("/");
     }
   }, []);
-  console.log(chats);
   useEffect(() => {
     if (socket) {
       socket.on(sessionStorage.getItem("username"), (arg) => {
-        console.log([...chats, { from: arg.from, message: arg.message }]);
-        setChats([...chats, { from: arg.from, message: arg.message }]);
-        setSelectedUser({
-          name: arg.from,
-          status: "Online",
-        });
+        console.log(chats);
+        setChats([
+          ...chats,
+          { from: arg.from, to: arg.to, message: arg.message },
+        ]);
       });
       socket.on("onlineUsers", (arg) => {
         const newConnectedUsers = arg
           .filter((a) => a.name !== sessionStorage.getItem("username"))
           .map((a) => a.name);
-
-        setSelectedUser({
-          ...selectedUser,
-          status: newConnectedUsers.includes(selectedUser.name)
-            ? "Online"
-            : "Offline",
-        });
+        if (newConnectedUsers.includes(selectedUser.name))
+          setSelectedUser({
+            ...selectedUser,
+            status: newConnectedUsers.includes(selectedUser.name)
+              ? "Online"
+              : "Offline",
+          });
       });
     }
-  }, [socket]);
+  }, [socket, chats]);
   return (
     <div className="flex justify-center items-center h-screen w-screen">
       <div className="h-[80vh] w-full flex">
@@ -144,12 +143,20 @@ const App = () => {
               </div>
             </div>
             <div className="h-[80%] border overflow-y-scroll">
-              {chats.map((chat) => (
-                <div className="border w-1/2" key={chat.message}>
-                  <div>{chat.from}</div>
-                  <div>{chat.message}</div>
-                </div>
-              ))}
+              {chats
+                .filter(
+                  (chat) =>
+                    (chat.from === sessionStorage.getItem("username") &&
+                      chat.to === selectedUser.name) ||
+                    (chat.to === sessionStorage.getItem("username") &&
+                      chat.from === selectedUser.name)
+                )
+                .map((chat) => (
+                  <div className="border w-1/2" key={chat.message}>
+                    <div>{chat.from}</div>
+                    <div>{chat.message}</div>
+                  </div>
+                ))}
             </div>
             <div className="h-[10%] border">
               <div className="flex h-full">
@@ -169,6 +176,14 @@ const App = () => {
                         to: selectedUser.name,
                         message,
                       });
+                      setChats([
+                        ...chats,
+                        {
+                          from: sessionStorage.getItem("username"),
+                          to: selectedUser.name,
+                          message,
+                        },
+                      ]);
                     } else alert("enter messgae");
                   }}
                 >

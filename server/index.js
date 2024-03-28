@@ -44,17 +44,18 @@ io.on("connection", async (socket) => {
   socket.on("server", async (args) => {
     const isUserOnline = connectedUsers.find((user) => user.name === args.to);
     if (isUserOnline) {
+      console.log("live transmitted");
       socket.broadcast.emit(args.to, {
         from: args.from,
         message: args.message,
-      });
-    } else {
-      const result = await chats.insertOne({
-        from: args.from,
         to: args.to,
-        message: args.message,
       });
     }
+    const result = await chats.insertOne({
+      from: args.from,
+      to: args.to,
+      message: args.message,
+    });
   });
   // const all = await io.fetchSockets();
   // socket.broadcast.emit(
@@ -112,7 +113,9 @@ app.post("/m", async (req, res) => {
 app.get("/u", async (req, res) => {
   try {
     const registeredUsers = await users.find({}).toArray();
-    res.send({ registeredUsers, connectedUsers });
+    const allChats = await chats.find({}).toArray();
+
+    res.send({ registeredUsers, connectedUsers, allChats });
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -157,8 +160,10 @@ app.get("/logout/:name", async (req, res) => {
     if (sockets) {
       sockets.disconnect(true);
       connectedUsers = connectedUsers.filter((user) => user.name !== name);
+      await chats.deleteMany({});
     }
   }
+
   // connectedUsers = connectedUsers.filter((user) => user.name !== name);
   // io.sockets.sockets[socketId.id].disconnect();
   // await client.close();

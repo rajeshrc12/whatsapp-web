@@ -22,25 +22,20 @@ const App = () => {
   const sendMessage = async () => {
     if (value.trim()) {
       setValue("");
-      const result = await axios.get(
-        `http://localhost:3001/getonlineuser/${selectedUser.name}`
-      );
-      console.log(
-        result?.data?.openProfile,
-        loggedInUser,
-        result?.data?.openProfile === loggedInUser
-      );
-      const prepareChat = {
+      const result = await axios.post(`http://localhost:3001/send`, {
         from: loggedInUser,
         to: selectedUser.name,
         message: value,
-        seen: result?.data?.openProfile === loggedInUser,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      socket.emit("server", prepareChat);
-      setChats([...chats, prepareChat]);
+      });
+      if (result.data.acknowledged) {
+        updateChats();
+      }
     }
+  };
+  const updateChats = async () => {
+    console.log("updateChats");
+    const result = await axios.get(`http://localhost:3001/chats`);
+    setChats(result.data);
   };
   useEffect(() => {
     const getData = async () => {
@@ -49,9 +44,8 @@ const App = () => {
           name: loggedInUser,
         },
       });
+      updateChats();
       setSocket(soc);
-      const result = await axios.get(`http://localhost:3001/chats`);
-      setChats(result.data);
       handleOpenProfile({ openProfile: null });
     };
     if (loggedInUser) {
@@ -60,11 +54,11 @@ const App = () => {
   }, []);
   useEffect(() => {
     if (socket) {
-      socket.on(loggedInUser, (arg) => {
-        setChats([...chats, arg]);
+      socket.on(loggedInUser, () => {
+        updateChats();
       });
     }
-  }, [socket, chats]);
+  }, [socket]);
   console.log(chats);
   return (
     <div className="flex h-screen w-screen">
@@ -95,7 +89,10 @@ const App = () => {
                 className={`p-3 ${user === selectedUser.name && "bg-red-300"}`}
                 onClick={async () => {
                   handleOpenProfile({ openProfile: user });
-
+                  await axios.post(`http://localhost:3001/seenall`, {
+                    from: user,
+                    to: loggedInUser,
+                  });
                   setSelectedUser({ name: user, status: "offline" });
                 }}
               >
@@ -131,9 +128,11 @@ const App = () => {
                   >
                     <div className="border w-1/3" key={chat.message}>
                       <div>{chat.message}</div>
-                      <div>
-                        <TickIcon seen={chat.seen} />
-                      </div>
+                      {chat.from === loggedInUser && (
+                        <div>
+                          <TickIcon seen={chat.seen} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -40,27 +40,9 @@ ioServer.listen(socketPort, async () => {
   console.log(`Socket.IO server listening at http://localhost:${socketPort}`);
 });
 let connectedUsers = [];
+
 io.on("connection", async (socket) => {
-  socket.on("server", (arg) => {
-    const createdAt = new Date(),
-      updatedAt = new Date();
-    socket.broadcast.emit(arg.to, {
-      message: arg.message,
-      from: arg.from,
-      to: arg.to,
-      createdAt,
-      updatedAt,
-      seen: arg.seen,
-    });
-    chats.insertOne({
-      from: arg.from,
-      to: arg.to,
-      message: arg.message,
-      createdAt,
-      updatedAt,
-      seen: arg.seen,
-    });
-  });
+  // socket.on("server", async (arg) => {});
   const all = await io.fetchSockets();
   for (const user of all) {
     const index = connectedUsers.findIndex(
@@ -81,6 +63,27 @@ io.on("connection", async (socket) => {
   console.clear();
   console.log("io.on('connection')", connectedUsers);
 });
+app.post("/send", async (req, res) => {
+  try {
+    console.clear();
+    console.log("/send", connectedUsers);
+    const { from, to, message } = req.body;
+    const isUserOnline = connectedUsers.find((user) => user.name === to);
+    const result = await chats.insertOne({
+      from,
+      to,
+      message,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      seen: isUserOnline?.openProfile === from,
+    });
+    io.sockets.emit(to, "update");
+    res.send(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
 
 app.get("/getonlineuser/:name", async (req, res) => {
   try {
@@ -95,10 +98,12 @@ app.get("/getonlineuser/:name", async (req, res) => {
 app.post("/openprofile", async (req, res) => {
   try {
     const { name, openProfile } = req.body;
-    const isUserOnline = connectedUsers.find((user) => user.name === name);
-    isUserOnline.openProfile = openProfile;
-    console.log("/openprofile", connectedUsers);
-    res.send("");
+    if (connectedUsers.length) {
+      const isUserOnline = connectedUsers.find((user) => user.name === name);
+      if (isUserOnline) isUserOnline.openProfile = openProfile;
+      console.log("/openprofile", connectedUsers);
+      res.send(isUserOnline);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -118,7 +123,12 @@ app.get("/chats", async (req, res) => {
 app.post("/seenall", async (req, res) => {
   try {
     const { from, to } = req.body;
-    const result = await chats.find({}).toArray();
+    const filter = { seen: false, from, to };
+    const updateDoc = {
+      $set: { seen: true },
+    };
+    const result = await chats.updateMany(filter, updateDoc);
+    io.sockets.emit(from, "update");
     res.send(result);
   } catch (error) {
     console.log(error);

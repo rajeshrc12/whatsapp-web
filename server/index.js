@@ -63,7 +63,7 @@ io.on("connection", async (socket) => {
   console.clear();
   console.log("io.on('connection')", connectedUsers);
   socket.on("disconnect", () => {
-    connectedUsers = all.filter((a) => a.id !== socket.id);
+    connectedUsers = connectedUsers.filter((a) => a.id !== socket.id);
     console.log("from disconnect function, connected users", connectedUsers); // false
   });
 });
@@ -114,10 +114,17 @@ app.post("/openprofile", async (req, res) => {
   }
 });
 
-app.get("/chats", async (req, res) => {
+app.get("/chats/:name", async (req, res) => {
   try {
-    const result = await chats.find({}).toArray();
-    res.send(result);
+    if (req?.params?.name) {
+      console.log("/chats", req.params.name);
+      const result = await chats
+        .find({
+          $or: [{ from: req.params.name }, { to: req.params.name }],
+        })
+        .toArray();
+      res.send(result);
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send(error);

@@ -33,8 +33,9 @@ const App = () => {
     }
   };
   const updateChats = async () => {
-    console.log("updateChats");
-    const result = await axios.get(`http://localhost:3001/chats`);
+    const result = await axios.get(
+      `http://localhost:3001/chats/${loggedInUser}`
+    );
     setChats(result.data);
   };
   useEffect(() => {

@@ -62,6 +62,10 @@ io.on("connection", async (socket) => {
   }
   console.clear();
   console.log("io.on('connection')", connectedUsers);
+  socket.on("disconnect", () => {
+    connectedUsers = all.filter((a) => a.id !== socket.id);
+    console.log("from disconnect function, connected users", connectedUsers); // false
+  });
 });
 app.post("/send", async (req, res) => {
   try {
@@ -135,6 +139,18 @@ app.post("/seenall", async (req, res) => {
     res.status(500).send(error);
   }
 });
+app.get("/logout/:name", async (req, res) => {
+  await chats.deleteMany({});
+  if (connectedUsers.length) {
+    const name = req.params.name;
+    const socketId = connectedUsers.find((user) => user.name === name);
+    if (socketId) {
+      const sockets = io.sockets.sockets.get(socketId.id);
+      sockets.disconnect(true);
+      connectedUsers = connectedUsers.filter((user) => user.name !== name);
+    }
+  }
+});
 
 app.post("/", async (req, res) => {
   try {
@@ -155,23 +171,6 @@ app.post("/", async (req, res) => {
     console.log(error);
     res.status(500).send(error);
   }
-});
-
-app.get("/logout/:name", async (req, res) => {
-  await chats.deleteMany({});
-  if (connectedUsers.length) {
-    const name = req.params.name;
-    const socketId = connectedUsers.find((user) => user.name === name);
-    const sockets = io.sockets.sockets.get(socketId.id);
-    if (sockets) {
-      sockets.disconnect(true);
-      connectedUsers = connectedUsers.filter((user) => user.name !== name);
-    }
-  }
-
-  // connectedUsers = connectedUsers.filter((user) => user.name !== name);
-  // io.sockets.sockets[socketId.id].disconnect();
-  // await client.close();
 });
 
 app.post("/users", async (req, res) => {

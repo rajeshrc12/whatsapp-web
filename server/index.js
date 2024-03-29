@@ -42,42 +42,84 @@ ioServer.listen(socketPort, async () => {
 let connectedUsers = [];
 io.on("connection", async (socket) => {
   socket.on("server", (arg) => {
+    const createdAt = new Date(),
+      updatedAt = new Date();
     socket.broadcast.emit(arg.to, {
       message: arg.message,
       from: arg.from,
       to: arg.to,
+      createdAt,
+      updatedAt,
+      seen: arg.seen,
+    });
+    chats.insertOne({
+      from: arg.from,
+      to: arg.to,
+      message: arg.message,
+      createdAt,
+      updatedAt,
+      seen: arg.seen,
     });
   });
+  const all = await io.fetchSockets();
+  for (const user of all) {
+    const index = connectedUsers.findIndex(
+      (u) => u.name === user.handshake.query.name
+    );
+    let openProfile = null;
+    if (index > -1 && index !== undefined) {
+      if (!!connectedUsers[index])
+        openProfile = connectedUsers[index].openProfile;
+      connectedUsers.splice(index, 1);
+    }
+    connectedUsers.push({
+      id: user.id,
+      name: user.handshake.query.name,
+      openProfile,
+    });
+  }
+  console.clear();
+  console.log("io.on('connection')", connectedUsers);
 });
 
-app.post("/m", async (req, res) => {
+app.get("/getonlineuser/:name", async (req, res) => {
   try {
-    const result = await chats.insertOne({
-      from: req.body.from,
-      to: req.body.to,
-      message: req.body.message,
-    });
+    const name = req.params.name;
+    res.send(connectedUsers.find((user) => user.name === name) ?? "offline");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
+
+app.post("/openprofile", async (req, res) => {
+  try {
+    const { name, openProfile } = req.body;
+    const isUserOnline = connectedUsers.find((user) => user.name === name);
+    isUserOnline.openProfile = openProfile;
+    console.log("/openprofile", connectedUsers);
+    res.send("");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
+
+app.get("/chats", async (req, res) => {
+  try {
+    const result = await chats.find({}).toArray();
     res.send(result);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
   }
 });
-app.get("/u", async (req, res) => {
-  try {
-    const registeredUsers = await users.find({}).toArray();
-    const allChats = await chats.find({}).toArray();
 
-    res.send({ registeredUsers, connectedUsers, allChats });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-});
-
-app.get("/connectedusers", async (req, res) => {
+app.post("/seenall", async (req, res) => {
   try {
-    res.send(connectedUsers);
+    const { from, to } = req.body;
+    const result = await chats.find({}).toArray();
+    res.send(result);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -106,6 +148,7 @@ app.post("/", async (req, res) => {
 });
 
 app.get("/logout/:name", async (req, res) => {
+  await chats.deleteMany({});
   if (connectedUsers.length) {
     const name = req.params.name;
     const socketId = connectedUsers.find((user) => user.name === name);
@@ -113,7 +156,6 @@ app.get("/logout/:name", async (req, res) => {
     if (sockets) {
       sockets.disconnect(true);
       connectedUsers = connectedUsers.filter((user) => user.name !== name);
-      await chats.deleteMany({});
     }
   }
 

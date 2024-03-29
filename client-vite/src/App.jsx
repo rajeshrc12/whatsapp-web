@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import TickIcon from "./icons/TickIcon";
 const App = () => {
   const loggedInUser = sessionStorage.getItem("name");
   const users = ["rajesh", "mahesh", "ganesh", "nagu"].filter(
@@ -12,22 +13,33 @@ const App = () => {
   const [chats, setChats] = useState([]);
   const [value, setValue] = useState("");
   const navigate = useNavigate();
-  const sendMessage = () => {
+  const handleOpenProfile = async ({ openProfile }) => {
+    await axios.post(`http://localhost:3001/openprofile`, {
+      name: loggedInUser,
+      openProfile,
+    });
+  };
+  const sendMessage = async () => {
     if (value.trim()) {
       setValue("");
-      socket.emit("server", {
+      const result = await axios.get(
+        `http://localhost:3001/getonlineuser/${selectedUser.name}`
+      );
+      console.log(
+        result?.data?.openProfile,
+        loggedInUser,
+        result?.data?.openProfile === loggedInUser
+      );
+      const prepareChat = {
         from: loggedInUser,
         to: selectedUser.name,
         message: value,
-      });
-      setChats([
-        ...chats,
-        {
-          from: loggedInUser,
-          to: selectedUser.name,
-          message: value,
-        },
-      ]);
+        seen: result?.data?.openProfile === loggedInUser,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      socket.emit("server", prepareChat);
+      setChats([...chats, prepareChat]);
     }
   };
   useEffect(() => {
@@ -38,6 +50,9 @@ const App = () => {
         },
       });
       setSocket(soc);
+      const result = await axios.get(`http://localhost:3001/chats`);
+      setChats(result.data);
+      handleOpenProfile({ openProfile: null });
     };
     if (loggedInUser) {
       getData();
@@ -50,6 +65,7 @@ const App = () => {
       });
     }
   }, [socket, chats]);
+  console.log(chats);
   return (
     <div className="flex h-screen w-screen">
       <div className="w-[40%]">
@@ -77,9 +93,11 @@ const App = () => {
               <div
                 key={user}
                 className={`p-3 ${user === selectedUser.name && "bg-red-300"}`}
-                onClick={() =>
-                  setSelectedUser({ name: user, status: "offline" })
-                }
+                onClick={async () => {
+                  handleOpenProfile({ openProfile: user });
+
+                  setSelectedUser({ name: user, status: "offline" });
+                }}
               >
                 {user}
               </div>
@@ -104,6 +122,7 @@ const App = () => {
                 )
                 .map((chat) => (
                   <div
+                    key={String(Math.random())}
                     className={`flex ${
                       chat.from === loggedInUser
                         ? "justify-end"
@@ -112,6 +131,9 @@ const App = () => {
                   >
                     <div className="border w-1/3" key={chat.message}>
                       <div>{chat.message}</div>
+                      <div>
+                        <TickIcon seen={chat.seen} />
+                      </div>
                     </div>
                   </div>
                 ))}

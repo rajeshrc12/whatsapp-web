@@ -122,7 +122,6 @@ const App = () => {
   //     seen: chat.seen,
   //   }))
   // );
-  // console.table(users);
 
   return (
     <div className="flex h-screen w-screen">

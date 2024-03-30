@@ -31,8 +31,8 @@ const LeftPanel = () => {
         </div>
       </div>
       <div className="h-[80%] overflow-y-scroll">
-        {new Array(30).fill(0).map((d) => (
-          <div>hello</div>
+        {new Array(30).fill(0).map((d, i) => (
+          <div key={i}>hello</div>
         ))}
       </div>
     </div>

@@ -98,7 +98,7 @@ const App = () => {
   }, [chats]);
   useEffect(() => {
     if (socket) {
-      socket.on(loggedInUser, (arg) => {
+      socket.on(loggedInUser, () => {
         fetchChats();
       });
       socket.on("onlineUsers", (arg) => {
@@ -113,7 +113,6 @@ const App = () => {
       else setSelectedUser({ ...selectedUser, status: "offline" });
     }
   }, [onlineUsers]);
-  console.log(onlineUsers, selectedUser);
   // console.clear();
   // console.table(
   //   chats.map((chat) => ({

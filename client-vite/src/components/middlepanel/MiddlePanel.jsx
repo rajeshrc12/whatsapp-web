@@ -32,6 +32,74 @@ const MiddlePanel = () => {
       message: "b",
       updatedAt: "7:15 pm",
     },
+    {
+      from: "rajesh",
+      to: "mahesh",
+      type: "text",
+      message:
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum corrupti nesciunt eius, non aut debitis nam voluptatem ad sunt. Ducimus dolore repellat enim eius aspernatur distinctio doloribus sequi temporibus expedita.",
+      updatedAt: "7:12 pm",
+    },
+    {
+      from: "mahesh",
+      to: "rajesh",
+      type: "text",
+      message: "b",
+      updatedAt: "7:15 pm",
+    },
+    {
+      from: "rajesh",
+      to: "mahesh",
+      type: "text",
+      message:
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum corrupti nesciunt eius, non aut debitis nam voluptatem ad sunt. Ducimus dolore repellat enim eius aspernatur distinctio doloribus sequi temporibus expedita.",
+      updatedAt: "7:12 pm",
+    },
+    {
+      from: "mahesh",
+      to: "rajesh",
+      type: "text",
+      message: "b",
+      updatedAt: "7:15 pm",
+    },
+    {
+      from: "rajesh",
+      to: "mahesh",
+      type: "text",
+      message:
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum corrupti nesciunt eius, non aut debitis nam voluptatem ad sunt. Ducimus dolore repellat enim eius aspernatur distinctio doloribus sequi temporibus expedita.",
+      updatedAt: "7:12 pm",
+    },
+    {
+      from: "mahesh",
+      to: "rajesh",
+      type: "text",
+      message: "b",
+      updatedAt: "7:15 pm",
+    },
+    {
+      from: "rajesh",
+      to: "mahesh",
+      type: "text",
+      message:
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum corrupti nesciunt eius, non aut debitis nam voluptatem ad sunt. Ducimus dolore repellat enim eius aspernatur distinctio doloribus sequi temporibus expedita.",
+      updatedAt: "7:12 pm",
+    },
+    {
+      from: "mahesh",
+      to: "rajesh",
+      type: "text",
+      message: "b",
+      updatedAt: "7:15 pm",
+    },
+    {
+      from: "mahesh",
+      to: "rajesh",
+      type: "text",
+      message:
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum corrupti nesciunt eius, non aut debitis nam voluptatem ad sunt. Ducimus dolore repellat enim eius aspernatur distinctio doloribus sequi temporibus expedita.",
+      updatedAt: "7:12 pm",
+    },
   ];
   return (
     <div
@@ -60,8 +128,8 @@ const MiddlePanel = () => {
         </div>
       </div>
       <div className="h-[80%] overflow-y-scroll">
-        <div className="h-full relative px-[4vw] py-5 flex flex-col justify-end gap-1">
-          <div className="flex justify-center sticky top-2">
+        <div className="h-full relative px-[4vw] flex flex-col gap-1 z-0 py-2">
+          <div className="flex justify-center sticky top-2 z-10">
             <div className="bg-white shadow-sm rounded-lg text-xs px-3 py-2">
               01/01/2024
             </div>
@@ -73,23 +141,23 @@ const MiddlePanel = () => {
                 chat.from === loggedInUser ? "justify-end" : "justify-start"
               }`}
             >
-              <div
-                className={`rounded-lg shadow-sm max-w-[65%] min-w-24 min-h-9 px-2 py-1 flex ${
-                  chat.from === loggedInUser
-                    ? "bg-outgoing-background"
-                    : "bg-white"
-                }`}
-              >
-                <div className="text-sm relative pb-1 w-full group">
+              <div className={`max-w-[65%] min-w-24 min-h-9 flex flex-col `}>
+                <div
+                  className={`${
+                    chat.from === loggedInUser
+                      ? "bg-outgoing-background"
+                      : "bg-white"
+                  } text-sm relative w-full group shadow-sm rounded-lg px-2 py-1`}
+                >
                   {chat.message}
-                  <div className="text-[11px] gap-1 text-input-border absolute bottom-0 right-0 flex items-center">
+                  <div className="text-[11px] gap-1 text-input-border absolute bottom-0 right-1 flex items-center">
                     <div>{chat.updatedAt}</div>
                     <div>
                       <TickIcon />
                     </div>
                   </div>
                   <div
-                    className={`hidden group-hover:block absolute top-0 right-0 ${
+                    className={`hidden group-hover:block absolute top-0 right-1 ${
                       chat.from === loggedInUser
                         ? "bg-outgoing-background"
                         : "bg-white"
@@ -98,9 +166,24 @@ const MiddlePanel = () => {
                     <DownArrowIcon />
                   </div>
                 </div>
+                <div
+                  className={`flex relative bottom-1 ${
+                    chat.from === loggedInUser
+                      ? "justify-end right-1"
+                      : "justify-start left-1"
+                  }`}
+                >
+                  <div className="bg-white rounded-full p-1 flex">
+                    <div>{String.fromCodePoint("0x1F600")}</div>
+                    <div>{String.fromCodePoint("0x1F600")}</div>
+                    <div>{String.fromCodePoint("0x1F600")}</div>
+                    <div className="px-1">2</div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
+          <div className="pb-5"></div>
         </div>
       </div>
       <div className="h-[10%]">

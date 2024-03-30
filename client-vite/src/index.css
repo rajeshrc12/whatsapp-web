@@ -22,3 +22,7 @@
   scrollbar-width: thin;
   scrollbar-color: rgb(200, 200, 200) #fff;
 }
+input::placeholder {
+  font-size: smaller;
+  color: #667781;
+}

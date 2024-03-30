@@ -9,10 +9,30 @@ import ContactIcon from "../../icons/ContactIcon";
 import PollIcon from "../../icons/PollIcon";
 import EmojiIcon from "../../icons/EmojiIcon";
 import MicIcon from "../../icons/MicIcon";
+import TickIcon from "../../icons/TickIcon";
+import DownArrowIcon from "../../icons/DownArrowIcon";
 import InputFileIcon from "../input/InputFileIcon";
 import data from "../../data/data";
 import WhatsaAppBG from "../../data/whatsapp.png";
 const MiddlePanel = () => {
+  const loggedInUser = "rajesh";
+  const chats = [
+    {
+      from: "rajesh",
+      to: "mahesh",
+      type: "text",
+      message:
+        "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum corrupti nesciunt eius, non aut debitis nam voluptatem ad sunt. Ducimus dolore repellat enim eius aspernatur distinctio doloribus sequi temporibus expedita.",
+      updatedAt: "7:12 pm",
+    },
+    {
+      from: "mahesh",
+      to: "rajesh",
+      type: "text",
+      message: "b",
+      updatedAt: "7:15 pm",
+    },
+  ];
   return (
     <div
       className="w-[70%] border"
@@ -28,8 +48,8 @@ const MiddlePanel = () => {
             </div>
             <div className="flex flex-col">
               <div>Rajesh</div>
-              <div className="text-xs text-input-border">
-                Last seen at today
+              <div className="text-sm text-input-border">
+                last seen today at 7.15 pm
               </div>
             </div>
           </div>
@@ -40,25 +60,46 @@ const MiddlePanel = () => {
         </div>
       </div>
       <div className="h-[80%] overflow-y-scroll">
-        <div className="h-full relative px-[4vw]">
+        <div className="h-full relative px-[4vw] py-5 flex flex-col justify-end gap-1">
           <div className="flex justify-center sticky top-2">
             <div className="bg-white shadow-sm rounded-lg text-xs px-3 py-2">
               01/01/2024
             </div>
           </div>
-          {new Array(10).fill(0).map((d, i) => (
-            <div key={i} className="flex justify-between">
-              <div>hello</div>
-              <div>hello</div>
+          {chats.map((chat, i) => (
+            <div
+              key={i}
+              className={`flex ${
+                chat.from === loggedInUser ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`rounded-lg shadow-sm max-w-[65%] min-w-24 min-h-9 px-2 py-1 flex ${
+                  chat.from === loggedInUser
+                    ? "bg-outgoing-background"
+                    : "bg-white"
+                }`}
+              >
+                <div className="text-sm relative pb-1 w-full group">
+                  {chat.message}
+                  <div className="text-[11px] gap-1 text-input-border absolute bottom-0 right-0 flex items-center">
+                    <div>{chat.updatedAt}</div>
+                    <div>
+                      <TickIcon />
+                    </div>
+                  </div>
+                  <div
+                    className={`hidden group-hover:block absolute top-0 right-0 ${
+                      chat.from === loggedInUser
+                        ? "bg-outgoing-background"
+                        : "bg-white"
+                    } p-1`}
+                  >
+                    <DownArrowIcon />
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
-          <div className="flex justify-center sticky top-2">
-            <div className="bg-white shadow-sm rounded-lg text-xs px-3 py-2">
-              02/01/2024
-            </div>
-          </div>
-          {new Array(30).fill(0).map((d, i) => (
-            <div key={i}>hello</div>
           ))}
         </div>
       </div>

@@ -26,6 +26,8 @@ const App = () => {
       name: loggedInUser,
       openProfile,
     });
+    const result = await axios.get(`http://localhost:3001/getonlineuser`);
+    setOnlineUsers(result.data);
   };
   const sendMessage = async () => {
     if (newChat) setNewChat(false);

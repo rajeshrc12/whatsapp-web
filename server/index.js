@@ -91,11 +91,9 @@ app.post("/send", async (req, res) => {
   }
 });
 
-app.get("/getonlineuser/:name", async (req, res) => {
+app.get("/getonlineuser", async (req, res) => {
   try {
-    console.log("/getonlineuser/:name", connectedUsers);
-    const name = req.params.name;
-    res.send(connectedUsers.find((user) => user.name === name) ? true : false);
+    res.send(connectedUsers);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);

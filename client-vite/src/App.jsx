@@ -13,6 +13,12 @@ const App = () => {
   const [value, setValue] = useState("");
   const [selectedUser, setSelectedUser] = useState({});
   const [socket, setSocket] = useState(null);
+  const handleOpenProfile = async ({ openProfile }) => {
+    await axios.post(`http://localhost:3001/openprofile`, {
+      name: loggedInUser,
+      openProfile,
+    });
+  };
   const sendMessage = async () => {
     if (newChat) setNewChat(false);
     if (value.trim()) {
@@ -26,11 +32,10 @@ const App = () => {
     fetchChats();
   };
   const fetchChats = async () => {
-    if (loggedInUser && selectedUser.name) {
-      const result = await axios.post(`http://localhost:3001/chats`, {
-        from: loggedInUser,
-        to: selectedUser.name,
-      });
+    if (loggedInUser) {
+      const result = await axios.get(
+        `http://localhost:3001/chats/${loggedInUser}`
+      );
       setChats(result.data);
     }
   };
@@ -49,6 +54,7 @@ const App = () => {
     setSocket(soc);
   };
   useEffect(() => {
+    handleOpenProfile({ openProfile: null });
     initiatSocket();
     fetchChats();
     fetchNewChatUsers();
@@ -56,28 +62,47 @@ const App = () => {
   useEffect(() => {
     const usersTemp = [];
     for (const chat of chats) {
-      const isUserExist = usersTemp.find((user) => user.name === chat.from);
-      if (isUserExist) {
-        isUserExist.unseenChatCount = chat.seen ? chat.seen : chat.seen + 1;
-      } else {
-        usersTemp.push({
-          name: chat.from,
-          unseenChatCount: chat.seen ? 0 : 1,
-        });
+      let isUserExist = null;
+      if (chat.from !== loggedInUser) {
+        isUserExist = usersTemp.find((user) => user.name === chat.from);
+        if (isUserExist) {
+          if (!chat.seen) isUserExist.unseenChat.push(chat);
+        } else {
+          usersTemp.push({
+            name: chat.from,
+            unseenChat: chat.seen ? [] : [chat],
+          });
+        }
+      }
+      if (chat.to !== loggedInUser) {
+        isUserExist = usersTemp.find((user) => user.name === chat.to);
+        if (!isUserExist) {
+          usersTemp.push({
+            name: chat.to,
+            unseenChat: [],
+          });
+        }
       }
     }
-    console.clear();
-    console.table(usersTemp);
+    setUsers(usersTemp);
   }, [chats]);
+  useEffect(() => {
+    if (socket)
+      socket.on(loggedInUser, (arg) => {
+        fetchChats();
+      });
+  }, [socket]);
   // console.clear();
   // console.table(
   //   chats.map((chat) => ({
   //     from: chat.from,
   //     to: chat.to,
   //     message: chat.message,
+  //     seen: chat.seen,
   //   }))
   // );
-  // console.table(newChatUsers);
+  // console.table(users);
+
   return (
     <div className="flex h-screen w-screen">
       <div className="w-[40%]">
@@ -139,7 +164,28 @@ const App = () => {
             </div>
             <div className="h-[90%] border overflow-y-scroll">
               {users.map((user) => (
-                <div>{user}</div>
+                <div
+                  key={user.name}
+                  className={`p-3 flex justify-between ${
+                    user.name === selectedUser.name ? "bg-gray-300" : ""
+                  }`}
+                  onClick={async () => {
+                    setSelectedUser({ name: user.name, status: "offline" });
+                    await axios.post(`http://localhost:3001/seenall`, {
+                      from: user.name,
+                      to: loggedInUser,
+                    });
+                    handleOpenProfile({ openProfile: user.name });
+                    fetchChats();
+                  }}
+                >
+                  <div>{user.name}</div>
+                  {user.unseenChat.length > 0 && (
+                    <div className="bg-red-500 rounded-full w-4 text-white font-bold">
+                      {user.unseenChat.length}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -152,23 +198,31 @@ const App = () => {
               {selectedUser.name}({selectedUser.status})
             </div>
             <div className="h-[80%] border overflow-y-scroll">
-              {chats.map((chat) => (
-                <div
-                  key={String(Math.random())}
-                  className={`flex ${
-                    chat.from === loggedInUser ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div className="border w-1/3" key={chat.message}>
-                    <div>{chat.message}</div>
-                    {chat.from === loggedInUser && (
-                      <div>
-                        <TickIcon seen={chat.seen} />
-                      </div>
-                    )}
+              {chats
+                .filter(
+                  (chat) =>
+                    chat.from === selectedUser.name ||
+                    chat.to === selectedUser.name
+                )
+                .map((chat) => (
+                  <div
+                    key={String(Math.random())}
+                    className={`flex ${
+                      chat.from === loggedInUser
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
+                    <div className="border w-1/3" key={chat.message}>
+                      <div>{chat.message}</div>
+                      {chat.from === loggedInUser && (
+                        <div>
+                          <TickIcon seen={chat.seen} />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
             <div className="h-[10%] border">
               <div className="flex h-full">

@@ -114,17 +114,13 @@ app.post("/openprofile", async (req, res) => {
   }
 });
 
-app.post("/chats", async (req, res) => {
+app.get("/chats/:name", async (req, res) => {
   try {
-    const { from, to } = req.body;
-    console.log("/chats", { from, to });
-    if (from && to) {
+    if (req?.params?.name) {
+      console.log("/chats", req.params.name);
       const result = await chats
         .find({
-          $or: [
-            { from, to },
-            { from: to, to: from },
-          ],
+          $or: [{ from: req.params.name }, { to: req.params.name }],
         })
         .toArray();
       res.send(result);

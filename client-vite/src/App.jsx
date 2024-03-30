@@ -13,6 +13,14 @@ const App = () => {
   const [value, setValue] = useState("");
   const [selectedUser, setSelectedUser] = useState({});
   const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const makeAllChatsAsSeen = async ({ name }) => {
+    await axios.post(`http://localhost:3001/seenall`, {
+      from: name,
+      to: loggedInUser,
+    });
+    fetchChats();
+  };
   const handleOpenProfile = async ({ openProfile }) => {
     await axios.post(`http://localhost:3001/openprofile`, {
       name: loggedInUser,
@@ -87,11 +95,23 @@ const App = () => {
     setUsers(usersTemp);
   }, [chats]);
   useEffect(() => {
-    if (socket)
+    if (socket) {
       socket.on(loggedInUser, (arg) => {
         fetchChats();
       });
+      socket.on("onlineUsers", (arg) => {
+        if (arg.length) setOnlineUsers(arg);
+      });
+    }
   }, [socket]);
+  useEffect(() => {
+    if (onlineUsers.length && selectedUser?.name) {
+      if (onlineUsers.find((user) => user.name === selectedUser.name))
+        setSelectedUser({ ...selectedUser, status: "online" });
+      else setSelectedUser({ ...selectedUser, status: "offline" });
+    }
+  }, [onlineUsers]);
+  console.log(onlineUsers, selectedUser);
   // console.clear();
   // console.table(
   //   chats.map((chat) => ({
@@ -133,7 +153,12 @@ const App = () => {
                   key={user.name}
                   className="p-3"
                   onClick={() => {
-                    setSelectedUser({ name: user.name, status: "offline" });
+                    if (selectedUser.name !== user.name) {
+                      setSelectedUser({ name: user.name, status: "offline" });
+                      makeAllChatsAsSeen({ name: user.name });
+                      handleOpenProfile({ openProfile: user.name });
+                      setNewChat(false);
+                    }
                   }}
                 >
                   {user.name}
@@ -170,13 +195,11 @@ const App = () => {
                     user.name === selectedUser.name ? "bg-gray-300" : ""
                   }`}
                   onClick={async () => {
-                    setSelectedUser({ name: user.name, status: "offline" });
-                    await axios.post(`http://localhost:3001/seenall`, {
-                      from: user.name,
-                      to: loggedInUser,
-                    });
-                    handleOpenProfile({ openProfile: user.name });
-                    fetchChats();
+                    if (selectedUser.name !== user.name) {
+                      makeAllChatsAsSeen({ name: user.name });
+                      handleOpenProfile({ openProfile: user.name });
+                      setSelectedUser({ name: user.name, status: "offline" });
+                    }
                   }}
                 >
                   <div>{user.name}</div>

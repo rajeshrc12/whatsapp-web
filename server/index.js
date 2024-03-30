@@ -61,16 +61,18 @@ io.on("connection", async (socket) => {
     });
   }
   console.clear();
-  console.log("io.on('connection')", connectedUsers);
+  // console.log("io.on('connection')", connectedUsers);
+  socket.broadcast.emit("onlineUsers", connectedUsers);
   socket.on("disconnect", () => {
     connectedUsers = connectedUsers.filter((a) => a.id !== socket.id);
-    console.log("from disconnect function, connected users", connectedUsers); // false
+    socket.broadcast.emit("onlineUsers", connectedUsers);
+    // console.log("from disconnect function, connected users", connectedUsers); // false
   });
 });
 app.post("/send", async (req, res) => {
   try {
     console.clear();
-    console.log("/send", connectedUsers);
+    // console.log("/send", connectedUsers);
     const { from, to, message } = req.body;
     const isUserOnline = connectedUsers.find((user) => user.name === to);
     const result = await chats.insertOne({
@@ -91,8 +93,9 @@ app.post("/send", async (req, res) => {
 
 app.get("/getonlineuser/:name", async (req, res) => {
   try {
+    console.log("/getonlineuser/:name", connectedUsers);
     const name = req.params.name;
-    res.send(connectedUsers.find((user) => user.name === name) ?? "offline");
+    res.send(connectedUsers.find((user) => user.name === name) ? true : false);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -105,7 +108,7 @@ app.post("/openprofile", async (req, res) => {
     if (connectedUsers.length) {
       const isUserOnline = connectedUsers.find((user) => user.name === name);
       if (isUserOnline) isUserOnline.openProfile = openProfile;
-      console.log("/openprofile", connectedUsers);
+      // console.log("/openprofile", connectedUsers);
       res.send(isUserOnline);
     }
   } catch (error) {
@@ -117,7 +120,7 @@ app.post("/openprofile", async (req, res) => {
 app.get("/chats/:name", async (req, res) => {
   try {
     if (req?.params?.name) {
-      console.log("/chats", req.params.name);
+      // console.log("/chats", req.params.name);
       const result = await chats
         .find({
           $or: [{ from: req.params.name }, { to: req.params.name }],

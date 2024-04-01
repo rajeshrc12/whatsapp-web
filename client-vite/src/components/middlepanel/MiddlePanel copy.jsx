@@ -16,12 +16,6 @@ import ForwardIcon from "../../icons/ForwardIcon";
 import InputFileIcon from "../input/InputFileIcon";
 import data from "../../data/data";
 import WhatsaAppBG from "../../data/whatsapp.png";
-import rajesh from "../../data/rajesh.jpg";
-import i1 from "../../data/i1.jpeg";
-import a1 from "../../data/a1.ogg";
-import v1 from "../../data/v1.mp4";
-import Popper from "../popper/Popper";
-import EmptyProfileIcon from "../../icons/EmptyProfileIcon";
 const MiddlePanel = () => {
   const loggedInUser = "rajesh";
   const chats = [
@@ -117,8 +111,10 @@ const MiddlePanel = () => {
       <div className="h-[10%]">
         <div className="px-5 h-full flex justify-between items-center bg-panel-header-background">
           <div className="flex gap-3">
-            <div>
-              <EmptyProfileIcon />
+            <div className="avatar">
+              <div className="w-10 rounded-full">
+                <img src={data.loggedInUser.url} />
+              </div>
             </div>
             <div className="flex flex-col">
               <div>Rajesh</div>
@@ -133,99 +129,70 @@ const MiddlePanel = () => {
           </div>
         </div>
       </div>
-      <div className="h-[80%] overflow-y-scroll px-10">
-        <div className="h-full relative flex flex-col gap-1 z-0">
+      <div className="h-[80%] overflow-y-scroll">
+        <div className="h-full relative px-[4vw] flex flex-col gap-1 z-0 py-2">
           <div className="flex justify-center sticky top-2 z-10">
             <div className="bg-white shadow-sm rounded-lg text-xs px-3 py-2">
               01/01/2024
             </div>
           </div>
-
-          {[
-            { type: "text", message: "." },
-            {
-              type: "text",
-              message:
-                "Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda, voluptas officiis nihil animi soluta, quibusdam nesciunt veniam, expedita qui earum iusto vel quaerat sunt eveniet hic quo voluptates molestiae reprehenderit.",
-            },
-            {
-              type: "audio",
-              message: <audio src={a1} controls className="w-[28rem]" />,
-            },
-            { type: "image", message: <img src={rajesh} width={450} /> },
-            { type: "image", message: <img src={i1} width={450} /> },
-            { type: "video", message: <video src={v1} width={270} /> },
-          ].map((chat) => (
-            <div className="flex flex-col items-end">
-              <div className="flex justify-end items-center">
-                <div className="flex items-center gap-1 px-2">
-                  <Popper
-                    content={<div className="flex">hello</div>}
-                    clickCotent={
-                      <div className="bg-quick-action-button-background p-1 rounded-full">
-                        <EmojiMessageIcon />
-                      </div>
-                    }
-                    className="rounded"
-                    direction="dropdown-end"
-                  />
-                  <div className="bg-quick-action-button-background rounded-full">
-                    <ForwardIcon />
+          {chats.map((chat, i) => (
+            <div
+              key={i}
+              className={`flex ${
+                chat.from === loggedInUser ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div className={`max-w-[65%] min-w-24 min-h-9 flex flex-col `}>
+                <div className="flex">
+                  <div className="flex items-center">
+                    <div className="bg-quick-action-button-background p-1 rounded-full">
+                      <EmojiMessageIcon />
+                    </div>
+                    <div className="bg-quick-action-button-background rounded-full">
+                      <ForwardIcon />
+                    </div>
                   </div>
-                </div>
-                <div className="p-1 group relative bg-outgoing-background rounded-lg max-w-[70%] min-w-20">
-                  <div className="flex justify-start text-sm">
+                  <div
+                    className={`${
+                      chat.from === loggedInUser
+                        ? "bg-outgoing-background"
+                        : "bg-white"
+                    } text-sm relative w-full group shadow-sm rounded-lg px-2 py-1`}
+                  >
                     {chat.message}
-                  </div>
-                  <div className="flex justify-end">
-                    <div
-                      className={`text-[11px] gap-1 text-input-border flex items-center relative ${
-                        chat.type === "image" ||
-                        chat.type === "video" ||
-                        chat.type === "audio"
-                          ? "bottom-0"
-                          : "bottom-1"
-                      }`}
-                    >
-                      <div className="w-10">7:12 pm</div>
+                    <div className="text-[11px] gap-1 text-input-border absolute bottom-0 right-1 flex items-center">
+                      <div>{chat.updatedAt}</div>
                       <div>
                         <TickIcon />
                       </div>
                     </div>
-                  </div>
-                  <div
-                    className={`hidden group-hover:block absolute top-1 right-2`}
-                  >
-                    <Popper
-                      content={
-                        <div className="flex flex-col py-2">
-                          <div className="hover:bg-gray-100 px-5 py-2">
-                            Message info
-                          </div>
-                          <div className="hover:bg-gray-100 px-5 py-2">
-                            Reply
-                          </div>
-                          <div className="hover:bg-gray-100 px-5 py-2">
-                            Forward
-                          </div>
-                        </div>
-                      }
-                      clickCotent={<DownArrowIcon />}
-                      className="rounded  w-40"
-                      direction="dropdown-end"
-                    />
+                    <div
+                      className={`hidden group-hover:block absolute top-0 right-1 ${
+                        chat.from === loggedInUser
+                          ? "bg-outgoing-background"
+                          : "bg-white"
+                      } p-1`}
+                    >
+                      <DownArrowIcon />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div
-                className={`flex bg-white rounded-full relative bottom-1 right-1`}
-              >
-                <Popper
-                  content={<div className="flex">hello</div>}
-                  clickCotent={<div>{String.fromCodePoint("0x1F600")}</div>}
-                  className="rounded"
-                  direction="dropdown-end"
-                />
+
+                <div
+                  className={`flex relative bottom-1 ${
+                    chat.from === loggedInUser
+                      ? "justify-end right-1"
+                      : "justify-start left-1"
+                  }`}
+                >
+                  <div className="bg-white rounded-full p-1 flex">
+                    <div>{String.fromCodePoint("0x1F600")}</div>
+                    <div>{String.fromCodePoint("0x1F600")}</div>
+                    <div>{String.fromCodePoint("0x1F600")}</div>
+                    <div className="px-1">2</div>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

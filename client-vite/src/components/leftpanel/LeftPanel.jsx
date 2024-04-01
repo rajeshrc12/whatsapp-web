@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import StatusIcon from "../../icons/StatusIcon.jsx";
 import FilterIcon from "../../icons/FilterIcon.jsx";
 import data from "../../data/data.js";
@@ -12,13 +12,19 @@ import Contact from "../contact/Contact.jsx";
 import MenuIcon from "../../icons/MenuIcon.jsx";
 import Popper from "../popper/Popper.jsx";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../api/socket.js";
+import { getAllUsers, logout } from "../../api/socket.js";
 const LeftPanel = () => {
   const navigate = useNavigate();
   const leftValue = useSelector((state) => state.panel.left);
   const user = useSelector((state) => state.user);
-  console.log(user);
   const dispatch = useDispatch();
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    getAllUsers().then((users) => {
+      console.log(users);
+      setUsers(users);
+    });
+  }, []);
   const render = useCallback(() => {
     switch (leftValue) {
       case "newChat":
@@ -36,8 +42,8 @@ const LeftPanel = () => {
               <InputWithSearchAndBackIcon />
             </div>
             <div className="h-[70%] overflow-y-scroll">
-              {new Array(30).fill(0).map((contact) => (
-                <Contact />
+              {users.map((user) => (
+                <Contact user={user} />
               ))}
             </div>
           </>
@@ -90,8 +96,8 @@ const LeftPanel = () => {
               </div>
             </div>
             <div className="h-[80%] overflow-y-scroll">
-              {new Array(30).fill(0).map((contact, i) => (
-                <Contact key={i} />
+              {users.map((user) => (
+                <Contact user={user} />
               ))}
             </div>
           </>

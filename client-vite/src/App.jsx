@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import LeftPanel from "./components/leftpanel/LeftPanel";
 import MiddlePanel from "./components/middlepanel/MiddlePanel";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setName, setOnlineUsers } from "./state/user/userSlice";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { getOnlineUsers } from "./api/socket";
 const App = () => {
+  const selectedUser = useSelector((state) => state.user.selectedUser);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [socket, setSocket] = useState(null);
@@ -42,7 +43,11 @@ const App = () => {
   return (
     <div className="flex h-screen w-screen">
       <LeftPanel />
-      <MiddlePanel />
+      {selectedUser ? (
+        <MiddlePanel />
+      ) : (
+        <div className="bg-panel-header-background w-[70%]"></div>
+      )}
     </div>
   );
 };

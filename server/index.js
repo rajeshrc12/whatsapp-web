@@ -181,14 +181,10 @@ app.post("/", async (req, res) => {
   }
 });
 
-app.post("/users", async (req, res) => {
-  if (req.body.user) {
-    const result = await users.find({ name: { $ne: req.body.user } }).toArray();
-    if (result) res.status(200).send(result);
-    else res.status(200).send("No user found");
-  } else {
-    res.status(500).send("user name required");
-  }
+app.get("/users", async (req, res) => {
+  const result = await users.find({}).toArray();
+  if (result) res.status(200).send(result);
+  else res.status(500).send([]);
 });
 app.post("/group", upload.single("file"), async (req, res) => {
   try {

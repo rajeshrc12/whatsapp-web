@@ -1,28 +1,44 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import LeftPanel from "./components/leftpanel/LeftPanel";
 import MiddlePanel from "./components/middlepanel/MiddlePanel";
 import { useDispatch } from "react-redux";
-import { setName, setSocket } from "./state/user/userSlice";
+import { setName, setOnlineUsers } from "./state/user/userSlice";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import { getOnlineUsers } from "./api/socket";
 const App = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [socket, setSocket] = useState(null);
+  const initializeUserData = async () => {
+    const onlineUsers = await getOnlineUsers();
+    dispatch(setOnlineUsers(onlineUsers));
+    dispatch(setName(sessionStorage.getItem("name")));
+  };
   useEffect(() => {
     if (sessionStorage.getItem("name")) {
-      const socket = io("ws://localhost:3002", {
+      const sock = io("ws://localhost:3002", {
         query: {
           name: sessionStorage.getItem("name"),
         },
       });
-      dispatch(setName(sessionStorage.getItem("name")));
-      dispatch(setSocket(socket));
+      setSocket(sock);
+      initializeUserData();
     } else {
       navigate("/");
       dispatch(setName(""));
-      dispatch(setSocket(null));
     }
   }, []);
+  useEffect(() => {
+    if (socket) {
+      // socket.on(loggedInUser, () => {
+      //   fetchChats();
+      // });
+      socket.on("onlineUsers", (arg) => {
+        if (arg.length) dispatch(setOnlineUsers(arg));
+      });
+    }
+  }, [socket]);
   return (
     <div className="flex h-screen w-screen">
       <LeftPanel />

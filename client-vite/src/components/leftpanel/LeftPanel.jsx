@@ -6,15 +6,18 @@ import InputWithSearchAndBackIcon from "../input/InputWithSearchAndBackIcon.jsx"
 import NewChatIcon from "../../icons/NewChatIcon.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { left } from "../../state/panel/panelSlice.js";
-import { setName, setSocket } from "../../state/user/userSlice.js";
+import { setName } from "../../state/user/userSlice.js";
 import BackIcon from "../../icons/BackIcon.jsx";
 import Contact from "../contact/Contact.jsx";
 import MenuIcon from "../../icons/MenuIcon.jsx";
 import Popper from "../popper/Popper.jsx";
 import { useNavigate } from "react-router-dom";
+import { logout } from "../../api/socket.js";
 const LeftPanel = () => {
   const navigate = useNavigate();
   const leftValue = useSelector((state) => state.panel.left);
+  const user = useSelector((state) => state.user);
+  console.log(user);
   const dispatch = useDispatch();
   const render = useCallback(() => {
     switch (leftValue) {
@@ -58,9 +61,9 @@ const LeftPanel = () => {
                       <div className="flex flex-col py-2">
                         <div
                           onClick={() => {
+                            logout({ name: user.name });
                             sessionStorage.removeItem("name");
                             dispatch(setName(""));
-                            dispatch(setSocket(null));
                             navigate("/");
                           }}
                           className="hover:bg-gray-100 px-5 py-2"

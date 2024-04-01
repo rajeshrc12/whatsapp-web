@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 
-const InputBottomBorder = ({ placeholder = "", borderWidth = 1 }) => {
-  const [value, setValue] = useState("");
+const InputBottomBorder = ({
+  placeholder = "",
+  borderWidth = 1,
+  value = "",
+  setValue = () => {},
+}) => {
   return (
     <input
       value={value}

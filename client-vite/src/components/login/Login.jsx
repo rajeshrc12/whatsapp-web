@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import WhatsaAppBG from "../../data/whatsapp.png";
-import WhatsAppLogo from "../../icons/WhatsAppLogo";
 import InputBottomBorder from "../input/InputBottomBorder";
 import SendIcon from "../../icons/SendIcon";
+import { useNavigate } from "react-router-dom";
 const Login = () => {
+  const navigate = useNavigate();
+  const [value, setValue] = useState("");
   return (
     <div
       className="h-screen w-screen flex justify-center items-center"
@@ -13,13 +15,23 @@ const Login = () => {
         <div className="flex flex-col h-full w-full justify-center items-center">
           <div className="w-full">
             <div className="px-5">
-              <InputBottomBorder borderWidth={2} placeholder="Enter name" />
-              <InputBottomBorder borderWidth={2} placeholder="Enter name" />
-              <InputBottomBorder borderWidth={2} placeholder="Enter name" />
+              <InputBottomBorder
+                value={value}
+                setValue={setValue}
+                borderWidth={2}
+                placeholder="Enter name"
+              />
             </div>
             <div className="flex h-full justify-center items-center">
               <div className="bg-poll-bar-fill-sender p-5 rounded-full">
-                <SendIcon />
+                <SendIcon
+                  onClick={() => {
+                    if (value.trim()) {
+                      sessionStorage.setItem("name", value);
+                      navigate("/home");
+                    }
+                  }}
+                />
               </div>
             </div>
           </div>

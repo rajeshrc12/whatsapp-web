@@ -22,8 +22,8 @@ import a1 from "../../data/a1.ogg";
 import v1 from "../../data/v1.mp4";
 import Popper from "../popper/Popper";
 import EmptyProfileIcon from "../../icons/EmptyProfileIcon";
+
 const MiddlePanel = () => {
-  const loggedInUser = "rajesh";
   const chats = [
     {
       from: "rajesh",
@@ -155,8 +155,8 @@ const MiddlePanel = () => {
             { type: "image", message: <img src={rajesh} width={450} /> },
             { type: "image", message: <img src={i1} width={450} /> },
             { type: "video", message: <video src={v1} width={270} /> },
-          ].map((chat) => (
-            <div className="flex flex-col items-end">
+          ].map((chat, i) => (
+            <div className="flex flex-col items-end" key={i}>
               <div className="flex justify-end items-center">
                 <div className="flex items-center gap-1 px-2">
                   <Popper

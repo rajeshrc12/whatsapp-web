@@ -9,7 +9,6 @@ const DownArrowIcon = ({ onClick = () => {} }) => {
       height="18"
       width="18"
       preserveAspectRatio="xMidYMid meet"
-      class=""
       version="1.1"
       x="0px"
       y="0px"

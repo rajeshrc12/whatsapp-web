@@ -6,12 +6,16 @@ import InputWithSearchAndBackIcon from "../input/InputWithSearchAndBackIcon.jsx"
 import NewChatIcon from "../../icons/NewChatIcon.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { left } from "../../state/panel/panelSlice.js";
+import { setName, setSocket } from "../../state/user/userSlice.js";
 import BackIcon from "../../icons/BackIcon.jsx";
 import Contact from "../contact/Contact.jsx";
+import MenuIcon from "../../icons/MenuIcon.jsx";
+import Popper from "../popper/Popper.jsx";
+import { useNavigate } from "react-router-dom";
 const LeftPanel = () => {
+  const navigate = useNavigate();
   const leftValue = useSelector((state) => state.panel.left);
   const dispatch = useDispatch();
-  console.log(leftValue);
   const render = useCallback(() => {
     switch (leftValue) {
       case "newChat":
@@ -49,6 +53,26 @@ const LeftPanel = () => {
                 <div className="flex gap-3">
                   <StatusIcon />
                   <NewChatIcon onClick={() => dispatch(left("newChat"))} />
+                  <Popper
+                    content={
+                      <div className="flex flex-col py-2">
+                        <div
+                          onClick={() => {
+                            sessionStorage.removeItem("name");
+                            dispatch(setName(""));
+                            dispatch(setSocket(null));
+                            navigate("/");
+                          }}
+                          className="hover:bg-gray-100 px-5 py-2"
+                        >
+                          Logout
+                        </div>
+                      </div>
+                    }
+                    clickCotent={<MenuIcon />}
+                    className="rounded  w-40"
+                    direction="dropdown-end"
+                  />
                 </div>
               </div>
             </div>
@@ -63,8 +87,8 @@ const LeftPanel = () => {
               </div>
             </div>
             <div className="h-[80%] overflow-y-scroll">
-              {new Array(30).fill(0).map((contact) => (
-                <Contact />
+              {new Array(30).fill(0).map((contact, i) => (
+                <Contact key={i} />
               ))}
             </div>
           </>

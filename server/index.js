@@ -61,12 +61,12 @@ io.on("connection", async (socket) => {
     });
   }
   console.clear();
-  // console.log("io.on('connection')", connectedUsers);
+  console.log("io.on('connection')", connectedUsers);
   socket.broadcast.emit("onlineUsers", connectedUsers);
   socket.on("disconnect", () => {
     connectedUsers = connectedUsers.filter((a) => a.id !== socket.id);
     socket.broadcast.emit("onlineUsers", connectedUsers);
-    // console.log("from disconnect function, connected users", connectedUsers); // false
+    console.log("from disconnect function, connected users", connectedUsers); // false
   });
 });
 app.post("/send", async (req, res) => {

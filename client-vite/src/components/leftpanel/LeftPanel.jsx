@@ -13,18 +13,47 @@ import MenuIcon from "../../icons/MenuIcon.jsx";
 import Popper from "../popper/Popper.jsx";
 import { useNavigate } from "react-router-dom";
 import { getAllUsers, logout } from "../../api/socket.js";
+import ContactLeftPanel from "../contact/ContactLeftPanel.jsx";
 const LeftPanel = () => {
   const navigate = useNavigate();
   const leftValue = useSelector((state) => state.panel.left);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [users, setUsers] = useState([]);
+  const [currentUsers, setCurrentUsers] = useState([]);
+  console.log(user);
   useEffect(() => {
     getAllUsers().then((users) => {
-      console.log(users);
-      setUsers(users);
+      setUsers(users.filter((u) => u.name !== sessionStorage.getItem("name")));
     });
   }, []);
+  useEffect(() => {
+    const usersTemp = [];
+    for (const chat of user.chats) {
+      let isUserExist = null;
+      if (chat.from !== user.name) {
+        isUserExist = usersTemp.find((user) => user.name === chat.from);
+        if (isUserExist) {
+          if (!chat.seen) isUserExist.unseenChat.push(chat);
+        } else {
+          usersTemp.push({
+            name: chat.from,
+            unseenChat: chat.seen ? [] : [chat],
+          });
+        }
+      }
+      if (chat.to !== user.name) {
+        isUserExist = usersTemp.find((user) => user.name === chat.to);
+        if (!isUserExist) {
+          usersTemp.push({
+            name: chat.to,
+            unseenChat: [],
+          });
+        }
+      }
+    }
+    setCurrentUsers(usersTemp);
+  }, [user.chats]);
   const render = useCallback(() => {
     switch (leftValue) {
       case "newChat":
@@ -96,14 +125,14 @@ const LeftPanel = () => {
               </div>
             </div>
             <div className="h-[80%] overflow-y-scroll">
-              {users.map((user) => (
-                <Contact user={user} />
+              {currentUsers.map((user) => (
+                <ContactLeftPanel user={user} />
               ))}
             </div>
           </>
         );
     }
-  }, [leftValue, users]);
+  }, [leftValue, users, currentUsers]);
   return <div className="w-[30%]">{render()}</div>;
 };
 

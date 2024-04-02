@@ -21,6 +21,7 @@ export default {
         "switch-track-checked-color": "var(--switch-track-checked-color)",
         "switch-track-color": "var(--switch-track-color)",
         "input-border": "var(--input-border)",
+        "unread-marker-background": "var(--unread-marker-background)",
         "switch-button-color": "var(--switch-button-color)",
       },
     },

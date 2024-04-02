@@ -10,7 +10,7 @@ const ReactionTab = () => {
   const tabsgroup = Object.entries(Object.groupBy(tabs, ({ emoji }) => emoji));
   const [selectedIndex, setSelectedIndex] = useState(0);
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full h-[30vh]">
       <div className="flex border-b-[1px] w-full">
         <div
           onClick={() => setSelectedIndex(0)}

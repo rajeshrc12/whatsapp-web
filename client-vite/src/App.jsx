@@ -2,17 +2,23 @@ import React, { useEffect, useState } from "react";
 import LeftPanel from "./components/leftpanel/LeftPanel";
 import MiddlePanel from "./components/middlepanel/MiddlePanel";
 import { useDispatch, useSelector } from "react-redux";
-import { setName, setOnlineUsers } from "./state/user/userSlice";
+import { setName, setOnlineUsers, setUserChats } from "./state/user/userSlice";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { getOnlineUsers } from "./api/socket";
+import { getChats } from "./api/chats";
 const App = () => {
   const selectedUser = useSelector((state) => state.user.selectedUser);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [socket, setSocket] = useState(null);
+  const fetchChats = async () => {
+    const chats = await getChats(sessionStorage.getItem("name"));
+    dispatch(setUserChats(chats));
+  };
   const initializeUserData = async () => {
     const onlineUsers = await getOnlineUsers();
+    fetchChats();
     dispatch(setOnlineUsers(onlineUsers));
     dispatch(setName(sessionStorage.getItem("name")));
   };
@@ -32,9 +38,9 @@ const App = () => {
   }, []);
   useEffect(() => {
     if (socket) {
-      // socket.on(loggedInUser, () => {
-      //   fetchChats();
-      // });
+      socket.on(sessionStorage.getItem("name"), () => {
+        fetchChats();
+      });
       socket.on("onlineUsers", (arg) => {
         if (arg.length) dispatch(setOnlineUsers(arg));
       });

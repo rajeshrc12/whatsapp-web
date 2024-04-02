@@ -17,6 +17,7 @@
   --switch-track-color: #b2b2b2;
   --switch-button-color: #ececec;
   --input-border: #667781;
+  --unread-marker-background: #25d366;
 }
 * {
   scrollbar-width: thin;

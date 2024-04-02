@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import SearchIcon from "../../icons/SearchIcon";
 import MenuIcon from "../../icons/MenuIcon";
 import PlusIcon from "../../icons/PlusIcon";
@@ -23,16 +23,38 @@ import EmptyProfileIcon from "../../icons/EmptyProfileIcon";
 import { useDispatch, useSelector } from "react-redux";
 import { middle } from "../../state/panel/panelSlice";
 import SendIcon from "../../icons/SendIcon";
+import ReactionTab from "./ReactionTab";
 import { FaFile } from "react-icons/fa6";
+import { deleteFileByIndex } from "../../state/files/filesSlice";
+import { setChats } from "../../api/chats";
 
 const MiddlePanel = () => {
+  const [value, setValue] = useState("");
   const user = useSelector((state) => state.user);
   const middleValue = useSelector((state) => state.panel.middle);
-  const files = useSelector((state) => state.files);
+  const files = useSelector((state) => state.files.blobFiles);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const dispatch = useDispatch();
-  const temp = new Array(3).fill(0);
-  console.log(files);
+
+  const removeFile = (index) => {
+    dispatch(deleteFileByIndex(index));
+  };
+  const sendMessage = async () => {
+    console.log(user);
+    setValue("");
+    const date = new Date();
+    const result = await setChats([
+      {
+        type: "text",
+        message: value,
+        seen: false,
+        from: user.name,
+        to: user.selectedUser.name,
+        createdAt: date,
+        updatedAt: date,
+      },
+    ]);
+  };
   const renderFile = (file, index) => {
     let fileType = file?.type?.split("/")[0];
     if (fileType === "video" && !file?.type?.includes("mp4")) {
@@ -50,57 +72,117 @@ const MiddlePanel = () => {
               flexGrow: "0",
               flexShrink: "0",
             }}
-            className={`${
+            className={`group relative ${
               selectedIndex === index
                 ? "border-2 border-poll-bar-fill-sender"
                 : "border border-switch-track-color"
             } rounded-lg`}
-          ></div>
+          >
+            <div className="hidden group-hover:block absolute top-0 right-0">
+              <CancelIcon onClick={() => removeFile(index)} />
+            </div>
+          </div>
         );
       case "video":
         return (
-          <video
-            onClick={() => setSelectedIndex(index)}
-            className={`w-[55px] ${
-              selectedIndex === index
-                ? "border-2 border-poll-bar-fill-sender"
-                : "border border-switch-track-color"
-            } rounded-lg`}
-            src={URL.createObjectURL(file)}
-          ></video>
+          <div className="group relative">
+            <video
+              onClick={() => setSelectedIndex(index)}
+              className={`w-[55px] h-full ${
+                selectedIndex === index
+                  ? "border-2 border-poll-bar-fill-sender"
+                  : "border border-switch-track-color"
+              } rounded-lg`}
+              src={URL.createObjectURL(file)}
+            ></video>
+            <div className="hidden group-hover:block absolute top-0 right-0">
+              <CancelIcon onClick={() => removeFile(index)} />
+            </div>
+          </div>
         );
       default:
         return (
           <div
             onClick={() => setSelectedIndex(index)}
-            className={`p-1 flex flex-col justify-center items-center ${
+            className={`relative group p-1 flex flex-col justify-center items-center ${
               selectedIndex === index
                 ? "border-2 border-poll-bar-fill-sender"
                 : "border border-switch-track-color"
             } rounded-lg`}
           >
             <FaFile color="gray" size={50} />
+            <div className="hidden group-hover:block absolute top-0 right-0">
+              <CancelIcon onClick={() => removeFile(index)} />
+            </div>
           </div>
         );
     }
   };
+  const renderFilePreview = useCallback(() => {
+    console.log("outside");
+    if (files.length) {
+      console.log("inside");
+      const file = files[selectedIndex];
+      let fileType = file?.type?.split("/")[0];
+      console.log(files[selectedIndex]);
+      if (fileType === "video" && !file?.type?.includes("mp4")) {
+        fileType = "";
+      }
+      switch (fileType) {
+        case "audio":
+          return (
+            <div>
+              <audio src={URL.createObjectURL(file)} controls />
+            </div>
+          );
+        case "image":
+          return (
+            <div
+              style={{
+                backgroundImage: `url(${URL.createObjectURL(file)})`,
+                backgroundSize: "contain",
+              }}
+              className="h-3/4 w-80 flex justify-center items-center"
+            ></div>
+          );
+        case "video":
+          return (
+            <video
+              className="w-[12vw]"
+              controls
+              src={URL.createObjectURL(file)}
+            >
+              <CancelIcon />
+            </video>
+          );
+        default:
+          return (
+            <div className="h-3/4 w-80 flex flex-col justify-center items-center">
+              <FaFile color="gray" size={100} />
+              <div>No preview available</div>
+            </div>
+          );
+      }
+    }
+  }, [files, selectedIndex]);
+  useEffect(() => {
+    if (!files.length) dispatch(middle(""));
+  }, [files]);
   const render = useCallback(() => {
     switch (middleValue) {
       case "filesPreview":
         return (
           <div className="h-[90%] bg-panel-background-deeper">
             <div className="h-full flex flex-col">
-              <div className="h-[10%] flex p-5">
-                <CancelIcon />
+              <div className="h-[10%] flex p-5 justify-between">
+                <div>
+                  <CancelIcon onClick={() => dispatch(middle(""))} />
+                </div>
+                <div>{files.length > 0 && files[selectedIndex].name}</div>
+                <div></div>
               </div>
               <div className="h-[60%] flex justify-center items-center">
-                <div
-                  style={{
-                    backgroundImage: `url(${i1})`,
-                    backgroundSize: "contain",
-                  }}
-                  className="h-3/4 w-80 shadow-lg"
-                ></div>
+                {renderFilePreview()}
               </div>
               <div className="h-[10%] px-[10vw]">
                 <input
@@ -113,12 +195,10 @@ const MiddlePanel = () => {
                 <div className="w-[90%] h-full">
                   <div
                     className={`${
-                      files.blobFiles.length < 12 && "justify-center"
+                      files.length < 12 && "justify-center"
                     } h-full flex px-5 py-6 overflow-x-scroll relative gap-2`}
                   >
-                    {files.blobFiles.map((file, index) =>
-                      renderFile(file, index)
-                    )}
+                    {files.map((file, index) => renderFile(file, index))}
                     <div
                       style={{
                         flexBasis: "55px",
@@ -233,11 +313,11 @@ const MiddlePanel = () => {
                       className={`flex bg-white rounded-full relative bottom-1 right-1`}
                     >
                       <Popper
-                        content={<div className="flex">hello</div>}
+                        content={<ReactionTab />}
                         clickCotent={
                           <div>{String.fromCodePoint("0x1F600")}</div>
                         }
-                        className="rounded"
+                        className="rounded w-80"
                         direction="dropdown-end"
                       />
                     </div>
@@ -291,9 +371,16 @@ const MiddlePanel = () => {
                   </div>
                 </div>
                 <input
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
                   type="text"
                   placeholder="Type a message"
                   className="outline-none p-2 rounded-lg w-full"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      sendMessage();
+                    }
+                  }}
                 />
                 <div>
                   <MicIcon />
@@ -303,7 +390,7 @@ const MiddlePanel = () => {
           </>
         );
     }
-  }, [middleValue, user, files, selectedIndex]);
+  }, [middleValue, user, files, selectedIndex, value]);
   return (
     <div
       className="w-[70%] border"
@@ -318,7 +405,9 @@ const MiddlePanel = () => {
             <div className="flex flex-col">
               <div>{user.selectedUser.name}</div>
               <div className="text-sm text-input-border">
-                {user.selectedUser.status}
+                {user.onlineUsers.find((u) => u.name === user.selectedUser.name)
+                  ? "Online"
+                  : user.selectedUser.status}
               </div>
             </div>
           </div>

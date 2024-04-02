@@ -40,7 +40,9 @@ ioServer.listen(socketPort, async () => {
   console.log(`Socket.IO server listening at http://localhost:${socketPort}`);
 });
 let connectedUsers = [];
-
+const setLastSeen = async ({ name, lastSeen }) => {
+  await users.updateOne({ name }, { $set: { lastSeen } });
+};
 io.on("connection", async (socket) => {
   // socket.on("server", async (arg) => {});
   const all = await io.fetchSockets();
@@ -65,25 +67,17 @@ io.on("connection", async (socket) => {
   socket.broadcast.emit("onlineUsers", connectedUsers);
   socket.on("disconnect", () => {
     connectedUsers = connectedUsers.filter((a) => a.id !== socket.id);
+    setLastSeen({ name: socket.handshake.query.name, lastSeen: new Date() });
     socket.broadcast.emit("onlineUsers", connectedUsers);
     console.log("from disconnect function, connected users", connectedUsers); // false
   });
 });
-app.post("/send", async (req, res) => {
+app.post("/chat", async (req, res) => {
   try {
-    console.clear();
-    // console.log("/send", connectedUsers);
-    const { from, to, message } = req.body;
-    const isUserOnline = connectedUsers.find((user) => user.name === to);
-    const result = await chats.insertOne({
-      from,
-      to,
-      message,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      seen: isUserOnline?.openProfile === from,
-    });
-    io.sockets.emit(to, "update");
+    let { chat } = req.body;
+
+    const result = await chats.insertMany(chat);
+    // io.sockets.emit(to, "update");
     res.send(result);
   } catch (error) {
     console.log(error);
@@ -115,8 +109,9 @@ app.post("/openprofile", async (req, res) => {
   }
 });
 
-app.get("/chats/:name", async (req, res) => {
+app.get("/chat/:name", async (req, res) => {
   try {
+    console.log("/chat/:name", req?.params?.name);
     if (req?.params?.name) {
       // console.log("/chats", req.params.name);
       const result = await chats
@@ -124,6 +119,7 @@ app.get("/chats/:name", async (req, res) => {
           $or: [{ from: req.params.name }, { to: req.params.name }],
         })
         .toArray();
+      console.log(result);
       res.send(result);
     }
   } catch (error) {

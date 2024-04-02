@@ -1,12 +1,11 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import SearchIcon from "../../icons/SearchIcon";
 import MenuIcon from "../../icons/MenuIcon";
 import PlusIcon from "../../icons/PlusIcon";
 import DocumentIcon from "../../icons/DocumentIcon";
 import PhotosAndVideosIcon from "../../icons/PhotosAndVideosIcon";
 import CamerIcon from "../../icons/CamerIcon";
-import ContactIcon from "../../icons/ContactIcon";
-import PollIcon from "../../icons/PollIcon";
+import CancelIcon from "../../icons/CancelIcon";
 import EmojiIcon from "../../icons/EmojiIcon";
 import MicIcon from "../../icons/MicIcon";
 import TickIcon from "../../icons/TickIcon";
@@ -14,7 +13,6 @@ import DownArrowIcon from "../../icons/DownArrowIcon";
 import EmojiMessageIcon from "../../icons/EmojiMessageIcon";
 import ForwardIcon from "../../icons/ForwardIcon";
 import InputFileIcon from "../input/InputFileIcon";
-import data from "../../data/data";
 import WhatsaAppBG from "../../data/whatsapp.png";
 import rajesh from "../../data/rajesh.jpg";
 import i1 from "../../data/i1.jpeg";
@@ -22,13 +20,128 @@ import a1 from "../../data/a1.ogg";
 import v1 from "../../data/v1.mp4";
 import Popper from "../popper/Popper";
 import EmptyProfileIcon from "../../icons/EmptyProfileIcon";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { middle } from "../../state/panel/panelSlice";
+import SendIcon from "../../icons/SendIcon";
+import { FaFile } from "react-icons/fa6";
 
 const MiddlePanel = () => {
   const user = useSelector((state) => state.user);
   const middleValue = useSelector((state) => state.panel.middle);
+  const files = useSelector((state) => state.files);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const dispatch = useDispatch();
+  const temp = new Array(3).fill(0);
+  console.log(files);
+  const renderFile = (file, index) => {
+    let fileType = file?.type?.split("/")[0];
+    if (fileType === "video" && !file?.type?.includes("mp4")) {
+      fileType = "";
+    }
+    switch (fileType) {
+      case "image":
+        return (
+          <div
+            onClick={() => setSelectedIndex(index)}
+            style={{
+              backgroundImage: `url(${URL.createObjectURL(file)})`,
+              backgroundSize: "contain",
+              flexBasis: "55px",
+              flexGrow: "0",
+              flexShrink: "0",
+            }}
+            className={`${
+              selectedIndex === index
+                ? "border-2 border-poll-bar-fill-sender"
+                : "border border-switch-track-color"
+            } rounded-lg`}
+          ></div>
+        );
+      case "video":
+        return (
+          <video
+            onClick={() => setSelectedIndex(index)}
+            className={`w-[55px] ${
+              selectedIndex === index
+                ? "border-2 border-poll-bar-fill-sender"
+                : "border border-switch-track-color"
+            } rounded-lg`}
+            src={URL.createObjectURL(file)}
+          ></video>
+        );
+      default:
+        return (
+          <div
+            onClick={() => setSelectedIndex(index)}
+            className={`p-1 flex flex-col justify-center items-center ${
+              selectedIndex === index
+                ? "border-2 border-poll-bar-fill-sender"
+                : "border border-switch-track-color"
+            } rounded-lg`}
+          >
+            <FaFile color="gray" size={50} />
+          </div>
+        );
+    }
+  };
   const render = useCallback(() => {
     switch (middleValue) {
+      case "filesPreview":
+        return (
+          <div className="h-[90%] bg-panel-background-deeper">
+            <div className="h-full flex flex-col">
+              <div className="h-[10%] flex p-5">
+                <CancelIcon />
+              </div>
+              <div className="h-[60%] flex justify-center items-center">
+                <div
+                  style={{
+                    backgroundImage: `url(${i1})`,
+                    backgroundSize: "contain",
+                  }}
+                  className="h-3/4 w-80 shadow-lg"
+                ></div>
+              </div>
+              <div className="h-[10%] px-[10vw]">
+                <input
+                  type="text"
+                  placeholder="Type a message"
+                  className="outline-none p-2 rounded-lg w-full"
+                />
+              </div>
+              <div className="h-[20%] flex">
+                <div className="w-[90%] h-full">
+                  <div
+                    className={`${
+                      files.blobFiles.length < 12 && "justify-center"
+                    } h-full flex px-5 py-6 overflow-x-scroll relative gap-2`}
+                  >
+                    {files.blobFiles.map((file, index) =>
+                      renderFile(file, index)
+                    )}
+                    <div
+                      style={{
+                        flexBasis: "55px",
+                        flexGrow: "0",
+                        flexShrink: "0",
+                      }}
+                      className=" bg-panel-background-deeper flex justify-center items-center sticky top-0 right-0 border border-switch-track-color rounded-lg"
+                    >
+                      <InputFileIcon icon={<PlusIcon />} multiple={true} />
+                    </div>
+                  </div>
+                </div>
+                <div className="w-[10%]">
+                  <div className="flex h-full justify-center items-center">
+                    <div className="bg-poll-bar-fill-sender p-5 rounded-full">
+                      <SendIcon />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
       default:
         return (
           <>
@@ -156,6 +269,7 @@ const MiddlePanel = () => {
                         </div>
                       }
                       multiple={true}
+                      callback={() => dispatch(middle("filesPreview"))}
                     />
                     <InputFileIcon
                       icon={
@@ -174,18 +288,6 @@ const MiddlePanel = () => {
                       </div>
                       <div>Camera</div>
                     </div>
-                    <div className="flex gap-3 p-2 hover:bg-gray-100 cursor-pointer">
-                      <div>
-                        <ContactIcon />
-                      </div>
-                      <div>Contact</div>
-                    </div>
-                    <div className="flex gap-3 p-2 hover:bg-gray-100 cursor-pointer">
-                      <div>
-                        <PollIcon />
-                      </div>
-                      <div>Poll</div>
-                    </div>
                   </div>
                 </div>
                 <input
@@ -201,7 +303,7 @@ const MiddlePanel = () => {
           </>
         );
     }
-  }, [middleValue, user]);
+  }, [middleValue, user, files, selectedIndex]);
   return (
     <div
       className="w-[70%] border"

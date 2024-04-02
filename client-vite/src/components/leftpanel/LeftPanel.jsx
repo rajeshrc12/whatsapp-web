@@ -103,7 +103,7 @@ const LeftPanel = () => {
           </>
         );
     }
-  }, [leftValue]);
+  }, [leftValue, users]);
   return <div className="w-[30%]">{render()}</div>;
 };
 

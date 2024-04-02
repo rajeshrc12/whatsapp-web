@@ -46,7 +46,13 @@ Draggable Poll answers
 
 ============
 
-online/offline
-typing
-seen
-unread message
+Send live text,image,video,audio
+show online and offline
+show last seen
+show blue tick
+show unread message
+preview media before upload
+add emoji
+react to media and list of reacted people
+pin message
+status

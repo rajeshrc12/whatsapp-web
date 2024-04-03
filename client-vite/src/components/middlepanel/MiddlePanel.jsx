@@ -27,6 +27,7 @@ import ReactionTab from "./ReactionTab";
 import { FaFile } from "react-icons/fa6";
 import { deleteFileByIndex } from "../../state/files/filesSlice";
 import { setChats } from "../../api/chats";
+import { getChats } from "../../state/user/userSlice";
 
 const MiddlePanel = () => {
   const [value, setValue] = useState("");
@@ -35,7 +36,6 @@ const MiddlePanel = () => {
   const files = useSelector((state) => state.files.blobFiles);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const dispatch = useDispatch();
-  console.log(user);
   const removeFile = (index) => {
     dispatch(deleteFileByIndex(index));
   };
@@ -54,8 +54,10 @@ const MiddlePanel = () => {
           updatedAt: date,
         },
       ],
+      from: user.name,
       to: user.selectedUser.name,
     });
+    dispatch(getChats(user.selectedUser.name));
   };
   const renderFile = (file, index) => {
     let fileType = file?.type?.split("/")[0];
@@ -278,7 +280,7 @@ const MiddlePanel = () => {
                           >
                             <div className="w-10">7:12 pm</div>
                             <div>
-                              <TickIcon />
+                              <TickIcon seen={chat.seen} />
                             </div>
                           </div>
                         </div>

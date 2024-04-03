@@ -19,7 +19,6 @@ const LeftPanel = () => {
   const leftValue = useSelector((state) => state.panel.left);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  console.log(user);
   const render = useCallback(() => {
     switch (leftValue) {
       case "newChat":
@@ -91,8 +90,8 @@ const LeftPanel = () => {
               </div>
             </div>
             <div className="h-[80%] overflow-y-scroll">
-              {user.chats.map((user, i) => (
-                <ContactLeftPanel key={i} user={user} />
+              {user.userContacts.map((u, i) => (
+                <ContactLeftPanel key={i} user={u} name={user.name} />
               ))}
             </div>
           </>

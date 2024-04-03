@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
+const moment = require("moment-timezone");
 const { MongoClient, GridFSBucket, ObjectId } = require("mongodb");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
@@ -74,71 +75,137 @@ io.on("connection", async (socket) => {
 });
 app.post("/chat", async (req, res) => {
   try {
-    let { chat, to } = req.body;
-    const result = await chats.insertMany(chat);
-    io.sockets.emit(to, "update");
-    res.send(result);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-});
-
-app.get("/getonlineuser", async (req, res) => {
-  try {
-    res.send(connectedUsers);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-});
-
-app.post("/openprofile", async (req, res) => {
-  try {
-    const { name, openProfile } = req.body;
-    if (connectedUsers.length) {
-      const isUserOnline = connectedUsers.find((user) => user.name === name);
-      if (isUserOnline) isUserOnline.openProfile = openProfile;
-      // console.log("/openprofile", connectedUsers);
-      res.send(isUserOnline);
+    let { chat, to, from } = req.body;
+    const result = await chats
+      .find({
+        users: {
+          $all: [from, to],
+        },
+      })
+      .toArray();
+    if (result.length) {
+      await chats.updateOne(
+        { _id: result[0]._id },
+        { $push: { chats: { $each: chat } } }
+      );
+    } else {
+      await chats.insertOne({
+        users: [from, to],
+        chats: chat,
+      });
     }
+    // const result = await chats.insertMany(chat);
+    io.sockets.emit(to, "update");
+    res.send([]);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
   }
 });
 
-app.get("/chat/:name", async (req, res) => {
+app.get("/getonlineuser/:name", async (req, res) => {
+  try {
+    let status = "";
+    if (connectedUsers.find((user) => user.name === req.params.name)) {
+      status = "online";
+    } else {
+      const result = await users.find({ name: req.params.name }).toArray();
+      if (result.length) {
+        status =
+          "last seen at " +
+          moment
+            .tz(
+              result[0].lastSeen,
+              Intl.DateTimeFormat().resolvedOptions().timeZone
+            )
+            .format("hh:mm a");
+      }
+    }
+    res.send(status);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
+
+app.get("/usercontacts/:name", async (req, res) => {
   try {
     const { name } = req.params;
     console.log(name);
     if (name) {
-      const result = await chats.find({ users: name }).toArray();
-      console.log("/chat/:name", result);
+      const result = await chats
+        .aggregate([
+          // Match documents where the given string is present in the users array
+          { $match: { users: name } },
+          // Project to remove the given string from users array and rename it to 'name'
+          {
+            $project: {
+              name: {
+                $filter: {
+                  input: "$users",
+                  as: "user",
+                  cond: { $ne: ["$$user", name] },
+                },
+              },
+              chats: 1,
+            },
+          },
+          // Filter chats where seen is false
+          {
+            $project: {
+              name: 1,
+              unseenChats: {
+                $filter: {
+                  input: "$chats",
+                  as: "chat",
+                  cond: { $eq: ["$$chat.seen", false] },
+                },
+              },
+            },
+          },
+          // Project to count the number of unseen chats
+          { $addFields: { unseenCount: { $size: "$unseenChats" } } },
+          // Project to keep only 'name' and 'unseenCount' fields
+          { $project: { _id: 0, name: 1, unseenCount: 1 } },
+        ])
+        .toArray();
       res.send(result);
-    }
-    return [];
+    } else res.status(500).send("user name required");
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
   }
 });
 
-app.post("/seenall", async (req, res) => {
+app.get("/chats/:name/:selectedname", async (req, res) => {
   try {
-    const { from, to } = req.body;
-    const filter = { seen: false, from, to };
-    const updateDoc = {
-      $set: { seen: true },
-    };
-    const result = await chats.updateMany(filter, updateDoc);
-    io.sockets.emit(from, "update");
-    res.send(result);
+    const { name, selectedname } = req.params;
+    await chats.updateMany(
+      {
+        users: {
+          $all: [name, selectedname],
+        },
+      },
+      {
+        $set: {
+          "chats.$[].seen": true,
+        },
+      }
+    );
+    const result = await chats
+      .find({
+        users: {
+          $all: [name, selectedname],
+        },
+      })
+      .toArray();
+    res.status(200).send(result[0].chats);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
   }
 });
+
 app.get("/logout/:name", async (req, res) => {
   await chats.deleteMany({});
   if (connectedUsers.length) {

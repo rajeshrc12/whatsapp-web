@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import LeftPanel from "./components/leftpanel/LeftPanel";
 import MiddlePanel from "./components/middlepanel/MiddlePanel";
 import { useDispatch, useSelector } from "react-redux";
-import { resetState, setName, setOnlineUsers } from "./state/user/userSlice";
+import {
+  checkUserStatus,
+  getChats,
+  resetState,
+  setName,
+  setOnlineUsers,
+} from "./state/user/userSlice";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { getOnlineUsers } from "./api/socket";
@@ -27,9 +33,12 @@ const App = () => {
   }, []);
   useEffect(() => {
     if (socket) {
-      socket.on(user.name, () => {});
+      socket.on(user.name, () => {
+        console.log(user);
+        // dispatch(getChats(user.selectedUser.name));
+      });
       socket.on("onlineUsers", (arg) => {
-        if (arg.length) dispatch(setOnlineUsers(arg));
+        if (arg.length) dispatch(checkUserStatus());
       });
     }
   }, [socket]);

@@ -4,7 +4,11 @@ import InputBottomBorder from "../input/InputBottomBorder";
 import SendIcon from "../../icons/SendIcon";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { getAllUsers, getChats, setName } from "../../state/user/userSlice";
+import {
+  getAllUsers,
+  getUserContacts,
+  setName,
+} from "../../state/user/userSlice";
 const Login = () => {
   const navigate = useNavigate();
   const [value, setValue] = useState("");
@@ -34,7 +38,7 @@ const Login = () => {
                       navigate("/home");
                       dispatch(setName(value));
                       dispatch(getAllUsers(value));
-                      dispatch(getChats(value));
+                      dispatch(getUserContacts(value));
                     }
                   }}
                 />

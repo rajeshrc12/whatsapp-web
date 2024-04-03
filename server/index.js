@@ -62,22 +62,21 @@ io.on("connection", async (socket) => {
       openProfile,
     });
   }
-  console.clear();
-  console.log("io.on('connection')", connectedUsers);
+  // console.clear();
+  // console.log("io.on('connection')", connectedUsers);
   socket.broadcast.emit("onlineUsers", connectedUsers);
   socket.on("disconnect", () => {
     connectedUsers = connectedUsers.filter((a) => a.id !== socket.id);
     setLastSeen({ name: socket.handshake.query.name, lastSeen: new Date() });
     socket.broadcast.emit("onlineUsers", connectedUsers);
-    console.log("from disconnect function, connected users", connectedUsers); // false
+    // console.log("from disconnect function, connected users", connectedUsers); // false
   });
 });
 app.post("/chat", async (req, res) => {
   try {
-    let { chat } = req.body;
-
+    let { chat, to } = req.body;
     const result = await chats.insertMany(chat);
-    // io.sockets.emit(to, "update");
+    io.sockets.emit(to, "update");
     res.send(result);
   } catch (error) {
     console.log(error);
@@ -111,17 +110,14 @@ app.post("/openprofile", async (req, res) => {
 
 app.get("/chat/:name", async (req, res) => {
   try {
-    console.log("/chat/:name", req?.params?.name);
-    if (req?.params?.name) {
-      // console.log("/chats", req.params.name);
-      const result = await chats
-        .find({
-          $or: [{ from: req.params.name }, { to: req.params.name }],
-        })
-        .toArray();
-      console.log(result);
+    const { name } = req.params;
+    console.log(name);
+    if (name) {
+      const result = await chats.find({ users: name }).toArray();
+      console.log("/chat/:name", result);
       res.send(result);
     }
+    return [];
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -179,6 +175,12 @@ app.post("/", async (req, res) => {
 
 app.get("/users", async (req, res) => {
   const result = await users.find({}).toArray();
+  if (result) res.status(200).send(result);
+  else res.status(500).send([]);
+});
+app.get("/user/:name", async (req, res) => {
+  const name = req.params.name;
+  const result = await users.find({ name }).toArray();
   if (result) res.status(200).send(result);
   else res.status(500).send([]);
 });

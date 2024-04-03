@@ -1,16 +1,17 @@
 import axios from "axios";
-export const setChats = async (chat = []) => {
+export const setChats = async ({ chat = [], to = "" }) => {
   try {
-    if (chat.length) {
+    if (chat.length && to) {
       const result = await axios.post(`http://localhost:3001/chat`, {
         chat,
+        to,
       });
       return result;
     }
   } catch (error) {
     console.log(error);
-    return [];
   }
+  return [];
 };
 
 export const getChats = async (name = "") => {
@@ -21,6 +22,6 @@ export const getChats = async (name = "") => {
     }
   } catch (error) {
     console.log(error);
-    return [];
   }
+  return [];
 };

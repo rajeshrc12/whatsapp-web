@@ -6,54 +6,20 @@ import InputWithSearchAndBackIcon from "../input/InputWithSearchAndBackIcon.jsx"
 import NewChatIcon from "../../icons/NewChatIcon.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { left } from "../../state/panel/panelSlice.js";
-import { setName } from "../../state/user/userSlice.js";
+import { resetState, setName } from "../../state/user/userSlice.js";
 import BackIcon from "../../icons/BackIcon.jsx";
 import Contact from "../contact/Contact.jsx";
 import MenuIcon from "../../icons/MenuIcon.jsx";
 import Popper from "../popper/Popper.jsx";
 import { useNavigate } from "react-router-dom";
-import { getAllUsers, logout } from "../../api/socket.js";
+import { logout } from "../../api/socket.js";
 import ContactLeftPanel from "../contact/ContactLeftPanel.jsx";
 const LeftPanel = () => {
   const navigate = useNavigate();
   const leftValue = useSelector((state) => state.panel.left);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const [users, setUsers] = useState([]);
-  const [currentUsers, setCurrentUsers] = useState([]);
   console.log(user);
-  useEffect(() => {
-    getAllUsers().then((users) => {
-      setUsers(users.filter((u) => u.name !== sessionStorage.getItem("name")));
-    });
-  }, []);
-  useEffect(() => {
-    const usersTemp = [];
-    for (const chat of user.chats) {
-      let isUserExist = null;
-      if (chat.from !== user.name) {
-        isUserExist = usersTemp.find((user) => user.name === chat.from);
-        if (isUserExist) {
-          if (!chat.seen) isUserExist.unseenChat.push(chat);
-        } else {
-          usersTemp.push({
-            name: chat.from,
-            unseenChat: chat.seen ? [] : [chat],
-          });
-        }
-      }
-      if (chat.to !== user.name) {
-        isUserExist = usersTemp.find((user) => user.name === chat.to);
-        if (!isUserExist) {
-          usersTemp.push({
-            name: chat.to,
-            unseenChat: [],
-          });
-        }
-      }
-    }
-    setCurrentUsers(usersTemp);
-  }, [user.chats]);
   const render = useCallback(() => {
     switch (leftValue) {
       case "newChat":
@@ -71,8 +37,8 @@ const LeftPanel = () => {
               <InputWithSearchAndBackIcon />
             </div>
             <div className="h-[70%] overflow-y-scroll">
-              {users.map((user) => (
-                <Contact user={user} />
+              {user.allUsers.map((user, i) => (
+                <Contact key={i} user={user} />
               ))}
             </div>
           </>
@@ -98,8 +64,8 @@ const LeftPanel = () => {
                           onClick={() => {
                             logout({ name: user.name });
                             sessionStorage.removeItem("name");
-                            dispatch(setName(""));
                             navigate("/");
+                            dispatch(resetState());
                           }}
                           className="hover:bg-gray-100 px-5 py-2"
                         >
@@ -125,14 +91,14 @@ const LeftPanel = () => {
               </div>
             </div>
             <div className="h-[80%] overflow-y-scroll">
-              {currentUsers.map((user) => (
-                <ContactLeftPanel user={user} />
+              {user.chats.map((user, i) => (
+                <ContactLeftPanel key={i} user={user} />
               ))}
             </div>
           </>
         );
     }
-  }, [leftValue, users, currentUsers]);
+  }, [leftValue, user]);
   return <div className="w-[30%]">{render()}</div>;
 };
 

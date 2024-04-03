@@ -35,25 +35,27 @@ const MiddlePanel = () => {
   const files = useSelector((state) => state.files.blobFiles);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const dispatch = useDispatch();
-
+  console.log(user);
   const removeFile = (index) => {
     dispatch(deleteFileByIndex(index));
   };
   const sendMessage = async () => {
-    console.log(user);
     setValue("");
     const date = new Date();
-    const result = await setChats([
-      {
-        type: "text",
-        message: value,
-        seen: false,
-        from: user.name,
-        to: user.selectedUser.name,
-        createdAt: date,
-        updatedAt: date,
-      },
-    ]);
+    await setChats({
+      chat: [
+        {
+          type: "text",
+          message: value,
+          seen: false,
+          from: user.name,
+          to: user.selectedUser.name,
+          createdAt: date,
+          updatedAt: date,
+        },
+      ],
+      to: user.selectedUser.name,
+    });
   };
   const renderFile = (file, index) => {
     let fileType = file?.type?.split("/")[0];
@@ -233,23 +235,18 @@ const MiddlePanel = () => {
                   </div>
                 </div>
 
-                {[
-                  { type: "text", message: "." },
-                  {
-                    type: "text",
-                    message:
-                      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda, voluptas officiis nihil animi soluta, quibusdam nesciunt veniam, expedita qui earum iusto vel quaerat sunt eveniet hic quo voluptates molestiae reprehenderit.",
-                  },
-                  {
-                    type: "audio",
-                    message: <audio src={a1} controls className="w-[28rem]" />,
-                  },
-                  { type: "image", message: <img src={rajesh} width={450} /> },
-                  { type: "image", message: <img src={i1} width={450} /> },
-                  { type: "video", message: <video src={v1} width={270} /> },
-                ].map((chat, i) => (
-                  <div className="flex flex-col items-end" key={i}>
-                    <div className="flex justify-end items-center">
+                {user.chats.map((chat, i) => (
+                  <div
+                    className={`flex flex-col ${
+                      chat.from === user.name ? "items-end" : "items-start"
+                    }`}
+                    key={i}
+                  >
+                    <div
+                      className={`flex ${
+                        chat.from !== user.name && "flex-row-reverse"
+                      } items-center`}
+                    >
                       <div className="flex items-center gap-1 px-2">
                         <Popper
                           content={<div className="flex">hello</div>}
@@ -310,7 +307,9 @@ const MiddlePanel = () => {
                       </div>
                     </div>
                     <div
-                      className={`flex bg-white rounded-full relative bottom-1 right-1`}
+                      className={`flex bg-white rounded-full relative bottom-1 ${
+                        chat.from === user.name ? "right-2" : "left-2"
+                      }`}
                     >
                       <Popper
                         content={<ReactionTab />}
@@ -318,7 +317,9 @@ const MiddlePanel = () => {
                           <div>{String.fromCodePoint("0x1F600")}</div>
                         }
                         className="rounded w-80"
-                        direction="dropdown-end"
+                        direction={
+                          chat.from === user.name ? "dropdown-end" : "dropdown"
+                        }
                       />
                     </div>
                   </div>
@@ -405,9 +406,7 @@ const MiddlePanel = () => {
             <div className="flex flex-col">
               <div>{user.selectedUser.name}</div>
               <div className="text-sm text-input-border">
-                {user.onlineUsers.find((u) => u.name === user.selectedUser.name)
-                  ? "Online"
-                  : user.selectedUser.status}
+                {user.selectedUser.lastSeen}
               </div>
             </div>
           </div>

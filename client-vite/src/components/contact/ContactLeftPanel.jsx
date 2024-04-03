@@ -5,14 +5,9 @@ import { setSelectedUser } from "../../state/user/userSlice";
 
 const ContactLeftPanel = ({ user }) => {
   const dispatch = useDispatch();
+  console.log(user);
   return (
-    <div
-      onClick={() =>
-        dispatch(setSelectedUser({ name: user.name, status: "offline" }))
-      }
-      key={user.name}
-      className="flex px-2 gap-2 hover:bg-gray-100 cursor-pointer w-full"
-    >
+    <div className="flex px-2 gap-2 hover:bg-gray-100 cursor-pointer w-full">
       <div className="flex items-center">
         <div>
           <EmptyProfileIcon size={50} />
@@ -25,9 +20,9 @@ const ContactLeftPanel = ({ user }) => {
         </div>
         <div className="flex justify-between items-center">
           <div className="text-sm text-input-border">Status</div>
-          {user.unseenChat.length > 0 && (
+          {user.chats.length > 0 && (
             <div className="bg-unread-marker-background text-white rounded-full px-[7px]">
-              {user.unseenChat.length}
+              {user.chats.filter((chat) => !chat.seen).length}
             </div>
           )}
         </div>

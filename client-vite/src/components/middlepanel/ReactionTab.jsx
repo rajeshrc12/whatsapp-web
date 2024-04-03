@@ -23,6 +23,7 @@ const ReactionTab = () => {
         </div>
         {tabsgroup.map((tab, i) => (
           <div
+            key={i}
             onClick={() => {
               setSelectedIndex(i + 1);
               console.log(i + 1);
@@ -39,8 +40,8 @@ const ReactionTab = () => {
       </div>
       <div className="flex flex-col p-2">
         {selectedIndex === 0
-          ? tabs.map((tab) => (
-              <div className="flex justify-between gap-2">
+          ? tabs.map((tab, i) => (
+              <div key={i} className="flex justify-between gap-2">
                 <div>
                   <div className="avatar">
                     <div className="w-10 rounded-full">
@@ -59,8 +60,8 @@ const ReactionTab = () => {
                 <div>{String.fromCodePoint(tab.emoji)}</div>
               </div>
             ))
-          : tabsgroup[selectedIndex - 1][1].map((tab) => (
-              <div className="flex justify-between gap-2">
+          : tabsgroup[selectedIndex - 1][1].map((tab, i) => (
+              <div key={i} className="flex justify-between gap-2">
                 <div>
                   <div className="avatar">
                     <div className="w-10 rounded-full">

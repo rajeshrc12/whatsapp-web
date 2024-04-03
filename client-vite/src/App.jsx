@@ -2,45 +2,32 @@ import React, { useEffect, useState } from "react";
 import LeftPanel from "./components/leftpanel/LeftPanel";
 import MiddlePanel from "./components/middlepanel/MiddlePanel";
 import { useDispatch, useSelector } from "react-redux";
-import { setName, setOnlineUsers, setUserChats } from "./state/user/userSlice";
+import { resetState, setName, setOnlineUsers } from "./state/user/userSlice";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { getOnlineUsers } from "./api/socket";
-import { getChats } from "./api/chats";
 const App = () => {
-  const selectedUser = useSelector((state) => state.user.selectedUser);
+  const user = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [socket, setSocket] = useState(null);
-  const fetchChats = async () => {
-    const chats = await getChats(sessionStorage.getItem("name"));
-    dispatch(setUserChats(chats));
-  };
-  const initializeUserData = async () => {
-    const onlineUsers = await getOnlineUsers();
-    fetchChats();
-    dispatch(setOnlineUsers(onlineUsers));
-    dispatch(setName(sessionStorage.getItem("name")));
-  };
+  const initializeUserData = async () => {};
   useEffect(() => {
-    if (sessionStorage.getItem("name")) {
+    if (user.name) {
       const sock = io("ws://localhost:3002", {
         query: {
-          name: sessionStorage.getItem("name"),
+          name: user.name,
         },
       });
       setSocket(sock);
-      initializeUserData();
     } else {
       navigate("/");
-      dispatch(setName(""));
+      dispatch(resetState());
     }
   }, []);
   useEffect(() => {
     if (socket) {
-      socket.on(sessionStorage.getItem("name"), () => {
-        fetchChats();
-      });
+      socket.on(user.name, () => {});
       socket.on("onlineUsers", (arg) => {
         if (arg.length) dispatch(setOnlineUsers(arg));
       });
@@ -49,7 +36,7 @@ const App = () => {
   return (
     <div className="flex h-screen w-screen">
       <LeftPanel />
-      {selectedUser ? (
+      {user.selectedUser?.name ? (
         <MiddlePanel />
       ) : (
         <div className="bg-panel-header-background w-[70%]"></div>

@@ -3,9 +3,12 @@ import WhatsaAppBG from "../../data/whatsapp.png";
 import InputBottomBorder from "../input/InputBottomBorder";
 import SendIcon from "../../icons/SendIcon";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getAllUsers, getChats, setName } from "../../state/user/userSlice";
 const Login = () => {
   const navigate = useNavigate();
   const [value, setValue] = useState("");
+  const dispatch = useDispatch();
   return (
     <div
       className="h-screen w-screen flex justify-center items-center"
@@ -29,6 +32,9 @@ const Login = () => {
                     if (value.trim()) {
                       sessionStorage.setItem("name", value);
                       navigate("/home");
+                      dispatch(setName(value));
+                      dispatch(getAllUsers(value));
+                      dispatch(getChats(value));
                     }
                   }}
                 />

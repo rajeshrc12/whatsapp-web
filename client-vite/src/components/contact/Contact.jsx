@@ -8,7 +8,7 @@ const Contact = ({ user = { name: "", lastSeen: "" } }) => {
   return (
     <div
       onClick={() =>
-        dispatch(setSelectedUser({ name: user.name, status: user.lastSeen }))
+        dispatch(setSelectedUser({ name: user.name, status: "offline" }))
       }
       key={user.name}
       className="flex px-2 gap-2 hover:bg-gray-100 cursor-pointer"

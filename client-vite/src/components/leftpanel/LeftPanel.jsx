@@ -7,6 +7,7 @@ import Contact from "./Contact";
 import { useDispatch, useSelector } from "react-redux";
 import { left } from "../../state/panel/panelSlice";
 import NewChat from "./NewChat";
+import { setCurrentUser } from "../../state/user/userSlice";
 const LeftPanel = () => {
   const leftValue = useSelector((state) => state.panel.left);
   const dispatch = useDispatch();
@@ -28,7 +29,12 @@ const LeftPanel = () => {
                   <NewChatIcon onClick={() => dispatch(left("newChat"))} />
                 </div>
                 <div>
-                  <MenuIcon />
+                  <MenuIcon
+                    onClick={() => {
+                      sessionStorage.removeItem("name");
+                      dispatch(setCurrentUser({ name: "" }));
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -39,8 +45,8 @@ const LeftPanel = () => {
               />
             </div>
             <div className="h-[80%] overflow-y-scroll">
-              {new Array(30).fill(0).map((d) => (
-                <Contact />
+              {new Array(30).fill(0).map((_, i) => (
+                <Contact key={i} />
               ))}
             </div>
           </>

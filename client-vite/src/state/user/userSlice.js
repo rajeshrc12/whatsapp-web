@@ -1,13 +1,20 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const initialState = {};
+const initialState = {
+  currentUser: { name: "" },
+  selectedUser: { name: "", lastSeen: "" },
+};
 const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    setCurrentUser: (state, action) => {
+      state.currentUser = action.payload;
+    },
+  },
   extraReducers: (builder) => {},
 });
 
-export const {} = userSlice.actions;
+export const { setCurrentUser } = userSlice.actions;
 export default userSlice.reducer;

@@ -1,10 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import WhatsaAppBG from "../../data/whatsapp.png";
 import SendIcon from "../../icons/SendIcon";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setCurrentUser } from "../../state/user/userSlice";
 const Login = () => {
   const navigate = useNavigate();
   const [value, setValue] = useState("");
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (sessionStorage.getItem("name")) {
+      dispatch(setCurrentUser({ name: sessionStorage.getItem("name") }));
+      navigate("/home");
+    } else {
+      navigate("/");
+    }
+  }, [sessionStorage.getItem("name")]);
   return (
     <div
       className="h-screen w-screen flex justify-center items-center"
@@ -28,6 +39,7 @@ const Login = () => {
                     if (value.trim()) {
                       sessionStorage.setItem("name", value);
                       navigate("/home");
+                      dispatch(setCurrentUser({ name: value }));
                     }
                   }}
                 />

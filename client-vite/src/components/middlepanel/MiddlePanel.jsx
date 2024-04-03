@@ -28,8 +28,8 @@ const MiddlePanel = () => {
               01/01/2024
             </div>
           </div>
-          {new Array(30).fill(0).map((d) => (
-            <div className="flex justify-end">
+          {new Array(30).fill(0).map((d, i) => (
+            <div key={i} className="flex justify-end">
               <div className="flex items-end bg-outgoing-background p-2 rounded-lg gap-2">
                 <div className="text-sm">Hello</div>
                 <div className="text-xs text-input-border">7:12 pm</div>

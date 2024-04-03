@@ -1,104 +1,53 @@
-import React, { useCallback, useEffect, useState } from "react";
-import StatusIcon from "../../icons/StatusIcon.jsx";
-import FilterIcon from "../../icons/FilterIcon.jsx";
-import data from "../../data/data.js";
-import InputWithSearchAndBackIcon from "../input/InputWithSearchAndBackIcon.jsx";
-import NewChatIcon from "../../icons/NewChatIcon.jsx";
+import React, { useCallback } from "react";
+import EmptyProfileIcon from "../../icons/EmptyProfileIcon";
+import NewChatIcon from "../../icons/NewChatIcon";
+import MenuIcon from "../../icons/MenuIcon";
+import BackIcon from "../../icons/BackIcon";
+import Contact from "./Contact";
 import { useDispatch, useSelector } from "react-redux";
-import { left } from "../../state/panel/panelSlice.js";
-import { resetState, setName } from "../../state/user/userSlice.js";
-import BackIcon from "../../icons/BackIcon.jsx";
-import Contact from "../contact/Contact.jsx";
-import MenuIcon from "../../icons/MenuIcon.jsx";
-import Popper from "../popper/Popper.jsx";
-import { useNavigate } from "react-router-dom";
-import { logout } from "../../api/socket.js";
-import ContactLeftPanel from "../contact/ContactLeftPanel.jsx";
+import { left } from "../../state/panel/panelSlice";
+import NewChat from "./NewChat";
 const LeftPanel = () => {
-  const navigate = useNavigate();
   const leftValue = useSelector((state) => state.panel.left);
-  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  console.log(leftValue);
   const render = useCallback(() => {
     switch (leftValue) {
       case "newChat":
-        return (
-          <>
-            <div className="h-[20%] bg-panel-background-colored flex items-end">
-              <div className="flex items-center gap-5 p-5">
-                <div>
-                  <BackIcon onClick={() => dispatch(left(""))} />
-                </div>
-                <div className="text-lg text-white font-bold">New chat</div>
-              </div>
-            </div>
-            <div className="h-[10%] p-2 flex items-center">
-              <InputWithSearchAndBackIcon />
-            </div>
-            <div className="h-[70%] overflow-y-scroll">
-              {user.allUsers.map((user, i) => (
-                <Contact key={i} user={user} />
-              ))}
-            </div>
-          </>
-        );
+        return <NewChat />;
 
       default:
         return (
           <>
-            <div className="h-[10%]">
-              <div className="px-5 h-full flex justify-between items-center bg-panel-header-background">
-                <div className="avatar">
-                  <div className="w-10 rounded-full">
-                    <img src={data.loggedInUser.url} />
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <StatusIcon />
-                  <NewChatIcon onClick={() => dispatch(left("newChat"))} />
-                  <Popper
-                    content={
-                      <div className="flex flex-col py-2">
-                        <div
-                          onClick={() => {
-                            logout({ name: user.name });
-                            sessionStorage.removeItem("name");
-                            navigate("/");
-                            dispatch(resetState());
-                          }}
-                          className="hover:bg-gray-100 px-5 py-2"
-                        >
-                          Logout
-                        </div>
-                      </div>
-                    }
-                    clickCotent={<MenuIcon />}
-                    className="rounded  w-40"
-                    direction="dropdown-end"
-                  />
-                </div>
+            <div className="h-[10%] bg-panel-header-background flex justify-between items-center p-5">
+              <div>
+                <EmptyProfileIcon />
               </div>
-            </div>
-            <div className="h-[10%]">
-              <div className="flex h-full px-1 gap-2 justify-between items-center">
-                <div className="w-full">
-                  <InputWithSearchAndBackIcon />
+              <div className="flex gap-5">
+                <div>
+                  <NewChatIcon onClick={() => dispatch(left("newChat"))} />
                 </div>
                 <div>
-                  <FilterIcon />
+                  <MenuIcon />
                 </div>
               </div>
             </div>
+            <div className="h-[10%] p-2">
+              <input
+                className="bg-gray-100 w-full rounded-lg p-2 outline-none"
+                placeholder="Enter name"
+              />
+            </div>
             <div className="h-[80%] overflow-y-scroll">
-              {user.userContacts.map((u, i) => (
-                <ContactLeftPanel key={i} user={u} name={user.name} />
+              {new Array(30).fill(0).map((d) => (
+                <Contact />
               ))}
             </div>
           </>
         );
     }
-  }, [leftValue, user]);
-  return <div className="w-[30%]">{render()}</div>;
+  }, [leftValue]);
+  return <div className="h-full w-full">{render()}</div>;
 };
 
 export default LeftPanel;

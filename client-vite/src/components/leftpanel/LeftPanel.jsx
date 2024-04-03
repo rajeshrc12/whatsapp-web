@@ -11,7 +11,6 @@ import { setCurrentUser } from "../../state/user/userSlice";
 const LeftPanel = () => {
   const leftValue = useSelector((state) => state.panel.left);
   const dispatch = useDispatch();
-  console.log(leftValue);
   const render = useCallback(() => {
     switch (leftValue) {
       case "newChat":

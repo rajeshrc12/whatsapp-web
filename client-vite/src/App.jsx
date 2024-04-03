@@ -9,7 +9,6 @@ const App = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  console.log(user);
   useEffect(() => {
     if (sessionStorage.getItem("name")) {
       dispatch(setCurrentUser({ name: sessionStorage.getItem("name") }));

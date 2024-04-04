@@ -1,15 +1,18 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import EmptyProfileIcon from "../../icons/EmptyProfileIcon";
 import NewChatIcon from "../../icons/NewChatIcon";
 import MenuIcon from "../../icons/MenuIcon";
-import BackIcon from "../../icons/BackIcon";
-import Contact from "./Contact";
 import { useDispatch, useSelector } from "react-redux";
 import { left } from "../../state/panel/panelSlice";
 import NewChat from "./NewChat";
 import { setCurrentUser } from "../../state/user/userSlice";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import ContactUnseenCount from "./ContactUnseenCount";
 const LeftPanel = () => {
+  const navigate = useNavigate();
   const leftValue = useSelector((state) => state.panel.left);
+  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const render = useCallback(() => {
     switch (leftValue) {
@@ -29,9 +32,17 @@ const LeftPanel = () => {
                 </div>
                 <div>
                   <MenuIcon
-                    onClick={() => {
-                      sessionStorage.removeItem("name");
-                      dispatch(setCurrentUser({ name: "" }));
+                    onClick={async () => {
+                      try {
+                        navigate("/");
+                        sessionStorage.removeItem("name");
+                        await axios.get(
+                          `http://localhost:3001/logout/${user.currentUser.name}`
+                        );
+                        dispatch(setCurrentUser({ name: "" }));
+                      } catch (error) {
+                        console.log(error);
+                      }
                     }}
                   />
                 </div>
@@ -44,14 +55,17 @@ const LeftPanel = () => {
               />
             </div>
             <div className="h-[80%] overflow-y-scroll">
-              {new Array(30).fill(0).map((_, i) => (
-                <div key={i}>User</div>
+              {user?.currentUser?.contacts?.map((contact) => (
+                <ContactUnseenCount
+                  contact={contact}
+                  key={contact.name.join("")}
+                />
               ))}
             </div>
           </>
         );
     }
-  }, [leftValue]);
+  }, [leftValue, user]);
   return <div className="h-full w-full">{render()}</div>;
 };
 

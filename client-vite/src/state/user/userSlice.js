@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const initialState = {
-  currentUser: { name: "" },
+  currentUser: { name: "", contacts: [] },
   selectedUser: { name: "", lastSeen: "", chats: [] },
   newChatUsers: [],
 };
@@ -20,6 +20,12 @@ const userSlice = createSlice({
     });
     builder.addCase(getSelectedUserChats.fulfilled, (state, action) => {
       state.selectedUser = action.payload;
+    });
+    builder.addCase(getSelectedUserLastSeen.fulfilled, (state, action) => {
+      state.selectedUser.lastSeen = action.payload;
+    });
+    builder.addCase(getCurrentUserContacts.fulfilled, (state, action) => {
+      state.currentUser.contacts = action.payload;
     });
   },
 });
@@ -63,6 +69,45 @@ export const getSelectedUserChats = createAsyncThunk(
     } catch (error) {
       console.log(error);
       return [];
+    }
+  }
+);
+
+export const getSelectedUserLastSeen = createAsyncThunk(
+  "getSelectedUserLastSeen",
+  async (_, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState();
+      let lastSeen = state.user.selectedUser.lastSeen;
+      if (state.user.selectedUser.name) {
+        const result = await axios.get(
+          `http://localhost:3001/getonlineuser/${state.user.selectedUser.name}`
+        );
+        lastSeen = result.data;
+      }
+      return lastSeen;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const getCurrentUserContacts = createAsyncThunk(
+  "getCurrentUserContacts",
+  async (name, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState();
+      const currentUserName = name || state.user.currentUser.name || "";
+      let contacts = [];
+      if (currentUserName) {
+        const result = await axios.get(
+          `http://localhost:3001/usercontacts/${currentUserName}`
+        );
+        contacts = result.data;
+      }
+      return contacts;
+    } catch (error) {
+      console.log(error);
     }
   }
 );

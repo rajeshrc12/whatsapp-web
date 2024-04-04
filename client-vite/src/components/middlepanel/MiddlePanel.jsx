@@ -5,7 +5,10 @@ import TickIcon from "../../icons/TickIcon";
 import { useDispatch, useSelector } from "react-redux";
 import { sendChat } from "../../api/chats";
 import { getTimeInAmPM } from "../../utils/utils";
-import { getSelectedUserChats } from "../../state/user/userSlice";
+import {
+  getCurrentUserContacts,
+  getSelectedUserChats,
+} from "../../state/user/userSlice";
 
 const MiddlePanel = () => {
   const user = useSelector((state) => state.user);
@@ -74,7 +77,7 @@ const MiddlePanel = () => {
           onChange={(e) => setValue(e.target.value)}
           className="bg-white w-full rounded-lg p-2 outline-none"
           placeholder="Enter message"
-          onKeyDown={(e) => {
+          onKeyDown={async (e) => {
             if (
               e.key === "Enter" &&
               value.trim() &&
@@ -83,7 +86,7 @@ const MiddlePanel = () => {
             ) {
               setValue("");
               const date = new Date();
-              sendChat({
+              const result = await sendChat({
                 from: user.currentUser.name,
                 to: user.selectedUser.name,
                 chat: [
@@ -94,10 +97,14 @@ const MiddlePanel = () => {
                     message: value,
                     createdAt: date,
                     updatedAt: date,
+                    seen: false,
                   },
                 ],
               });
-              dispatch(getSelectedUserChats(user.selectedUser.name));
+              if (result.data.acknowledged) {
+                dispatch(getSelectedUserChats(user.selectedUser.name));
+                dispatch(getCurrentUserContacts());
+              }
             }
           }}
         />

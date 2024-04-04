@@ -76,6 +76,7 @@ io.on("connection", async (socket) => {
 app.post("/chat", async (req, res) => {
   try {
     let { chat, to, from } = req.body;
+    console.log(chat);
     let result = false;
     result = await chats
       .find({
@@ -152,7 +153,7 @@ app.get("/usercontacts/:name", async (req, res) => {
               chats: 1,
             },
           },
-          // Filter chats where seen is false
+          // Filter chats where seen is false and chat.to is "rajesh"
           {
             $project: {
               name: 1,
@@ -160,7 +161,12 @@ app.get("/usercontacts/:name", async (req, res) => {
                 $filter: {
                   input: "$chats",
                   as: "chat",
-                  cond: { $eq: ["$$chat.seen", false] },
+                  cond: {
+                    $and: [
+                      { $eq: ["$$chat.seen", false] },
+                      { $eq: ["$$chat.to", name] },
+                    ],
+                  },
                 },
               },
             },
@@ -185,15 +191,12 @@ app.get("/chats/:name/:selectedname", async (req, res) => {
     let chat = [];
     await chats.updateMany(
       {
-        users: {
-          $all: [name, selectedname],
-        },
+        users: { $all: [name, selectedname] },
+        "chats.from": selectedname,
+        "chats.to": name,
       },
-      {
-        $set: {
-          "chats.$[].seen": true,
-        },
-      }
+      { $set: { "chats.$[elem].seen": true } },
+      { arrayFilters: [{ "elem.from": selectedname, "elem.to": name }] }
     );
     const result = await chats
       .find({
@@ -202,7 +205,10 @@ app.get("/chats/:name/:selectedname", async (req, res) => {
         },
       })
       .toArray();
-    if (result.length) chat = result[0].chats;
+    if (result.length) {
+      chat = result[0].chats;
+      io.sockets.emit(selectedname, "update");
+    }
     res.status(200).send(chat);
   } catch (error) {
     console.log(error);

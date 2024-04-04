@@ -3,7 +3,12 @@ import LeftPanel from "./components/leftpanel/LeftPanel";
 import MiddlePanel from "./components/middlepanel/MiddlePanel";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getSelectedUserChats, setCurrentUser } from "./state/user/userSlice";
+import {
+  getCurrentUserContacts,
+  getSelectedUserChats,
+  getSelectedUserLastSeen,
+  setCurrentUser,
+} from "./state/user/userSlice";
 import { io } from "socket.io-client";
 const App = () => {
   const navigate = useNavigate();
@@ -14,6 +19,7 @@ const App = () => {
     const name = sessionStorage.getItem("name");
     if (name) {
       dispatch(setCurrentUser({ name }));
+      dispatch(getCurrentUserContacts(name));
       const skt = io("ws://localhost:3002", {
         query: {
           name,
@@ -28,9 +34,10 @@ const App = () => {
     if (socket) {
       socket.on(sessionStorage.getItem("name"), (arg) => {
         dispatch(getSelectedUserChats());
+        dispatch(getCurrentUserContacts());
       });
       socket.on("onlineUsers", (arg) => {
-        if (arg.length) console.log(arg);
+        if (arg.length) dispatch(getSelectedUserLastSeen());
       });
     }
   }, [socket]);

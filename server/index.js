@@ -63,20 +63,21 @@ io.on("connection", async (socket) => {
       openProfile,
     });
   }
-  // console.clear();
-  // console.log("io.on('connection')", connectedUsers);
+  console.clear();
+  console.log("io.on('connection')", connectedUsers);
   socket.broadcast.emit("onlineUsers", connectedUsers);
   socket.on("disconnect", () => {
     connectedUsers = connectedUsers.filter((a) => a.id !== socket.id);
     setLastSeen({ name: socket.handshake.query.name, lastSeen: new Date() });
     socket.broadcast.emit("onlineUsers", connectedUsers);
-    // console.log("from disconnect function, connected users", connectedUsers); // false
+    console.log("from disconnect function, connected users", connectedUsers); // false
   });
 });
 app.post("/chat", async (req, res) => {
   try {
     let { chat, to, from } = req.body;
-    const result = await chats
+    let result = false;
+    result = await chats
       .find({
         users: {
           $all: [from, to],
@@ -84,19 +85,20 @@ app.post("/chat", async (req, res) => {
       })
       .toArray();
     if (result.length) {
-      await chats.updateOne(
+      result = await chats.updateOne(
         { _id: result[0]._id },
         { $push: { chats: { $each: chat } } }
       );
     } else {
-      await chats.insertOne({
+      result = await chats.insertOne({
         users: [from, to],
         chats: chat,
       });
     }
     // const result = await chats.insertMany(chat);
     io.sockets.emit(to, "update");
-    res.send([]);
+    if (result) res.status(200).send(result);
+    else res.status(500).send(result);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -180,6 +182,7 @@ app.get("/usercontacts/:name", async (req, res) => {
 app.get("/chats/:name/:selectedname", async (req, res) => {
   try {
     const { name, selectedname } = req.params;
+    let chat = [];
     await chats.updateMany(
       {
         users: {
@@ -199,7 +202,8 @@ app.get("/chats/:name/:selectedname", async (req, res) => {
         },
       })
       .toArray();
-    res.status(200).send(result[0].chats);
+    if (result.length) chat = result[0].chats;
+    res.status(200).send(chat);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);

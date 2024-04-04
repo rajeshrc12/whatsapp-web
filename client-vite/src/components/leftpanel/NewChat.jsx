@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import BackIcon from "../../icons/BackIcon";
 import Contact from "./Contact";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { left } from "../../state/panel/panelSlice";
+import { getAllUsers } from "../../state/user/userSlice";
 
 const NewChat = () => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  useEffect(() => {
+    dispatch(getAllUsers());
+  }, []);
   return (
     <>
       <div className="h-[20%] bg-panel-background-colored flex flex-col justify-end">
@@ -23,8 +28,8 @@ const NewChat = () => {
         />
       </div>
       <div className="h-[70%] overflow-y-scroll">
-        {new Array(30).fill(0).map((d) => (
-          <Contact />
+        {user.newChatUsers.map((u, i) => (
+          <Contact key={i} user={u} />
         ))}
       </div>
     </>

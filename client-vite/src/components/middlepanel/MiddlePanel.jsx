@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import WhatsaAppBG from "../../data/whatsapp.png";
 import EmptyProfileIcon from "../../icons/EmptyProfileIcon";
 import TickIcon from "../../icons/TickIcon";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { sendChat } from "../../api/chats";
+import { getTimeInAmPM } from "../../utils/utils";
+import { getSelectedUserChats } from "../../state/user/userSlice";
 
 const MiddlePanel = () => {
   const user = useSelector((state) => state.user);
   const [value, setValue] = useState("");
+  const chatRef = useRef();
+  const dispatch = useDispatch();
   return (
     <div className="h-full">
       <div className="h-[10%] bg-panel-header-background p-2">
@@ -16,9 +20,9 @@ const MiddlePanel = () => {
             <EmptyProfileIcon />
           </div>
           <div className="flex flex-col">
-            <div>Rajesh</div>
+            <div>{user.selectedUser.name}</div>
             <div className="text-sm text-input-border">
-              last seen at 7:12 pm
+              {user.selectedUser.lastSeen}
             </div>
           </div>
         </div>
@@ -26,6 +30,7 @@ const MiddlePanel = () => {
       <div
         className="h-[80%] bg-panel-header-background overflow-y-scroll"
         style={{ backgroundImage: `url(${WhatsaAppBG})` }}
+        ref={chatRef}
       >
         <div className="flex flex-col gap-2 relative z-0 px-10 py-5">
           <div className="flex justify-center sticky top-2 z-10">
@@ -33,15 +38,31 @@ const MiddlePanel = () => {
               01/01/2024
             </div>
           </div>
-          {new Array(30).fill(0).map((d, i) => (
-            <div key={i} className="flex justify-end">
-              {console.log("inside map")}
-              <div className="flex items-end bg-outgoing-background p-2 rounded-lg gap-2">
-                <div className="text-sm">Hello</div>
-                <div className="text-xs text-input-border">7:12 pm</div>
-                <div>
-                  <TickIcon />
+          {user.selectedUser.chats.map((chat, i) => (
+            <div
+              key={i}
+              className={`flex ${
+                chat.from === user.currentUser.name
+                  ? "justify-end"
+                  : "justify-start"
+              }`}
+            >
+              <div
+                className={`flex items-end ${
+                  chat.from === user.currentUser.name
+                    ? "bg-outgoing-background"
+                    : "bg-white"
+                } p-2 rounded-lg gap-2`}
+              >
+                <div className="text-sm">{chat.message}</div>
+                <div className="text-xs text-input-border">
+                  {getTimeInAmPM(chat.updatedAt)}
                 </div>
+                {chat.from === user.currentUser.name && (
+                  <div>
+                    <TickIcon seen={chat.seen} />
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -54,7 +75,13 @@ const MiddlePanel = () => {
           className="bg-white w-full rounded-lg p-2 outline-none"
           placeholder="Enter message"
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (
+              e.key === "Enter" &&
+              value.trim() &&
+              user.currentUser.name &&
+              user.selectedUser.name
+            ) {
+              setValue("");
               const date = new Date();
               sendChat({
                 from: user.currentUser.name,
@@ -70,6 +97,7 @@ const MiddlePanel = () => {
                   },
                 ],
               });
+              dispatch(getSelectedUserChats(user.selectedUser.name));
             }
           }}
         />

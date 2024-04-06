@@ -27,6 +27,9 @@ const userSlice = createSlice({
     builder.addCase(getCurrentUserContacts.fulfilled, (state, action) => {
       state.currentUser.contacts = action.payload;
     });
+    builder.addCase(fetchChats.fulfilled, (state, action) => {
+      state.selectedUser.chats = action.payload;
+    });
   },
 });
 export const getAllUsers = createAsyncThunk(
@@ -54,18 +57,45 @@ export const getSelectedUserChats = createAsyncThunk(
       let chats = [],
         lastSeen = "offline";
       if (state.user.currentUser.name && selectedUserName) {
+        await axios.get(
+          `http://localhost:3001/seenall/${state.user.currentUser.name}/${selectedUserName}`
+        );
         chats = await axios.get(
           `http://localhost:3001/chats/${state.user.currentUser.name}/${selectedUserName}`
         );
         lastSeen = await axios.get(
           `http://localhost:3001/getonlineuser/${selectedUserName}`
         );
+        await axios.post(`http://localhost:3001/openprofile`, {
+          name: state.user.currentUser.name,
+          openProfile: selectedUserName,
+        });
       }
       return {
         name: selectedUserName,
         lastSeen: lastSeen.data,
         chats: chats.data,
       };
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+);
+
+export const fetchChats = createAsyncThunk(
+  "fetchChats",
+  async (_, thunkAPI) => {
+    try {
+      const state = thunkAPI.getState();
+      let chats = [];
+      if (state.user.currentUser.name && state.user.selectedUser.name) {
+        const result = await axios.get(
+          `http://localhost:3001/chats/${state.user.currentUser.name}/${state.user.selectedUser.name}`
+        );
+        chats = result.data;
+      }
+      return chats;
     } catch (error) {
       console.log(error);
       return [];

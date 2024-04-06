@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { sendChat } from "../../api/chats";
 import { getTimeInAmPM } from "../../utils/utils";
 import {
+  fetchChats,
   getCurrentUserContacts,
   getSelectedUserChats,
 } from "../../state/user/userSlice";
@@ -102,7 +103,7 @@ const MiddlePanel = () => {
                 ],
               });
               if (result.data.acknowledged) {
-                dispatch(getSelectedUserChats(user.selectedUser.name));
+                dispatch(fetchChats());
                 dispatch(getCurrentUserContacts());
               }
             }

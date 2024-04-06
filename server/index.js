@@ -73,10 +73,15 @@ io.on("connection", async (socket) => {
     console.log("from disconnect function, connected users", connectedUsers); // false
   });
 });
+
 app.post("/chat", async (req, res) => {
   try {
     let { chat, to, from } = req.body;
-    console.log(chat);
+
+    const isUserOnline = connectedUsers.find(
+      (user) => user.name === to && user.openProfile === from
+    );
+    if (isUserOnline) chat = chat.map((c) => ({ ...c, seen: true }));
     let result = false;
     result = await chats
       .find({
@@ -97,9 +102,48 @@ app.post("/chat", async (req, res) => {
       });
     }
     // const result = await chats.insertMany(chat);
-    io.sockets.emit(to, "update");
+    io.sockets.emit(to, "fetchChats");
     if (result) res.status(200).send(result);
     else res.status(500).send(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
+app.get("/chats/:name/:selectedname", async (req, res) => {
+  try {
+    const { name, selectedname } = req.params;
+    let chat = [];
+    const result = await chats
+      .find({
+        users: {
+          $all: [name, selectedname],
+        },
+      })
+      .toArray();
+    if (result.length) {
+      chat = result[0].chats;
+    }
+    res.status(200).send(chat);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+});
+app.get("/seenall/:name/:selectedname", async (req, res) => {
+  try {
+    const { name, selectedname } = req.params;
+    const result = await chats.updateMany(
+      {
+        users: { $all: [name, selectedname] },
+        "chats.to": name,
+        "chats.from": selectedname,
+      },
+      { $set: { "chats.$[elem].seen": true } },
+      { arrayFilters: [{ "elem.to": name, "elem.from": selectedname }] }
+    );
+    io.sockets.emit(selectedname, "fetchChats");
+    res.status(200).send(result);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -185,37 +229,6 @@ app.get("/usercontacts/:name", async (req, res) => {
   }
 });
 
-app.get("/chats/:name/:selectedname", async (req, res) => {
-  try {
-    const { name, selectedname } = req.params;
-    let chat = [];
-    await chats.updateMany(
-      {
-        users: { $all: [name, selectedname] },
-        "chats.from": selectedname,
-        "chats.to": name,
-      },
-      { $set: { "chats.$[elem].seen": true } },
-      { arrayFilters: [{ "elem.from": selectedname, "elem.to": name }] }
-    );
-    const result = await chats
-      .find({
-        users: {
-          $all: [name, selectedname],
-        },
-      })
-      .toArray();
-    if (result.length) {
-      chat = result[0].chats;
-      io.sockets.emit(selectedname, "update");
-    }
-    res.status(200).send(chat);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-});
-
 app.get("/logout/:name", async (req, res) => {
   await chats.deleteMany({});
   if (connectedUsers.length) {
@@ -226,6 +239,21 @@ app.get("/logout/:name", async (req, res) => {
       sockets.disconnect(true);
       connectedUsers = connectedUsers.filter((user) => user.name !== name);
     }
+  }
+});
+
+app.post("/openprofile", async (req, res) => {
+  try {
+    const { name, openProfile } = req.body;
+    if (connectedUsers.length) {
+      const isUserOnline = connectedUsers.find((user) => user.name === name);
+      if (isUserOnline) isUserOnline.openProfile = openProfile;
+      console.log("/openprofile", connectedUsers);
+      res.send(isUserOnline);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
   }
 });
 

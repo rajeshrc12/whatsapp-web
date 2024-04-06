@@ -14,6 +14,7 @@ const LeftPanel = () => {
   const leftValue = useSelector((state) => state.panel.left);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  console.log(user.currentUser.contacts);
   const render = useCallback(() => {
     switch (leftValue) {
       case "newChat":
@@ -59,6 +60,7 @@ const LeftPanel = () => {
                 <ContactUnseenCount
                   contact={contact}
                   key={contact.name.join("")}
+                  selectedUserName={user.selectedUser.name}
                 />
               ))}
             </div>

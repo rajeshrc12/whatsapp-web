@@ -4,6 +4,7 @@ import MiddlePanel from "./components/middlepanel/MiddlePanel";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
+  fetchChats,
   getCurrentUserContacts,
   getSelectedUserChats,
   getSelectedUserLastSeen,
@@ -33,7 +34,7 @@ const App = () => {
   useEffect(() => {
     if (socket) {
       socket.on(sessionStorage.getItem("name"), (arg) => {
-        dispatch(getSelectedUserChats());
+        dispatch(fetchChats());
         dispatch(getCurrentUserContacts());
       });
       socket.on("onlineUsers", (arg) => {

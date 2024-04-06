@@ -1,15 +1,18 @@
 import React from "react";
 import EmptyProfileIcon from "../../icons/EmptyProfileIcon";
 import { useDispatch } from "react-redux";
-import { getSelectedUserChats } from "../../state/user/userSlice";
-const ContactUnseenCount = ({ contact }) => {
+import {
+  getCurrentUserContacts,
+  getSelectedUserChats,
+} from "../../state/user/userSlice";
+const ContactUnseenCount = ({ contact, selectedUserName }) => {
   const dispatch = useDispatch();
-  console.log(contact);
   return (
     <div
       onClick={() => {
         const name = contact.name.join("") || "";
-        if (name) dispatch(getSelectedUserChats(name));
+        if (name !== selectedUserName) dispatch(getSelectedUserChats(name));
+        dispatch(getCurrentUserContacts());
       }}
       className="flex w-full items-center hover:bg-gray-100 cursor-pointer"
     >

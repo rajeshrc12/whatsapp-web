@@ -3,14 +3,14 @@ import WhatsaAppBG from "../../data/whatsapp.png";
 import SendIcon from "../../icons/SendIcon";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCurrentUser } from "../../state/user/userSlice";
+import { setCurrentUserName } from "../../state/user/userSlice";
 const Login = () => {
   const navigate = useNavigate();
   const [value, setValue] = useState("");
   const dispatch = useDispatch();
   useEffect(() => {
     if (sessionStorage.getItem("name")) {
-      dispatch(setCurrentUser({ name: sessionStorage.getItem("name") }));
+      dispatch(setCurrentUserName(sessionStorage.getItem("name")));
       navigate("/home");
     } else {
       navigate("/");
@@ -39,7 +39,7 @@ const Login = () => {
                     if (value.trim()) {
                       sessionStorage.setItem("name", value);
                       navigate("/home");
-                      dispatch(setCurrentUser({ name: value }));
+                      dispatch(setCurrentUserName(value));
                     }
                   }}
                 />

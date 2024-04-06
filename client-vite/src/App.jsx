@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from "react";
-import LeftPanel from "./components/leftpanel/LeftPanel";
-import MiddlePanel from "./components/middlepanel/MiddlePanel";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import {
-  fetchChats,
+  getAllUsers,
   getCurrentUserContacts,
-  getSelectedUserChats,
-  getSelectedUserLastSeen,
-  setCurrentUser,
+  setCurrentUserName,
 } from "./state/user/userSlice";
 import { io } from "socket.io-client";
+import BackIcon from "./icons/BackIcon";
+import NewChatIcon from "./icons/NewChatIcon";
 const App = () => {
-  const navigate = useNavigate();
   const user = useSelector((state) => state.user);
-  const dispatch = useDispatch();
+  const panel = useSelector((state) => state.panel);
+  const dispatch = useDispatch((state) => state.user);
   const [socket, setSocket] = useState(null);
+  console.clear();
+  console.log(user, panel);
   useEffect(() => {
     const name = sessionStorage.getItem("name");
     if (name) {
-      dispatch(setCurrentUser({ name }));
+      dispatch(setCurrentUserName(name));
       dispatch(getCurrentUserContacts(name));
+      dispatch(getAllUsers());
+
       const skt = io("ws://localhost:3002", {
         query: {
           name,
@@ -31,29 +32,46 @@ const App = () => {
       navigate("/");
     }
   }, [sessionStorage]);
-  useEffect(() => {
-    if (socket) {
-      socket.on(sessionStorage.getItem("name"), (arg) => {
-        dispatch(fetchChats());
-        dispatch(getCurrentUserContacts());
-      });
-      socket.on("onlineUsers", (arg) => {
-        if (arg.length) dispatch(getSelectedUserLastSeen());
-      });
-    }
-  }, [socket]);
   return (
     <div className="flex h-screen w-screen">
-      <div className="border w-[30%]">
-        <LeftPanel />
-      </div>
-      <div className="border w-[70%]">
-        {user.selectedUser.name ? (
-          <MiddlePanel />
+      <div className="w-[30%] border flex flex-col">
+        {panel.left ? (
+          <div className="h-full">
+            <div className="h-[10%] border flex justify-between">
+              <div>
+                <BackIcon />
+              </div>
+              <div>Start a chat</div>
+            </div>
+            <div className="h-[90%] border">
+              {user.newChatUsers.map((user) => (
+                <div className="p-2">{user.name}</div>
+              ))}
+            </div>
+          </div>
         ) : (
-          <div className="bg-panel-header-background h-full"></div>
+          <div className="h-full">
+            <div className="h-[10%] border flex justify-between">
+              <div>{user.currentUser.name}</div>
+              <div>
+                <NewChatIcon />
+              </div>
+            </div>
+            <div className="h-[90%] border">
+              {user.currentUser.contacts.map((user) => (
+                <div className="p-2">{user.name}</div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
+      {user.selectedUser.name && (
+        <div className="w-[70%] border">
+          <div className="h-[10%]">1</div>
+          <div className="h-[80%]">2</div>
+          <div className="h-[10%]">3</div>
+        </div>
+      )}
     </div>
   );
 };

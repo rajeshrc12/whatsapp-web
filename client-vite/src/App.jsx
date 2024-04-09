@@ -5,6 +5,7 @@ import {
   getAllUsers,
   getCurrentUserContacts,
   getSelectedUserChats,
+  getSelectedUserLastSeen,
   setCurrentUserName,
 } from "./state/user/userSlice";
 import { left } from "./state/panel/panelSlice";
@@ -16,6 +17,7 @@ import TickIcon from "./icons/TickIcon";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { sendChat } from "./api/chats";
+import { getTimeInAmPM } from "./utils/utils";
 const App = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -23,7 +25,7 @@ const App = () => {
   const dispatch = useDispatch((state) => state.user);
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
-  console.log(user);
+  // console.log(user);
   useEffect(() => {
     const name = sessionStorage.getItem("name");
     if (name) {
@@ -40,6 +42,18 @@ const App = () => {
       navigate("/");
     }
   }, [sessionStorage]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on(sessionStorage.getItem("name"), (arg) => {
+        dispatch(fetchChats());
+        dispatch(getCurrentUserContacts());
+      });
+      socket.on("onlineUsers", (arg) => {
+        if (arg.length) dispatch(getSelectedUserLastSeen());
+      });
+    }
+  }, [socket]);
 
   return (
     <div className="flex h-screen w-screen">
@@ -99,7 +113,10 @@ const App = () => {
                   className={`p-2 cursor-pointer flex justify-between ${
                     us.name === user.selectedUser.name && "bg-gray-100"
                   }`}
-                  onClick={() => dispatch(getSelectedUserChats(us.name))}
+                  onClick={() => {
+                    dispatch(getSelectedUserChats(us.name));
+                    dispatch(getCurrentUserContacts());
+                  }}
                 >
                   <div>{us.name}</div>
                   <div>{us.unseenCount}</div>
@@ -126,9 +143,13 @@ const App = () => {
               >
                 <div className="flex border items-center gap-2 p-2">
                   <div>{chat.message}</div>
-                  <div>
-                    <TickIcon seen={chat.seen} />
-                  </div>
+                  {user.currentUser.name === chat.from && (
+                    <div>
+                      <TickIcon seen={chat.seen} />
+                    </div>
+                  )}
+
+                  <div>{getTimeInAmPM(chat.updatedAt)}</div>
                 </div>
               </div>
             ))}
@@ -164,6 +185,7 @@ const App = () => {
                     ],
                   });
                   dispatch(fetchChats());
+                  dispatch(getCurrentUserContacts());
                 }
               }}
             />

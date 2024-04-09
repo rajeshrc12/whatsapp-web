@@ -19,7 +19,8 @@ const userSlice = createSlice({
       state.newChatUsers = action.payload;
     });
     builder.addCase(getSelectedUserChats.fulfilled, (state, action) => {
-      state.selectedUser = action.payload;
+      state.selectedUser = action.payload.selectedUser;
+      state.currentUser.contacts = action.payload.contacts;
     });
     builder.addCase(getSelectedUserLastSeen.fulfilled, (state, action) => {
       state.selectedUser.lastSeen = action.payload;
@@ -55,26 +56,38 @@ export const getSelectedUserChats = createAsyncThunk(
       const state = thunkAPI.getState();
       const selectedUserName = name || state.user.selectedUser.name || "";
       let chats = [],
+        contacts = [],
         lastSeen = "offline";
+
       if (state.user.currentUser.name && selectedUserName) {
-        // await axios.get(
-        //   `http://localhost:3001/seenall/${state.user.currentUser.name}/${selectedUserName}`
-        // );
-        chats = await axios.get(
+        await axios.get(
+          `http://localhost:3001/seenall/${state.user.currentUser.name}/${selectedUserName}`
+        );
+        const chatsResult = await axios.get(
           `http://localhost:3001/chats/${state.user.currentUser.name}/${selectedUserName}`
         );
-        // lastSeen = await axios.get(
-        //   `http://localhost:3001/getonlineuser/${selectedUserName}`
-        // );
-        // await axios.post(`http://localhost:3001/openprofile`, {
-        //   name: state.user.currentUser.name,
-        //   openProfile: selectedUserName,
-        // });
+        chats = chatsResult.data;
+        const lastSeenResult = await axios.get(
+          `http://localhost:3001/getonlineuser/${selectedUserName}`
+        );
+        lastSeen = lastSeenResult.data;
+        await axios.post(`http://localhost:3001/openprofile`, {
+          name: state.user.currentUser.name,
+          openProfile: selectedUserName,
+        });
+        const contactsResult = await axios.get(
+          `http://localhost:3001/usercontacts/${state.user.currentUser.name}`
+        );
+        contacts = contactsResult.data;
+        console.log(contacts);
       }
       return {
-        name: selectedUserName,
-        lastSeen: lastSeen,
-        chats: chats.data,
+        selectedUser: {
+          name: selectedUserName,
+          lastSeen,
+          chats,
+        },
+        contacts,
       };
     } catch (error) {
       console.log(error);

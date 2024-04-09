@@ -156,6 +156,7 @@ const App = () => {
           </div>
           <div className="h-[10%] border">
             <input
+              placeholder="Type a message..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               type="text"

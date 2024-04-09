@@ -231,7 +231,6 @@ app.get("/usercontacts/:name", async (req, res) => {
 });
 
 app.get("/logout/:name", async (req, res) => {
-  await chats.deleteMany({});
   if (connectedUsers.length) {
     const name = req.params.name;
     const socketId = connectedUsers.find((user) => user.name === name);

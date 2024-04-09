@@ -119,7 +119,7 @@ const App = () => {
                   }}
                 >
                   <div>{us.name}</div>
-                  <div>{us.unseenCount}</div>
+                  {us.unseenCount > 0 && <div>{us.unseenCount}</div>}
                 </div>
               ))}
             </div>
@@ -131,7 +131,7 @@ const App = () => {
           <div className="h-[10%] border">
             {user.selectedUser.name}({user.selectedUser.lastSeen})
           </div>
-          <div className="h-[80%]">
+          <div className="h-[80%] overflow-y-scroll">
             {user.selectedUser.chats.map((chat) => (
               <div
                 className={`flex ${

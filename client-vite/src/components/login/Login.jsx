@@ -3,7 +3,8 @@ import WhatsaAppBG from "../../data/whatsapp.png";
 import SendIcon from "../../icons/SendIcon";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCurrentUserName } from "../../state/user/userSlice";
+import { resetUser, setCurrentUserName } from "../../state/user/userSlice";
+import { resetPanel } from "../../state/panel/panelSlice";
 const Login = () => {
   const navigate = useNavigate();
   const [value, setValue] = useState("");
@@ -37,6 +38,8 @@ const Login = () => {
                 <SendIcon
                   onClick={() => {
                     if (value.trim()) {
+                      dispatch(resetPanel());
+                      dispatch(resetUser());
                       sessionStorage.setItem("name", value);
                       navigate("/home");
                       dispatch(setCurrentUserName(value));

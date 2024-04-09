@@ -13,13 +13,7 @@ const userSlice = createSlice({
     setCurrentUserName: (state, action) => {
       state.currentUser.name = action.payload;
     },
-    resetUser: (state) => {
-      state = {
-        currentUser: { name: "", contacts: [] },
-        selectedUser: { name: "", lastSeen: "", chats: [] },
-        newChatUsers: [],
-      };
-    },
+    resetUser: () => initialState,
   },
   extraReducers: (builder) => {
     builder.addCase(getAllUsers.fulfilled, (state, action) => {

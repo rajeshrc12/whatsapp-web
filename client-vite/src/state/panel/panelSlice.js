@@ -23,14 +23,7 @@ const panelSlice = createSlice({
     right: (state, action) => {
       state.right = action.payload;
     },
-    resetPanel: (state) => {
-      state = {
-        main: "",
-        left: "",
-        middle: "",
-        right: "",
-      };
-    },
+    resetPanel: () => initialState,
   },
 });
 

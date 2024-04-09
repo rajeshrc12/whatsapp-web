@@ -244,6 +244,7 @@ app.get("/logout/:name", async (req, res) => {
 
 app.get("/cleardb/", async (req, res) => {
   await chats.deleteMany({});
+  connectedUsers = [];
 });
 
 app.post("/openprofile", async (req, res) => {

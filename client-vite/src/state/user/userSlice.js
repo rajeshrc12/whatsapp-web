@@ -57,23 +57,23 @@ export const getSelectedUserChats = createAsyncThunk(
       let chats = [],
         lastSeen = "offline";
       if (state.user.currentUser.name && selectedUserName) {
-        await axios.get(
-          `http://localhost:3001/seenall/${state.user.currentUser.name}/${selectedUserName}`
-        );
+        // await axios.get(
+        //   `http://localhost:3001/seenall/${state.user.currentUser.name}/${selectedUserName}`
+        // );
         chats = await axios.get(
           `http://localhost:3001/chats/${state.user.currentUser.name}/${selectedUserName}`
         );
-        lastSeen = await axios.get(
-          `http://localhost:3001/getonlineuser/${selectedUserName}`
-        );
-        await axios.post(`http://localhost:3001/openprofile`, {
-          name: state.user.currentUser.name,
-          openProfile: selectedUserName,
-        });
+        // lastSeen = await axios.get(
+        //   `http://localhost:3001/getonlineuser/${selectedUserName}`
+        // );
+        // await axios.post(`http://localhost:3001/openprofile`, {
+        //   name: state.user.currentUser.name,
+        //   openProfile: selectedUserName,
+        // });
       }
       return {
         name: selectedUserName,
-        lastSeen: lastSeen.data,
+        lastSeen: lastSeen,
         chats: chats.data,
       };
     } catch (error) {

@@ -221,7 +221,8 @@ app.get("/usercontacts/:name", async (req, res) => {
           { $project: { _id: 0, name: 1, unseenCount: 1 } },
         ])
         .toArray();
-      res.send(result);
+      console.log(name, result);
+      res.send(result.map((user) => ({ ...user, name: user.name.join("") })));
     } else res.status(500).send("user name required");
   } catch (error) {
     console.log(error);

@@ -6,11 +6,13 @@ import {
   getCurrentUserContacts,
   getSelectedUserChats,
   getSelectedUserLastSeen,
+  resetUser,
   setCurrentUserName,
 } from "./state/user/userSlice";
-import { left } from "./state/panel/panelSlice";
+import { left, resetPanel } from "./state/panel/panelSlice";
 import { io } from "socket.io-client";
 import BackIcon from "./icons/BackIcon";
+import EmptyProfileIcon from "./icons/EmptyProfileIcon";
 import NewChatIcon from "./icons/NewChatIcon";
 import MenuIcon from "./icons/MenuIcon";
 import TickIcon from "./icons/TickIcon";
@@ -18,6 +20,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { sendChat } from "./api/chats";
 import { getTimeInAmPM } from "./utils/utils";
+import WhatsaAppBG from "./data/whatsapp.png";
+import Popper from "./components/popper/Popper";
 const App = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -25,8 +29,8 @@ const App = () => {
   const dispatch = useDispatch((state) => state.user);
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
+  const [searchName, setSearchName] = useState("");
   const chatContainerRef = useRef(null);
-  // console.log(user);
   useEffect(() => {
     const name = sessionStorage.getItem("name");
     if (name) {
@@ -64,81 +68,193 @@ const App = () => {
   }, [user.selectedUser.chats]);
   return (
     <div className="flex h-screen w-screen">
-      <div className="w-[30%] border flex flex-col">
+      <div className="w-[30%] flex flex-col">
         {panel.left ? (
           <div className="h-full">
-            <div className="h-[10%] border flex justify-between">
+            <div className="h-[16%] bg-panel-background-colored flex items-end p-5 gap-5">
               <div>
                 <BackIcon
-                  className="fill-black"
-                  onClick={() => dispatch(left(""))}
+                  onClick={() => {
+                    dispatch(left(""));
+                    setSearchName("");
+                  }}
                 />
               </div>
-              <div>Start a chat</div>
+              <div className="font-bold text-white">New chat</div>
             </div>
-            <div className="h-[90%] border">
-              {user.newChatUsers.map((user) => (
-                <div
-                  key={user.name}
-                  className="p-2 cursor-pointer"
-                  onClick={() => {
-                    dispatch(getSelectedUserChats(user.name));
-                    dispatch(left(""));
-                  }}
-                >
-                  {user.name}
-                </div>
-              ))}
+            <div className="h-[10%] p-2">
+              <input
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                placeholder="Search"
+                type="text"
+                className="bg-gray-100 w-full rounded-lg p-2 outline-none"
+              />
+            </div>
+            <div className="h-[74%] overflow-y-scroll px-2">
+              {user.newChatUsers
+                .filter((user) => {
+                  if (!searchName) return true;
+                  else if (user.name.includes(searchName)) return true;
+                  else false;
+                })
+                .map((user) => (
+                  <div
+                    key={user.name}
+                    className="cursor-pointer flex items-center gap-3"
+                    onClick={() => {
+                      dispatch(getSelectedUserChats(user.name));
+                      dispatch(left(""));
+                      setSearchName("");
+                    }}
+                  >
+                    <div>
+                      <EmptyProfileIcon size={45} />
+                    </div>
+                    <div className="w-full flex flex-col border-t-[1px] py-3">
+                      <div className="flex justify-between">
+                        <div>{user.name}</div>
+                        <div className="text-xs text-input-border"></div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="text-xs text-input-border">Status</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         ) : (
           <div className="h-full">
-            <div className="h-[10%] border flex justify-between">
-              <div>{user.currentUser.name}</div>
+            <div className="h-[10%] flex justify-between items-center px-2  bg-panel-header-background">
               <div>
-                <NewChatIcon onClick={() => dispatch(left("newChat"))} />
+                <EmptyProfileIcon />
               </div>
-              <MenuIcon
-                onClick={async () => {
-                  try {
-                    navigate("/");
-                    sessionStorage.removeItem("name");
-                    await axios.get(
-                      `http://localhost:3001/logout/${user.currentUser.name}`
-                    );
-                    dispatch(setCurrentUserName(""));
-                  } catch (error) {
-                    console.log(error);
+              <div className="flex gap-5">
+                <NewChatIcon
+                  onClick={() => {
+                    dispatch(left("newChat"));
+                    setSearchName("");
+                  }}
+                />
+
+                <Popper
+                  className="w-24"
+                  content={
+                    <div className="flex flex-col py-3">
+                      <div
+                        className="hover:bg-gray-50 cursor-pointer px-3 py-2"
+                        onClick={async () => {
+                          try {
+                            dispatch(resetPanel());
+                            dispatch(resetUser());
+
+                            navigate("/");
+                            sessionStorage.removeItem("name");
+                            await axios.get(
+                              `http://localhost:3001/logout/${user.currentUser.name}`
+                            );
+                          } catch (error) {
+                            console.log(error);
+                          }
+                        }}
+                      >
+                        Logout
+                      </div>
+                      <div
+                        className="hover:bg-gray-50 cursor-pointer px-3 py-2"
+                        onClick={async () => {
+                          try {
+                            dispatch(resetPanel());
+                            dispatch(resetUser());
+                            navigate("/");
+                            sessionStorage.removeItem("name");
+                            await axios.get(`http://localhost:3001/cleardb`);
+                          } catch (error) {
+                            console.log(error);
+                          }
+                        }}
+                      >
+                        Clear DB
+                      </div>
+                    </div>
                   }
-                }}
+                  clickCotent={<MenuIcon />}
+                />
+              </div>
+            </div>
+            <div className="h-[10%] p-2 flex items-center">
+              <input
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                placeholder="Search"
+                type="text"
+                className="bg-gray-100 w-full rounded-lg p-2 outline-none"
               />
             </div>
-            <div className="h-[90%] border">
-              {user.currentUser.contacts.map((us) => (
-                <div
-                  key={us.name}
-                  className={`p-2 cursor-pointer flex justify-between ${
-                    us.name === user.selectedUser.name && "bg-gray-100"
-                  }`}
-                  onClick={() => {
-                    dispatch(getSelectedUserChats(us.name));
-                    dispatch(getCurrentUserContacts());
-                  }}
-                >
-                  <div>{us.name}</div>
-                  {us.unseenCount > 0 && <div>{us.unseenCount}</div>}
-                </div>
-              ))}
+            <div className="h-[80%]">
+              {user.currentUser.contacts
+                .filter((user) => {
+                  if (!searchName) return true;
+                  else if (user.name.includes(searchName)) return true;
+                  else false;
+                })
+                .map((contact) => (
+                  <div
+                    key={contact.name}
+                    className={`px-3 gap-2 cursor-pointer flex items-center ${
+                      contact.name === user.selectedUser.name
+                        ? "bg-panel-header-background"
+                        : "hover:bg-gray-50"
+                    }`}
+                    onClick={() => {
+                      dispatch(getSelectedUserChats(contact.name));
+                      dispatch(getCurrentUserContacts());
+                    }}
+                  >
+                    <div>
+                      <EmptyProfileIcon size={45} />
+                    </div>
+                    <div className="w-full flex flex-col border-t-[1px] py-3">
+                      <div className="flex justify-between">
+                        <div>{contact.name}</div>
+                        <div className="text-xs text-input-border">7:30 pm</div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="text-xs text-input-border">Hii</div>
+                        {contact.unseenCount > 0 && (
+                          <div className="bg-unread-marker-background rounded-full w-6 pl-2 text-white">
+                            {contact.unseenCount}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         )}
       </div>
-      {user.selectedUser.name && (
+      {user.selectedUser.name ? (
         <div className="w-[70%]">
-          <div className="h-[10%] border">
-            {user.selectedUser.name}({user.selectedUser.lastSeen})
+          <div className="h-[10%] bg-panel-header-background p-2">
+            <div className="flex gap-3">
+              <div>
+                <EmptyProfileIcon />
+              </div>
+              <div className="flex flex-col">
+                <div>{user.selectedUser.name}</div>
+                <div className="text-sm text-input-border">
+                  {user.selectedUser.lastSeen}
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="h-[80%] overflow-y-scroll" ref={chatContainerRef}>
+          <div
+            className="h-[80%] overflow-y-scroll flex flex-col gap-1 p-10"
+            ref={chatContainerRef}
+            style={{ backgroundImage: `url(${WhatsaAppBG})` }}
+          >
             {user.selectedUser.chats.map((chat) => (
               <div
                 className={`flex ${
@@ -148,26 +264,33 @@ const App = () => {
                 }`}
                 key={chat.message}
               >
-                <div className="flex border items-center gap-2 p-2">
+                <div
+                  className={`max-w-[70%] break-words rounded-lg shadow flex items-end gap-2 p-1 ${
+                    user.currentUser.name === chat.from
+                      ? "justify-end bg-outgoing-background"
+                      : "justify-start bg-white"
+                  }`}
+                >
                   <div>{chat.message}</div>
+                  <div className="text-[11px] text-input-border min-w-[50px]">
+                    {getTimeInAmPM(chat.updatedAt)}
+                  </div>
                   {user.currentUser.name === chat.from && (
                     <div>
                       <TickIcon seen={chat.seen} />
                     </div>
                   )}
-
-                  <div>{getTimeInAmPM(chat.updatedAt)}</div>
                 </div>
               </div>
             ))}
           </div>
-          <div className="h-[10%] border">
+          <div className="h-[10%] bg-panel-header-background p-2">
             <input
               placeholder="Type a message..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               type="text"
-              className="w-full h-full"
+              className="bg-white w-full rounded-lg p-2 outline-none"
               onKeyDown={async (e) => {
                 if (
                   e.key === "Enter" &&
@@ -199,6 +322,8 @@ const App = () => {
             />
           </div>
         </div>
+      ) : (
+        <div className="w-[70%] bg-panel-header-background h-full"></div>
       )}
     </div>
   );

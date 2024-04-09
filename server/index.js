@@ -242,6 +242,10 @@ app.get("/logout/:name", async (req, res) => {
   }
 });
 
+app.get("/cleardb/", async (req, res) => {
+  await chats.deleteMany({});
+});
+
 app.post("/openprofile", async (req, res) => {
   try {
     const { name, openProfile } = req.body;

@@ -23,8 +23,16 @@ const panelSlice = createSlice({
     right: (state, action) => {
       state.right = action.payload;
     },
+    resetPanel: (state) => {
+      state = {
+        main: "",
+        left: "",
+        middle: "",
+        right: "",
+      };
+    },
   },
 });
 
-export const { main, left, middle, right } = panelSlice.actions;
+export const { main, left, middle, right, resetPanel } = panelSlice.actions;
 export default panelSlice.reducer;

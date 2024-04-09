@@ -13,6 +13,13 @@ const userSlice = createSlice({
     setCurrentUserName: (state, action) => {
       state.currentUser.name = action.payload;
     },
+    resetUser: (state) => {
+      state = {
+        currentUser: { name: "", contacts: [] },
+        selectedUser: { name: "", lastSeen: "", chats: [] },
+        newChatUsers: [],
+      };
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getAllUsers.fulfilled, (state, action) => {
@@ -155,5 +162,5 @@ export const getCurrentUserContacts = createAsyncThunk(
   }
 );
 
-export const { setCurrentUserName } = userSlice.actions;
+export const { setCurrentUserName, resetUser } = userSlice.actions;
 export default userSlice.reducer;

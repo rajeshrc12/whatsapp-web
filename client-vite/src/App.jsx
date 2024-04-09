@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchChats,
@@ -25,6 +25,7 @@ const App = () => {
   const dispatch = useDispatch((state) => state.user);
   const [socket, setSocket] = useState(null);
   const [message, setMessage] = useState("");
+  const chatContainerRef = useRef(null);
   // console.log(user);
   useEffect(() => {
     const name = sessionStorage.getItem("name");
@@ -54,7 +55,13 @@ const App = () => {
       });
     }
   }, [socket]);
-
+  useEffect(() => {
+    // Scroll to bottom when chat messages change
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [user.selectedUser.chats]);
   return (
     <div className="flex h-screen w-screen">
       <div className="w-[30%] border flex flex-col">
@@ -131,7 +138,7 @@ const App = () => {
           <div className="h-[10%] border">
             {user.selectedUser.name}({user.selectedUser.lastSeen})
           </div>
-          <div className="h-[80%] overflow-y-scroll">
+          <div className="h-[80%] overflow-y-scroll" ref={chatContainerRef}>
             {user.selectedUser.chats.map((chat) => (
               <div
                 className={`flex ${

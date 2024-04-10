@@ -23,6 +23,7 @@ export default {
         "input-border": "var(--input-border)",
         "unread-marker-background": "var(--unread-marker-background)",
         "switch-button-color": "var(--switch-button-color)",
+        transparent: "rgba(0, 0, 0, 0.05)",
       },
     },
   },

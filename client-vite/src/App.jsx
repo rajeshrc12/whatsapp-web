@@ -16,12 +16,20 @@ import EmptyProfileIcon from "./icons/EmptyProfileIcon";
 import NewChatIcon from "./icons/NewChatIcon";
 import MenuIcon from "./icons/MenuIcon";
 import TickIcon from "./icons/TickIcon";
+import DownloadIcon from "./icons/DownloadIcon";
+import PlusIcon from "./icons/PlusIcon";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { sendChat } from "./api/chats";
 import { getTimeInAmPM } from "./utils/utils";
 import WhatsaAppBG from "./data/whatsapp.png";
 import Popper from "./components/popper/Popper";
+import i1 from "./data/i1.jpeg";
+import i2 from "./data/i2.jpeg";
+import v1 from "./data/v1.mp4";
+import v2 from "./data/v2.mp4";
+import a1 from "./data/a1.ogg";
+import { FaFile } from "react-icons/fa6";
 const App = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -31,6 +39,216 @@ const App = () => {
   const [message, setMessage] = useState("");
   const [searchName, setSearchName] = useState("");
   const chatContainerRef = useRef(null);
+  const [chats, setChats] = useState([
+    {
+      from: "rajesh",
+      to: "ganesh",
+      type: "text",
+      message: "yo",
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "ganesh",
+      to: "rajesh",
+      type: "image",
+      message: i1,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "rajesh",
+      to: "ganesh",
+      type: "image",
+      message: i2,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "rajesh",
+      to: "ganesh",
+      type: "video",
+      message: v1,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "rajesh",
+      to: "ganesh",
+      type: "video",
+      message: v2,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "rajesh",
+      to: "ganesh",
+      type: "audio",
+      message: a1,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "ganesh",
+      to: "rajesh",
+      type: "image",
+      message: i1,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "mahesh",
+      to: "ganesh",
+      type: "image",
+      message: i2,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "mahesh",
+      to: "ganesh",
+      type: "video",
+      message: v1,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "mahesh",
+      to: "ganesh",
+      type: "video",
+      message: v2,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+    {
+      from: "mahesh",
+      to: "ganesh",
+      type: "audio",
+      message: a1,
+      createdAt: "2024-04-10T02:47:54.064Z",
+      updatedAt: "2024-04-10T02:47:54.064Z",
+      seen: true,
+    },
+  ]);
+  const renderMessage = (chat) => {
+    switch (chat.type) {
+      case "text":
+        return (
+          <div
+            className={`flex break-all relative max-w-[70%] rounded-lg shadow gap-2 p-1 ${
+              user.currentUser.name === chat.from
+                ? "justify-end bg-outgoing-background"
+                : "justify-start bg-white"
+            }`}
+          >
+            <div className="flex-wrap">{chat.message}</div>
+            <div
+              className={`flex items-end ${
+                chat.message.length > 60 && "absolute bottom-1 right-1"
+              }`}
+            >
+              <div className="text-[11px] text-input-border min-w-[50px]">
+                {getTimeInAmPM(chat.updatedAt)}
+              </div>
+              {user.currentUser.name === chat.from && (
+                <div>
+                  <TickIcon seen={chat.seen} />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      case "image":
+        return (
+          <div
+            className={`p-1 w-[40%] rounded-lg shadow ${
+              user.currentUser.name === chat.from
+                ? "bg-outgoing-background"
+                : "bg-white"
+            }`}
+          >
+            <img src={chat.message} alt="" />
+            <div className={`flex justify-end items-center w-full pt-1`}>
+              <div className="text-[11px] text-input-border min-w-[50px]">
+                {getTimeInAmPM(chat.updatedAt)}
+              </div>
+              {user.currentUser.name === chat.from && (
+                <div>
+                  <TickIcon seen={chat.seen} />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      case "video":
+        return (
+          <div
+            className={`p-1 w-[20%] rounded-lg shadow ${
+              user.currentUser.name === chat.from
+                ? "bg-outgoing-background"
+                : "bg-white"
+            }`}
+          >
+            <video src={chat.message} alt="" />
+            <div className={`flex justify-end items-center w-full pt-1`}>
+              <div className="text-[11px] text-input-border min-w-[50px]">
+                {getTimeInAmPM(chat.updatedAt)}
+              </div>
+              {user.currentUser.name === chat.from && (
+                <div>
+                  <TickIcon seen={chat.seen} />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div
+            className={`p-1 w-[40%] rounded-lg shadow ${
+              user.currentUser.name === chat.from
+                ? "bg-outgoing-background"
+                : "bg-white"
+            }`}
+          >
+            <div className="flex justify-between p-3 bg-transparent rounded-lg">
+              <div className="flex gap-2">
+                <div>
+                  <FaFile color="#79909b" size={30} />
+                </div>
+                <div>
+                  <div className="text-xs">Name.ogg</div>
+                  <div></div>
+                </div>
+              </div>
+              <div>
+                <DownloadIcon />
+              </div>
+            </div>
+            <div className={`flex justify-end items-center w-full pt-1`}>
+              <div className="text-[11px] text-input-border min-w-[50px]">
+                {getTimeInAmPM(chat.updatedAt)}
+              </div>
+              {user.currentUser.name === chat.from && (
+                <div>
+                  <TickIcon seen={chat.seen} />
+                </div>
+              )}
+            </div>
+          </div>
+        );
+    }
+  };
   useEffect(() => {
     const name = sessionStorage.getItem("name");
     if (name) {
@@ -250,77 +468,68 @@ const App = () => {
               </div>
             </div>
           </div>
-          <div
-            className="h-[80%] overflow-y-scroll flex flex-col gap-1 p-10"
-            ref={chatContainerRef}
-            style={{ backgroundImage: `url(${WhatsaAppBG})` }}
-          >
-            {user.selectedUser.chats.map((chat) => (
+          {panel.middle ? (
+            <div>preview</div>
+          ) : (
+            <>
               <div
-                className={`flex ${
-                  user.currentUser.name === chat.from
-                    ? "justify-end"
-                    : "justify-start"
-                }`}
-                key={chat.message}
+                className="h-[80%] overflow-y-scroll flex flex-col gap-1 p-10"
+                ref={chatContainerRef}
+                style={{ backgroundImage: `url(${WhatsaAppBG})` }}
               >
-                <div
-                  className={`max-w-[70%] break-words rounded-lg shadow flex items-end gap-2 p-1 ${
-                    user.currentUser.name === chat.from
-                      ? "justify-end bg-outgoing-background"
-                      : "justify-start bg-white"
-                  }`}
-                >
-                  <div>{chat.message}</div>
-                  <div className="text-[11px] text-input-border min-w-[50px]">
-                    {getTimeInAmPM(chat.updatedAt)}
+                {chats.map((chat) => (
+                  <div
+                    className={`flex ${
+                      user.currentUser.name === chat.from
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                    key={chat.message}
+                  >
+                    {renderMessage(chat)}
                   </div>
-                  {user.currentUser.name === chat.from && (
-                    <div>
-                      <TickIcon seen={chat.seen} />
-                    </div>
-                  )}
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="h-[10%] bg-panel-header-background p-2">
-            <input
-              placeholder="Type a message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              type="text"
-              className="bg-white w-full rounded-lg p-2 outline-none"
-              onKeyDown={async (e) => {
-                if (
-                  e.key === "Enter" &&
-                  message.trim() &&
-                  user.currentUser.name &&
-                  user.selectedUser.name
-                ) {
-                  setMessage("");
-                  const date = new Date();
-                  await sendChat({
-                    from: user.currentUser.name,
-                    to: user.selectedUser.name,
-                    chat: [
-                      {
+              <div className="h-[10%] bg-panel-header-background p-2 flex items-center gap-3">
+                <PlusIcon />
+                <input
+                  placeholder="Type a message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  type="text"
+                  className="bg-white w-full rounded-lg p-2 outline-none"
+                  onKeyDown={async (e) => {
+                    if (
+                      e.key === "Enter" &&
+                      message.trim() &&
+                      user.currentUser.name &&
+                      user.selectedUser.name
+                    ) {
+                      setMessage("");
+                      const date = new Date();
+                      await sendChat({
                         from: user.currentUser.name,
                         to: user.selectedUser.name,
-                        type: "text",
-                        message,
-                        createdAt: date,
-                        updatedAt: date,
-                        seen: false,
-                      },
-                    ],
-                  });
-                  dispatch(fetchChats());
-                  dispatch(getCurrentUserContacts());
-                }
-              }}
-            />
-          </div>
+                        chat: [
+                          {
+                            from: user.currentUser.name,
+                            to: user.selectedUser.name,
+                            type: "text",
+                            message,
+                            createdAt: date,
+                            updatedAt: date,
+                            seen: false,
+                          },
+                        ],
+                      });
+                      dispatch(fetchChats());
+                      dispatch(getCurrentUserContacts());
+                    }
+                  }}
+                />
+              </div>
+            </>
+          )}
         </div>
       ) : (
         <div className="w-[70%] bg-panel-header-background h-full"></div>

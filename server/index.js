@@ -10,7 +10,15 @@ const app = express();
 const port = 3001; // Port for MongoDB API
 const socketPort = 3002; // Port for Socket.IO server
 
-const upload = multer();
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({ storage });
 require("dotenv").config();
 app.use(cors());
 app.use(bodyParser.json());
@@ -244,6 +252,8 @@ app.get("/logout/:name", async (req, res) => {
 
 app.get("/cleardb/", async (req, res) => {
   await chats.deleteMany({});
+  await fschunks.deleteMany({});
+  await fsfiles.deleteMany({});
   connectedUsers = [];
 });
 
@@ -259,6 +269,59 @@ app.post("/openprofile", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
+  }
+});
+
+app.post("/files", upload.array("files"), async (req, res) => {
+  if (req.files) {
+    const files = req.files;
+    const { from, to } = JSON.parse(req.body.userData) || {};
+    date = new Date();
+    let seen = false,
+      result = false;
+    const isUserOnline = connectedUsers.find(
+      (user) => user.name === to && user.openProfile === from
+    );
+    if (isUserOnline) seen = true;
+    for (const file of files) {
+      const uploadStream = bucket.openUploadStream(file.originalname);
+      // Pipe the file buffer to the GridFS upload stream
+      const resp = await uploadStream.end(file.buffer);
+      if (resp.filename) {
+        const chat = {
+          from,
+          to,
+          seen,
+          createdAt: date,
+          updatedAt: date,
+          message: String(resp.id),
+          type: file.mimetype.split("/")[0],
+        };
+        console.log(chat);
+        result = await chats
+          .find({
+            users: {
+              $all: [from, to],
+            },
+          })
+          .toArray();
+        if (result.length) {
+          result = await chats.updateOne(
+            { _id: result[0]._id },
+            { $push: { chats: { $each: [chat] } } }
+          );
+        } else {
+          result = await chats.insertOne({
+            users: [from, to],
+            chats: [chat],
+          });
+        }
+      }
+    }
+    console.log(result);
+    res.status(200).send(result);
+  } else {
+    res.status(400).send(false);
   }
 });
 

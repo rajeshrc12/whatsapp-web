@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchChats,
@@ -17,6 +17,7 @@ import NewChatIcon from "./icons/NewChatIcon";
 import MenuIcon from "./icons/MenuIcon";
 import TickIcon from "./icons/TickIcon";
 import DownloadIcon from "./icons/DownloadIcon";
+import CancelIcon from "./icons/CancelIcon";
 import PlusIcon from "./icons/PlusIcon";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -24,13 +25,14 @@ import { sendChat } from "./api/chats";
 import { getTimeInAmPM } from "./utils/utils";
 import WhatsaAppBG from "./data/whatsapp.png";
 import Popper from "./components/popper/Popper";
-import i1 from "./data/i1.jpeg";
+import mahesh from "./data/mahesh.jpeg";
 import i2 from "./data/i2.jpeg";
 import v1 from "./data/v1.mp4";
 import v2 from "./data/v2.mp4";
 import a1 from "./data/a1.ogg";
 import { FaFile } from "react-icons/fa6";
 import InputFileIcon from "./components/input/InputFileIcon";
+import SendIcon from "./icons/SendIcon";
 const App = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -40,113 +42,16 @@ const App = () => {
   const [message, setMessage] = useState("");
   const [searchName, setSearchName] = useState("");
   const chatContainerRef = useRef(null);
-  const [chats, setChats] = useState([
-    {
-      from: "rajesh",
-      to: "ganesh",
-      type: "text",
-      message: "yo",
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "ganesh",
-      to: "rajesh",
-      type: "image",
-      message: i1,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "rajesh",
-      to: "ganesh",
-      type: "image",
-      message: i2,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "rajesh",
-      to: "ganesh",
-      type: "video",
-      message: v1,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "rajesh",
-      to: "ganesh",
-      type: "video",
-      message: v2,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "rajesh",
-      to: "ganesh",
-      type: "audio",
-      message: a1,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "ganesh",
-      to: "rajesh",
-      type: "image",
-      message: i1,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "mahesh",
-      to: "ganesh",
-      type: "image",
-      message: i2,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "mahesh",
-      to: "ganesh",
-      type: "video",
-      message: v1,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "mahesh",
-      to: "ganesh",
-      type: "video",
-      message: v2,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-    {
-      from: "mahesh",
-      to: "ganesh",
-      type: "audio",
-      message: a1,
-      createdAt: "2024-04-10T02:47:54.064Z",
-      updatedAt: "2024-04-10T02:47:54.064Z",
-      seen: true,
-    },
-  ]);
+  const [selectedPreviewFile, setSelectedPreviewFile] = useState(0);
+  const [files, setFiles] = useState([]);
+  const [chats, setChats] = useState([]);
   const renderMessage = (chat) => {
+    console.log(chat);
     switch (chat.type) {
       case "text":
         return (
           <div
-            className={`flex break-all relative max-w-[70%] rounded-lg shadow gap-2 p-1 ${
+            className={`flex break-all relative max-w-[35rem] rounded-lg shadow gap-2 p-1 ${
               user.currentUser.name === chat.from
                 ? "justify-end bg-outgoing-background"
                 : "justify-start bg-white"
@@ -172,7 +77,7 @@ const App = () => {
       case "image":
         return (
           <div
-            className={`p-1 w-[40%] rounded-lg shadow ${
+            className={`p-1 w-[20rem] rounded-lg shadow ${
               user.currentUser.name === chat.from
                 ? "bg-outgoing-background"
                 : "bg-white"
@@ -194,7 +99,7 @@ const App = () => {
       case "video":
         return (
           <div
-            className={`p-1 w-[20%] rounded-lg shadow ${
+            className={`p-1 w-[10rem] rounded-lg shadow ${
               user.currentUser.name === chat.from
                 ? "bg-outgoing-background"
                 : "bg-white"
@@ -216,7 +121,7 @@ const App = () => {
       default:
         return (
           <div
-            className={`p-1 w-[40%] rounded-lg shadow ${
+            className={`p-1 w-[20rem] rounded-lg shadow ${
               user.currentUser.name === chat.from
                 ? "bg-outgoing-background"
                 : "bg-white"
@@ -250,6 +155,46 @@ const App = () => {
         );
     }
   };
+  const renderPreviewMessage = useCallback(() => {
+    if (files.length) {
+      const file = files[selectedPreviewFile];
+      let fileType = file?.type?.split("/")[0];
+      if (fileType === "video" && !file?.type?.includes("mp4")) {
+        fileType = "";
+      }
+      switch (fileType) {
+        case "image":
+          return (
+            <div
+              style={{
+                backgroundImage: `url(${URL.createObjectURL(file)})`,
+                backgroundSize: "contain",
+                backgroundPosition: "center center",
+                backgroundRepeat: "no-repeat",
+              }}
+              className="rounded-lg h-full w-full p-5"
+            ></div>
+          );
+        case "video":
+          return (
+            <div className="h-full flex justify-center">
+              <video
+                className="h-full"
+                controls
+                src={URL.createObjectURL(file)}
+              />
+            </div>
+          );
+        default:
+          return (
+            <div className="h-full flex flex-col justify-center items-center">
+              <FaFile size={200} color="#79909b" />
+              <div>No preview available</div>
+            </div>
+          );
+      }
+    }
+  }, [selectedPreviewFile, files]);
   useEffect(() => {
     const name = sessionStorage.getItem("name");
     if (name) {
@@ -278,12 +223,33 @@ const App = () => {
       });
     }
   }, [socket]);
+  const formatChats = async () => {
+    const result = [];
+    for (const chat of user.selectedUser.chats) {
+      if (chat.type !== "text") {
+        const response = await axios.get(
+          `http://localhost:3001/download/${chat.message}`,
+          {
+            responseType: "blob",
+          }
+        );
+        console.log(response.data);
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        result.push({
+          ...chat,
+          message: url,
+        });
+      } else result.push(chat);
+    }
+    setChats(result);
+  };
   useEffect(() => {
     // Scroll to bottom when chat messages change
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
+    formatChats();
   }, [user.selectedUser.chats]);
   return (
     <div className="flex h-screen w-screen">
@@ -470,10 +436,116 @@ const App = () => {
             </div>
           </div>
           {panel.middle ? (
-            <div className=" bg-panel-header-background h-full w-full">
-              <div></div>
-              <div></div>
-              <div></div>
+            <div className="h-[90%] bg-panel-header-background w-full">
+              <div className="p-3 h-[10%] flex justify-between items-center bg-panel-background-deeper">
+                <div>
+                  <CancelIcon
+                    onClick={() => {
+                      dispatch(middle(""));
+                      setFiles([]);
+                      setSelectedPreviewFile(0);
+                    }}
+                  />
+                </div>
+                <div className="text-sm">{files[selectedPreviewFile].name}</div>
+                <div></div>
+              </div>
+              <div className="h-[70%] p-10">{renderPreviewMessage()}</div>
+              <div className="h-[20%] w-full flex border-t-[2px]">
+                <div className="w-[90%]  overflow-x-scroll flex gap-5 p-5">
+                  {files.map((file, i) => {
+                    let fileType = file?.type?.split("/")[0];
+                    if (fileType === "video" && !file?.type?.includes("mp4")) {
+                      fileType = "";
+                    }
+                    if (fileType === "image")
+                      return (
+                        <div
+                          key={i}
+                          onClick={() => setSelectedPreviewFile(i)}
+                          style={{
+                            flexBasis: "60px",
+                            flexGrow: "0",
+                            flexShrink: "0",
+                            backgroundImage: `url(${URL.createObjectURL(
+                              file
+                            )})`,
+                            backgroundSize: "contain",
+                          }}
+                          className="border border-gray-300 rounded-lg"
+                        ></div>
+                      );
+                    else if (fileType === "video")
+                      return (
+                        <div
+                          key={i}
+                          onClick={() => setSelectedPreviewFile(i)}
+                          style={{
+                            flexBasis: "60px",
+                            flexGrow: "0",
+                            flexShrink: "0",
+                          }}
+                          className="border border-gray-300 rounded-lg flex justify-center"
+                        >
+                          <video
+                            src={URL.createObjectURL(file)}
+                            className="h-full"
+                          />
+                        </div>
+                      );
+                    else
+                      return (
+                        <div
+                          key={i}
+                          onClick={() => setSelectedPreviewFile(i)}
+                          style={{
+                            flexBasis: "60px",
+                            flexGrow: "0",
+                            flexShrink: "0",
+                          }}
+                          className="border border-gray-300 rounded-lg flex justify-center items-center"
+                        >
+                          <FaFile color="#79909b" size={40} />
+                        </div>
+                      );
+                  })}
+                </div>
+                <div className="w-[10%] flex justify-center items-center">
+                  <div className="bg-poll-bar-fill-sender p-5 rounded-full">
+                    <SendIcon
+                      onClick={async () => {
+                        const formData = new FormData();
+                        for (const file of files) {
+                          formData.append("files", file);
+                        }
+                        formData.append(
+                          "userData",
+                          JSON.stringify({
+                            from: user.currentUser.name,
+                            to: user.selectedUser.name,
+                          })
+                        );
+                        try {
+                          const response = await axios.post(
+                            "http://localhost:3001/files",
+                            formData,
+                            {
+                              headers: {
+                                "Content-Type": "multipart/form-data",
+                              },
+                            }
+                          );
+                        } catch (error) {
+                          console.error("Error uploading files:", error);
+                        }
+                        dispatch(middle(""));
+                        setFiles([]);
+                        setSelectedPreviewFile(0);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <>
@@ -498,7 +570,10 @@ const App = () => {
               <div className="h-[10%] bg-panel-header-background p-2 flex items-center gap-3">
                 <InputFileIcon
                   icon={<PlusIcon />}
-                  callback={() => dispatch(middle("filepreview"))}
+                  callback={(e) => {
+                    dispatch(middle("filepreview"));
+                    setFiles([...e.target.files]);
+                  }}
                 />
                 <input
                   placeholder="Type a message..."

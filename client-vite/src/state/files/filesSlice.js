@@ -12,9 +12,7 @@ const filesSlice = createSlice({
       const allFiles = [...state.blobFiles, ...action.payload];
       state.blobFiles = allFiles;
     },
-    deleteAllFiles: (state) => {
-      state = initialState;
-    },
+    deleteAllFiles: () => initialState,
     deleteFileByIndex: (state, action) => {
       state.blobFiles.splice(action.payload, 1);
     },

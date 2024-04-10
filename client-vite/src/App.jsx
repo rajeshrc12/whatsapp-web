@@ -9,7 +9,7 @@ import {
   resetUser,
   setCurrentUserName,
 } from "./state/user/userSlice";
-import { left, resetPanel } from "./state/panel/panelSlice";
+import { left, middle, resetPanel } from "./state/panel/panelSlice";
 import { io } from "socket.io-client";
 import BackIcon from "./icons/BackIcon";
 import EmptyProfileIcon from "./icons/EmptyProfileIcon";
@@ -30,6 +30,7 @@ import v1 from "./data/v1.mp4";
 import v2 from "./data/v2.mp4";
 import a1 from "./data/a1.ogg";
 import { FaFile } from "react-icons/fa6";
+import InputFileIcon from "./components/input/InputFileIcon";
 const App = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -469,7 +470,11 @@ const App = () => {
             </div>
           </div>
           {panel.middle ? (
-            <div>preview</div>
+            <div className=" bg-panel-header-background h-full w-full">
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
           ) : (
             <>
               <div
@@ -491,7 +496,10 @@ const App = () => {
                 ))}
               </div>
               <div className="h-[10%] bg-panel-header-background p-2 flex items-center gap-3">
-                <PlusIcon />
+                <InputFileIcon
+                  icon={<PlusIcon />}
+                  callback={() => dispatch(middle("filepreview"))}
+                />
                 <input
                   placeholder="Type a message..."
                   value={message}

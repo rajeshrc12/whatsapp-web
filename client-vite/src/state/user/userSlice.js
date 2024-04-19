@@ -67,7 +67,20 @@ export const getSelectedUserChats = createAsyncThunk(
         const chatsResult = await axios.get(
           `http://localhost:3001/chats/${state.user.currentUser.name}/${selectedUserName}`
         );
-        chats = chatsResult.data;
+        for (const chat of chatsResult.data) {
+          if (chat.type !== "text") {
+            const response = await axios.get(
+              `http://localhost:3001/download/${chat.message}`,
+              {
+                responseType: "blob",
+              }
+            );
+            chats.push({
+              ...chat,
+              message: URL.createObjectURL(response.data),
+            });
+          } else chats.push(chat);
+        }
         const lastSeenResult = await axios.get(
           `http://localhost:3001/getonlineuser/${selectedUserName}`
         );
@@ -107,7 +120,20 @@ export const fetchChats = createAsyncThunk(
         const result = await axios.get(
           `http://localhost:3001/chats/${state.user.currentUser.name}/${state.user.selectedUser.name}`
         );
-        chats = result.data;
+        for (const chat of result.data) {
+          if (chat.type !== "text") {
+            const response = await axios.get(
+              `http://localhost:3001/download/${chat.message}`,
+              {
+                responseType: "blob",
+              }
+            );
+            chats.push({
+              ...chat,
+              message: URL.createObjectURL(response.data),
+            });
+          } else chats.push(chat);
+        }
       }
       return chats;
     } catch (error) {

@@ -1,9 +1,11 @@
 import React from "react";
 import iconColors from "./colors";
 
-const DownloadIcon = () => {
+const DownloadIcon = ({ onClick = () => {} }) => {
   return (
     <svg
+      onClick={onClick}
+      className="cursor-pointer"
       viewBox="0 0 34 34"
       height="34"
       width="34"

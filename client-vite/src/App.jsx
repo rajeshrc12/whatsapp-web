@@ -25,11 +25,6 @@ import { sendChat } from "./api/chats";
 import { getTimeInAmPM } from "./utils/utils";
 import WhatsaAppBG from "./data/whatsapp.png";
 import Popper from "./components/popper/Popper";
-import mahesh from "./data/mahesh.jpeg";
-import i2 from "./data/i2.jpeg";
-import v1 from "./data/v1.mp4";
-import v2 from "./data/v2.mp4";
-import a1 from "./data/a1.ogg";
 import { FaFile } from "react-icons/fa6";
 import InputFileIcon from "./components/input/InputFileIcon";
 import SendIcon from "./icons/SendIcon";
@@ -44,9 +39,8 @@ const App = () => {
   const chatContainerRef = useRef(null);
   const [selectedPreviewFile, setSelectedPreviewFile] = useState(0);
   const [files, setFiles] = useState([]);
-  const [chats, setChats] = useState([]);
+  console.log(user.selectedUser.chats);
   const renderMessage = (chat) => {
-    console.log(chat);
     switch (chat.type) {
       case "text":
         return (
@@ -133,12 +127,24 @@ const App = () => {
                   <FaFile color="#79909b" size={30} />
                 </div>
                 <div>
-                  <div className="text-xs">Name.ogg</div>
+                  <div className="text-xs">{chat.filename}</div>
                   <div></div>
                 </div>
               </div>
               <div>
-                <DownloadIcon />
+                <DownloadIcon
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = chat.message;
+                    link.setAttribute("download", chat.filename);
+                    // Append to html link element page
+                    document.body.appendChild(link);
+                    // Start download
+                    link.click();
+                    // Clean up and remove the link
+                    link.parentNode.removeChild(link);
+                  }}
+                />
               </div>
             </div>
             <div className={`flex justify-end items-center w-full pt-1`}>
@@ -223,33 +229,13 @@ const App = () => {
       });
     }
   }, [socket]);
-  const formatChats = async () => {
-    const result = [];
-    for (const chat of user.selectedUser.chats) {
-      if (chat.type !== "text") {
-        const response = await axios.get(
-          `http://localhost:3001/download/${chat.message}`,
-          {
-            responseType: "blob",
-          }
-        );
-        console.log(response.data);
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        result.push({
-          ...chat,
-          message: url,
-        });
-      } else result.push(chat);
-    }
-    setChats(result);
-  };
   useEffect(() => {
     // Scroll to bottom when chat messages change
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
+      console.log(chatContainerRef.current.scrollHeight);
     }
-    formatChats();
   }, [user.selectedUser.chats]);
   return (
     <div className="flex h-screen w-screen">
@@ -379,12 +365,12 @@ const App = () => {
             </div>
             <div className="h-[80%]">
               {user.currentUser.contacts
-                .filter((user) => {
+                ?.filter((user) => {
                   if (!searchName) return true;
                   else if (user.name.includes(searchName)) return true;
                   else false;
                 })
-                .map((contact) => (
+                ?.map((contact) => (
                   <div
                     key={contact.name}
                     className={`px-3 gap-2 cursor-pointer flex items-center ${
@@ -541,6 +527,8 @@ const App = () => {
                         dispatch(middle(""));
                         setFiles([]);
                         setSelectedPreviewFile(0);
+                        dispatch(fetchChats());
+                        dispatch(getCurrentUserContacts());
                       }}
                     />
                   </div>
@@ -554,18 +542,24 @@ const App = () => {
                 ref={chatContainerRef}
                 style={{ backgroundImage: `url(${WhatsaAppBG})` }}
               >
-                {chats.map((chat) => (
-                  <div
-                    className={`flex ${
-                      user.currentUser.name === chat.from
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                    key={chat.message}
-                  >
-                    {renderMessage(chat)}
+                {user.selectedUser.chats.length ? (
+                  user.selectedUser.chats.map((chat) => (
+                    <div
+                      className={`flex ${
+                        user.currentUser.name === chat.from
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
+                      key={chat._id}
+                    >
+                      {renderMessage(chat)}
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex justify-center">
+                    <span className="loading loading-spinner text-poll-bar-fill-sender"></span>
                   </div>
-                ))}
+                )}
               </div>
               <div className="h-[10%] bg-panel-header-background p-2 flex items-center gap-3">
                 <InputFileIcon

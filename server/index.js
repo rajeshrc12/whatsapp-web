@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const moment = require("moment-timezone");
+const fs = require("fs");
 const { MongoClient, GridFSBucket, ObjectId } = require("mongodb");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
@@ -81,7 +82,6 @@ io.on("connection", async (socket) => {
     console.log("from disconnect function, connected users", connectedUsers); // false
   });
 });
-
 app.post("/chat", async (req, res) => {
   try {
     let { chat, to, from } = req.body;
@@ -91,6 +91,9 @@ app.post("/chat", async (req, res) => {
     );
     if (isUserOnline) chat = chat.map((c) => ({ ...c, seen: true }));
     let result = false;
+    chat = chat.map((c) => {
+      return { ...c, _id: new ObjectId() };
+    });
     result = await chats
       .find({
         users: {
@@ -284,18 +287,20 @@ app.post("/files", upload.array("files"), async (req, res) => {
     );
     if (isUserOnline) seen = true;
     for (const file of files) {
-      const uploadStream = bucket.openUploadStream(file.originalname);
-      // Pipe the file buffer to the GridFS upload stream
-      const resp = await uploadStream.end(file.buffer);
-      if (resp.filename) {
+      const fileStream = fs.createReadStream(file.path);
+      const uploadStream = bucket.openUploadStream(file.filename);
+      fileStream.pipe(uploadStream);
+      if (uploadStream.filename) {
         const chat = {
           from,
           to,
           seen,
           createdAt: date,
           updatedAt: date,
-          message: String(resp.id),
+          message: String(uploadStream.id),
           type: file.mimetype.split("/")[0],
+          filename: uploadStream.filename,
+          _id: new ObjectId(),
         };
         console.log(chat);
         result = await chats
@@ -318,7 +323,7 @@ app.post("/files", upload.array("files"), async (req, res) => {
         }
       }
     }
-    console.log(result);
+    io.sockets.emit(to, "fetchChats");
     res.status(200).send(result);
   } else {
     res.status(400).send(false);

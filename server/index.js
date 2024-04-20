@@ -72,7 +72,7 @@ io.on("connection", async (socket) => {
       openProfile,
     });
   }
-  console.clear();
+  // console.clear();
   console.log("io.on('connection')", connectedUsers);
   socket.broadcast.emit("onlineUsers", connectedUsers);
   socket.on("disconnect", () => {
@@ -232,8 +232,32 @@ app.get("/usercontacts/:name", async (req, res) => {
           { $project: { _id: 0, name: 1, unseenCount: 1 } },
         ])
         .toArray();
-      console.log(name, result);
-      res.send(result.map((user) => ({ ...user, name: user.name.join("") })));
+      const data = [];
+      for (const user of result) {
+        const res = await chats
+          .aggregate([
+            {
+              $match: {
+                users: { $all: [user.name.join(""), name] },
+              },
+            },
+            {
+              $project: {
+                lastChat: { $arrayElemAt: [{ $slice: ["$chats", -1] }, 0] },
+              },
+            },
+            {
+              $replaceRoot: { newRoot: "$lastChat" },
+            },
+          ])
+          .toArray();
+        data.push({
+          ...user,
+          name: user.name.join(""),
+          lastChat: res[0],
+        });
+      }
+      res.send(data);
     } else res.status(500).send("user name required");
   } catch (error) {
     console.log(error);
@@ -298,7 +322,9 @@ app.post("/files", upload.array("files"), async (req, res) => {
           createdAt: date,
           updatedAt: date,
           message: String(uploadStream.id),
-          type: file.mimetype.split("/")[0],
+          type: uploadStream.filename.includes("mkv")
+            ? "others"
+            : file.mimetype.split("/")[0],
           filename: uploadStream.filename,
           _id: new ObjectId(),
         };
@@ -327,6 +353,22 @@ app.post("/files", upload.array("files"), async (req, res) => {
     res.status(200).send(result);
   } else {
     res.status(400).send(false);
+  }
+});
+
+app.get("/download/:id", async (req, res) => {
+  try {
+    const fileId = req.params.id;
+    const fileObjectId = new ObjectId(fileId);
+    const file = await fsfiles.findOne({ _id: fileObjectId });
+    console.log("/download/:id", file, fileObjectId);
+    if (file?.filename) {
+      const downloadStream = bucket.openDownloadStreamByName(file.filename);
+      downloadStream.pipe(res);
+    } else res.send(false);
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -674,19 +716,6 @@ app.get("/clean", async (req, res) => {
   res.send({ response1, response2, response3, response4 });
 });
 
-app.get("/download/:id", async (req, res) => {
-  try {
-    const fileId = req.params.id;
-    const fileObjectId = new ObjectId(fileId);
-    const file = await fsfiles.findOne({ _id: fileObjectId });
-    console.log(file);
-    const downloadStream = bucket.openDownloadStreamByName(file.filename);
-    downloadStream.pipe(res);
-  } catch (error) {
-    console.error("Error downloading file:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
 app.post("/emoji", async (req, res) => {
   try {
     const { chatId, emoji, currentUser, selectedUser } = req.body;

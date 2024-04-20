@@ -28,6 +28,9 @@ import Popper from "./components/popper/Popper";
 import { FaFile } from "react-icons/fa6";
 import InputFileIcon from "./components/input/InputFileIcon";
 import SendIcon from "./icons/SendIcon";
+import CameraIconUpload from "./icons/CameraIconUpload";
+import DocumentIcon from "./icons/DocumentIcon";
+import VideoIcon from "./icons/VideoIcon";
 const App = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -39,7 +42,7 @@ const App = () => {
   const chatContainerRef = useRef(null);
   const [selectedPreviewFile, setSelectedPreviewFile] = useState(0);
   const [files, setFiles] = useState([]);
-  console.log(user.selectedUser.chats);
+  console.log(user.currentUser.contacts);
   const renderMessage = (chat) => {
     switch (chat.type) {
       case "text":
@@ -157,6 +160,43 @@ const App = () => {
                 </div>
               )}
             </div>
+          </div>
+        );
+    }
+  };
+  const renderLastChat = (chat) => {
+    switch (chat.type) {
+      case "image":
+        return (
+          <div className="flex gap-1">
+            <div>
+              <CameraIconUpload size="15" />
+            </div>
+            <div>Image</div>
+          </div>
+        );
+      case "video":
+        return (
+          <div className="flex gap-1">
+            <div>
+              <VideoIcon size="18" />
+            </div>
+            <div>Video</div>
+          </div>
+        );
+      case "text":
+        return (
+          <div className="flex">
+            <div>{chat.message}</div>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex gap-1">
+            <div>
+              <DocumentIcon size="15" />
+            </div>
+            <div>{chat.filename}</div>
           </div>
         );
     }
@@ -389,10 +429,17 @@ const App = () => {
                     <div className="w-full flex flex-col border-t-[1px] py-3">
                       <div className="flex justify-between">
                         <div>{contact.name}</div>
-                        <div className="text-xs text-input-border">7:30 pm</div>
+                        <div className="text-xs text-input-border">
+                          {getTimeInAmPM(contact.lastChat.createdAt)}
+                        </div>
                       </div>
                       <div className="flex justify-between">
-                        <div className="text-xs text-input-border">Hii</div>
+                        <div className="text-xs text-input-border flex items-center gap-1">
+                          {contact.lastChat.from === user.currentUser.name && (
+                            <TickIcon seen={contact.lastChat.seen} />
+                          )}
+                          {renderLastChat(contact.lastChat)}
+                        </div>
                         {contact.unseenCount > 0 && (
                           <div className="bg-unread-marker-background rounded-full w-6 pl-2 text-white">
                             {contact.unseenCount}

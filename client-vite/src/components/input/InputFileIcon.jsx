@@ -4,6 +4,7 @@ const InputFileIcon = ({
   icon = <></>,
   callback = () => {},
   multiple = true,
+  accept = "",
 }) => {
   return (
     <div>
@@ -19,6 +20,7 @@ const InputFileIcon = ({
         }}
         className="hidden"
         type="file"
+        accept={accept}
       />
     </div>
   );

@@ -75,10 +75,11 @@ export const getSelectedUserChats = createAsyncThunk(
                 responseType: "blob",
               }
             );
-            chats.push({
-              ...chat,
-              message: URL.createObjectURL(response.data),
-            });
+            if (response.data)
+              chats.push({
+                ...chat,
+                message: URL.createObjectURL(response.data),
+              });
           } else chats.push(chat);
         }
         const lastSeenResult = await axios.get(
@@ -128,10 +129,11 @@ export const fetchChats = createAsyncThunk(
                 responseType: "blob",
               }
             );
-            chats.push({
-              ...chat,
-              message: URL.createObjectURL(response.data),
-            });
+            if (response.data)
+              chats.push({
+                ...chat,
+                message: URL.createObjectURL(response.data),
+              });
           } else chats.push(chat);
         }
       }

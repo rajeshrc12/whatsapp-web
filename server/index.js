@@ -3,10 +3,10 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const { Connection } = require("./database/db");
 const { routes } = require("./routes/Routes");
-
+const { Server } = require("socket.io");
+const { handleSocket } = require("./controllers/socket-controller");
 const app = express();
 const port = 3001;
-
 require("dotenv").config();
 app.use(cors());
 app.use(bodyParser.json());
@@ -20,6 +20,14 @@ Connection(
 
 app.use("/", routes);
 
-app.listen(port, () => {
-  console.log(`API server listening at http://localhost:${port}`);
+const server = app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
+
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+  },
+});
+
+io.on("connection", handleSocket);

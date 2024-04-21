@@ -13,3 +13,12 @@ export const addUser = async ({ email, name, profileImageUrl }) => {
     console.log("error src/service/user/(addUser)", error);
   }
 };
+export const getOnlineUsers = async () => {
+  try {
+    const response = await axios.get(`${serverUrl}/onlineusers`);
+    console.log("src/service/user/(getOnlineUsers)", response);
+    return response.data;
+  } catch (error) {
+    console.log("error src/service/user/(getOnlineUsers)", error);
+  }
+};

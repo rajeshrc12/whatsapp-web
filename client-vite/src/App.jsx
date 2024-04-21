@@ -17,6 +17,7 @@ const App = () => {
   }, []);
   return (
     <div>
+      <div className="text-2xl font-bold">{localStorage.getItem("email")}</div>
       <button
         onClick={() => {
           localStorage.removeItem("email");

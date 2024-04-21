@@ -6,7 +6,6 @@ import { Provider } from "react-redux";
 import { store } from "./state/store.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./components/login/Login.jsx";
-
 const router = createBrowserRouter([
   {
     path: "/",

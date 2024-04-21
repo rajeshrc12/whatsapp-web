@@ -16,6 +16,5 @@ const handleSocket = (socket) => {
 const getOnlineUsers = (_, res) => res.send(onlineUsers);
 module.exports = {
   handleSocket,
-  onlineUsers,
   getOnlineUsers,
 };

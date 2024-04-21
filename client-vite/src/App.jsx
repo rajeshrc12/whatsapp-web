@@ -9,7 +9,7 @@ import {
   resetUser,
   setCurrentUserName,
 } from "./state/user/userSlice";
-import { left, middle, resetPanel } from "./state/panel/panelSlice";
+import { left, main, middle, resetPanel } from "./state/panel/panelSlice";
 import { io } from "socket.io-client";
 import BackIcon from "./icons/BackIcon";
 import EmptyProfileIcon from "./icons/EmptyProfileIcon";
@@ -31,6 +31,8 @@ import SendIcon from "./icons/SendIcon";
 import CameraIconUpload from "./icons/CameraIconUpload";
 import DocumentIcon from "./icons/DocumentIcon";
 import VideoIcon from "./icons/VideoIcon";
+import LeftArrowIcon from "./icons/LeftArrowIcon";
+import RightArrowIcon from "./icons/RightArrowIcon";
 const App = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -42,7 +44,6 @@ const App = () => {
   const chatContainerRef = useRef(null);
   const [selectedPreviewFile, setSelectedPreviewFile] = useState(0);
   const [files, setFiles] = useState([]);
-  console.log(user.currentUser.contacts);
   const renderMessage = (chat) => {
     switch (chat.type) {
       case "text":
@@ -74,7 +75,11 @@ const App = () => {
       case "image":
         return (
           <div
-            className={`p-1 w-[20rem] rounded-lg shadow ${
+            onClick={() => {
+              setSelectedPreviewFile(chat);
+              dispatch(main("viewMedia"));
+            }}
+            className={`cursor-pointer p-1 w-[20rem] rounded-lg shadow ${
               user.currentUser.name === chat.from
                 ? "bg-outgoing-background"
                 : "bg-white"
@@ -96,7 +101,11 @@ const App = () => {
       case "video":
         return (
           <div
-            className={`p-1 w-[10rem] rounded-lg shadow ${
+            onClick={() => {
+              setSelectedPreviewFile(chat);
+              dispatch(main("viewMedia"));
+            }}
+            className={`cursor-pointer p-1 w-[10rem] rounded-lg shadow ${
               user.currentUser.name === chat.from
                 ? "bg-outgoing-background"
                 : "bg-white"
@@ -675,6 +684,122 @@ const App = () => {
         </div>
       ) : (
         <div className="w-[70%] bg-panel-header-background h-full"></div>
+      )}
+      {panel.main === "viewMedia" && (
+        <div className="fixed top-0 left-0 h-screen w-screen bg-white">
+          <div className="h-[10%] flex justify-between">
+            <div className="flex gap-3 items-center p-3">
+              <div>
+                <EmptyProfileIcon />
+              </div>
+              <div className="flex flex-col">
+                <div>{user.selectedUser.name}</div>
+                <div className="text-sm text-input-border">
+                  {user.selectedUser.lastSeen}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 items-center p-3">
+              <DownloadIcon
+                size="25"
+                onClick={() => {
+                  const link = document.createElement("a");
+                  link.href = selectedPreviewFile.message;
+                  link.setAttribute("download", selectedPreviewFile.filename);
+                  // Append to html link element page
+                  document.body.appendChild(link);
+                  // Start download
+                  link.click();
+                  // Clean up and remove the link
+                  link.parentNode.removeChild(link);
+                }}
+              />
+              <CancelIcon onClick={() => dispatch(main(""))} />
+            </div>
+          </div>
+          <div className="h-[70%] flex justify-between items-center">
+            <div className="bg-chevron-button-background rounded-full p-2">
+              <LeftArrowIcon />
+            </div>
+            {selectedPreviewFile.type === "image" && (
+              <div
+                style={{
+                  backgroundImage: `url(${
+                    user?.selectedUser?.chats?.find(
+                      (chat) => chat._id === selectedPreviewFile._id
+                    )?.message
+                  })`,
+                  backgroundSize: "contain",
+                  backgroundPosition: "center center",
+                  backgroundRepeat: "no-repeat",
+                }}
+                className="rounded-lg h-full w-full p-5"
+              ></div>
+            )}
+            {selectedPreviewFile.type === "video" && (
+              <video
+                controls
+                src={
+                  user?.selectedUser?.chats?.find(
+                    (chat) => chat._id === selectedPreviewFile._id
+                  )?.message
+                }
+                className="h-full w-60"
+              />
+            )}
+            <div className="bg-chevron-button-background rounded-full p-2">
+              <RightArrowIcon />
+            </div>
+          </div>
+          <div className="h-[20%]">
+            <div className="w-full h-full overflow-x-scroll flex gap-2 items-center justify-center">
+              {user.selectedUser.chats
+                .filter(
+                  (chat) => chat.type === "image" || chat.type === "video"
+                )
+                .map((chat) => {
+                  if (chat.type === "image")
+                    return (
+                      <div
+                        onClick={() => setSelectedPreviewFile(chat)}
+                        key={chat._id}
+                        style={{
+                          flexBasis: "80px",
+                          flexGrow: "0",
+                          flexShrink: "0",
+                          backgroundImage: `url(${chat.message})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center center",
+                          backgroundRepeat: "no-repeat",
+                        }}
+                        className={`${
+                          chat._id === selectedPreviewFile._id &&
+                          "scale-75 border-[5px] border-gray-200"
+                        } border border-gray-300 rounded-lg h-[80px]`}
+                      ></div>
+                    );
+                  else if (chat.type === "video")
+                    return (
+                      <div
+                        onClick={() => setSelectedPreviewFile(chat)}
+                        key={chat._id}
+                        style={{
+                          flexBasis: "80px",
+                          flexGrow: "0",
+                          flexShrink: "0",
+                        }}
+                        className={`${
+                          chat._id === selectedPreviewFile._id &&
+                          "scale-75 border-[5px] border-gray-200"
+                        } rounded-lg flex justify-center h-[80px]`}
+                      >
+                        <video src={chat.message} className="h-full" />
+                      </div>
+                    );
+                })}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

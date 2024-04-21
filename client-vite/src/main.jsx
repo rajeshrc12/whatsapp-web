@@ -5,7 +5,8 @@ import "./index.css";
 import { Provider } from "react-redux";
 import { store } from "./state/store.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Login from "./components/login/Login.jsx";
+import Login from "./pages/Login.jsx";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 const router = createBrowserRouter([
   {
     path: "/login",
@@ -17,7 +18,9 @@ const router = createBrowserRouter([
   },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Provider store={store}>
-    <RouterProvider router={router} />
-  </Provider>
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID}>
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
+  </GoogleOAuthProvider>
 );

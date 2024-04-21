@@ -15,7 +15,18 @@ const App = () => {
       navigate("/login");
     }
   }, []);
-  return <div>App</div>;
+  return (
+    <div>
+      <button
+        onClick={() => {
+          localStorage.removeItem("email");
+          navigate("/login");
+        }}
+      >
+        logout
+      </button>
+    </div>
+  );
 };
 
 export default App;

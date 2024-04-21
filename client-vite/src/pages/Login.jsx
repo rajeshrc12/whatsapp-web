@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import WhatsappIcon from "../icons/WhatsappIcon";
 import qr from "../images/qr.png";
 import { useNavigate } from "react-router-dom";
+import { addUser } from "../service/user";
 const Login = () => {
   const navigate = useNavigate();
   useEffect(() => {
@@ -35,8 +36,12 @@ const Login = () => {
             <GoogleLogin
               onSuccess={(credentialResponse) => {
                 const userData = jwtDecode(credentialResponse.credential);
-                console.log(userData);
                 localStorage.setItem("email", userData.email);
+                addUser({
+                  email: userData.email,
+                  name: userData.name,
+                  profileImageUrl: userData.picture,
+                });
                 navigate("/");
               }}
               onError={() => {

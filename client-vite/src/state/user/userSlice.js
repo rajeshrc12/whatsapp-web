@@ -68,7 +68,7 @@ export const getSelectedUserChats = createAsyncThunk(
           `http://localhost:3001/chats/${state.user.currentUser.name}/${selectedUserName}`
         );
         for (const chat of chatsResult.data) {
-          if (chat.type !== "text") {
+          if (chat.type !== "text" && chat.type !== "date") {
             const response = await axios.get(
               `http://localhost:3001/download/${chat.message}`,
               {
@@ -122,7 +122,7 @@ export const fetchChats = createAsyncThunk(
           `http://localhost:3001/chats/${state.user.currentUser.name}/${state.user.selectedUser.name}`
         );
         for (const chat of result.data) {
-          if (chat.type !== "text") {
+          if (chat.type !== "text" && chat.type !== "date") {
             const response = await axios.get(
               `http://localhost:3001/download/${chat.message}`,
               {

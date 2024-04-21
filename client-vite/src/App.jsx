@@ -589,23 +589,37 @@ const App = () => {
           ) : (
             <>
               <div
-                className="h-[80%] overflow-y-scroll flex flex-col gap-1 p-10"
+                className="h-[80%] overflow-y-scroll flex flex-col gap-1 relative px-10"
                 ref={chatContainerRef}
                 style={{ backgroundImage: `url(${WhatsaAppBG})` }}
               >
                 {user.selectedUser.chats.length ? (
-                  user.selectedUser.chats.map((chat) => (
-                    <div
-                      className={`flex ${
-                        user.currentUser.name === chat.from
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                      key={chat._id}
-                    >
-                      {renderMessage(chat)}
-                    </div>
-                  ))
+                  user.selectedUser.chats.map((chat) => {
+                    if (chat.type === "date")
+                      return (
+                        <div
+                          key={chat._id}
+                          className="sticky top-1 flex justify-center"
+                        >
+                          <div className="p-1 bg-white rounded-lg text-xs shadow px-3 py-2">
+                            {chat.date}
+                          </div>
+                        </div>
+                      );
+                    else
+                      return (
+                        <div
+                          className={`flex ${
+                            user.currentUser.name === chat.from
+                              ? "justify-end"
+                              : "justify-start"
+                          }`}
+                          key={chat._id}
+                        >
+                          {renderMessage(chat)}
+                        </div>
+                      );
+                  })
                 ) : (
                   <div className="flex justify-center">
                     <span className="loading loading-spinner text-poll-bar-fill-sender"></span>

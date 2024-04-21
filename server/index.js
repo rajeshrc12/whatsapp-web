@@ -6,6 +6,7 @@ const fs = require("fs");
 const { MongoClient, GridFSBucket, ObjectId } = require("mongodb");
 const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
+const { type } = require("os");
 
 const app = express();
 const port = 3001; // Port for MongoDB API
@@ -135,7 +136,31 @@ app.get("/chats/:name/:selectedname", async (req, res) => {
     if (result.length) {
       chat = result[0].chats;
     }
-    res.status(200).send(chat);
+    const newChat = [];
+    if (chat.length) {
+      let date = moment(chat[0].createdAt).format("DD/MM/YYYY").slice(0, 10);
+      newChat.push({
+        _id: new ObjectId(),
+        type: "date",
+        date,
+      });
+      for (const ch of chat) {
+        if (date === moment(ch.createdAt).format("DD/MM/YYYY").slice(0, 10)) {
+          newChat.push(ch);
+        } else {
+          date = moment(ch.createdAt).format("DD/MM/YYYY").slice(0, 10);
+          newChat.push({
+            _id: new ObjectId(),
+            type: "date",
+            date,
+          });
+          newChat.push(ch);
+        }
+      }
+    }
+    console.clear();
+    console.log("/chats/:name/:selectedname", newChat);
+    res.status(200).send(newChat);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);

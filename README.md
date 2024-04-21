@@ -56,3 +56,9 @@ add emoji
 react to media and list of reacted people
 pin message
 status
+
+====final
+date
+view media on click
+login using gmail
+profile upload and name and status change

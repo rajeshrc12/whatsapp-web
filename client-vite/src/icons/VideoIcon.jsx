@@ -7,7 +7,6 @@ const VideoIcon = ({ onClick = () => {}, size = "24" }) => {
       height={size}
       width={size}
       preserveAspectRatio="xMidYMid meet"
-      class=""
       version="1.1"
       x="0px"
       y="0px"

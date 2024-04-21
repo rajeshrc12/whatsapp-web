@@ -80,7 +80,7 @@ const App = () => {
                 : "bg-white"
             }`}
           >
-            <img src={chat.message} alt="" />
+            <img src={chat.message} alt="" className="max-h-[20rem] w-full" />
             <div className={`flex justify-end items-center w-full pt-1`}>
               <div className="text-[11px] text-input-border min-w-[50px]">
                 {getTimeInAmPM(chat.updatedAt)}
@@ -187,7 +187,11 @@ const App = () => {
       case "text":
         return (
           <div className="flex">
-            <div>{chat.message}</div>
+            <div>
+              {chat.message.length > 20
+                ? chat.message.slice(0, 20) + "..."
+                : chat.message}
+            </div>
           </div>
         );
       default:

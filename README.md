@@ -62,3 +62,9 @@ date
 view media on click
 login using gmail
 profile upload and name and status change
+
+=====bugs
+videos is not showing sometime,
+create blob file at server side when fetching data not in ui side
+when select chat , if there is unseen message then only send request to reciepent
+auto scroll to bottom not working when media is there

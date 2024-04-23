@@ -8,7 +8,13 @@ const { handleSocket } = require("./controllers/socket-controller");
 const app = express();
 const port = 3001;
 require("dotenv").config();
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    methods: ["POST", "GET"],
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 
 Connection(

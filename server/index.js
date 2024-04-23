@@ -12,7 +12,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://whatsapp-web-client-phi.vercel.app/",
+      "https://whatsapp-web-client-phi.vercel.app",
     ],
     methods: ["POST", "GET", "PATCH", "DELETE"],
     credentials: true,

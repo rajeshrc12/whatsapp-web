@@ -12,7 +12,7 @@ const App = () => {
   useEffect(() => {
     const email = localStorage.getItem("email");
     if (email) {
-      const skt = io("ws://localhost:3001", {
+      const skt = io(`ws://${import.meta.env.VITE_CLIENT_ID}`, {
         query: {
           email,
         },

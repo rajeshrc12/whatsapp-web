@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import { getOnlineUsers } from "./service/user";
+import { getOnlineUsers, getUsers } from "./service/user";
 const App = () => {
   const navigate = useNavigate();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const handleOnlineUsers = async () => {
-    const users = await getOnlineUsers();
-    setOnlineUsers(users);
+    const users = await getUsers();
+    const onlineUsers = await getOnlineUsers();
+    setOnlineUsers(onlineUsers);
+    console.log(users);
   };
   useEffect(() => {
     const email = localStorage.getItem("email");
     if (email) {
-      const skt = io(`ws://${import.meta.env.VITE_CLIENT_ID}`, {
+      const skt = io(import.meta.env.VITE_SERVER_SOCKET_URL, {
         query: {
           email,
         },

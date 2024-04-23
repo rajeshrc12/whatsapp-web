@@ -8,12 +8,10 @@ const { handleSocket } = require("./controllers/socket-controller");
 const app = express();
 const port = 3001;
 require("dotenv").config();
+console.log(process.env.CLIENT_URL);
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://whatsapp-web-client-phi.vercel.app",
-    ],
+    origin: [process.env.CLIENT_URL],
     methods: ["POST", "GET", "PATCH", "DELETE"],
     credentials: true,
   })

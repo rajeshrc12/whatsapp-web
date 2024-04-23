@@ -7,9 +7,9 @@ const App = () => {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const handleOnlineUsers = async () => {
     const users = await getUsers();
-    const onlineUsers = await getOnlineUsers();
-    setOnlineUsers(onlineUsers);
-    console.log(users);
+    const response = await getOnlineUsers();
+    setOnlineUsers(users, response);
+    console.log(users, response);
   };
   useEffect(() => {
     const email = localStorage.getItem("email");
@@ -27,6 +27,8 @@ const App = () => {
   return (
     <div>
       <div className="text-2xl font-bold">{localStorage.getItem("email")}</div>
+      <div>{import.meta.env.VITE_SERVER_SOCKET_URL}</div>
+      <div>{import.meta.env.VITE_SERVER_API_URL}</div>
       <button
         onClick={() => {
           localStorage.removeItem("email");

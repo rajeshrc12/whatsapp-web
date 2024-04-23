@@ -8,7 +8,7 @@ const App = () => {
         name: "rajesh",
       })
       .then((res) => console.log("client", res.data));
-  });
+  }, []);
   return (
     <div>
       <div>VITE_SERVER_API_URL {import.meta.env.VITE_SERVER_API_URL}</div>

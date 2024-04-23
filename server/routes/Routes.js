@@ -6,6 +6,9 @@ const routes = express.Router();
 routes.post("/user", addUser);
 routes.get("/user", getUsers);
 routes.get("/onlineusers", getOnlineUsers);
+routes.get("/", (req, res) => {
+  res.send("hello");
+});
 
 module.exports = {
   routes,

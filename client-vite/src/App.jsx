@@ -27,6 +27,7 @@ const App = () => {
   return (
     <div>
       <div className="text-2xl font-bold">{localStorage.getItem("email")}</div>
+      <div>ENVS</div>
       <div>{import.meta.env.VITE_SERVER_SOCKET_URL}</div>
       <div>{import.meta.env.VITE_SERVER_API_URL}</div>
       <button

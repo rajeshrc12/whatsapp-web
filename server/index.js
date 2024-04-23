@@ -10,8 +10,11 @@ const port = 3001;
 require("dotenv").config();
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
-    methods: ["POST", "GET"],
+    origin: [
+      "http://localhost:5173",
+      "https://whatsapp-web-client-phi.vercel.app/",
+    ],
+    methods: ["POST", "GET", "PATCH", "DELETE"],
     credentials: true,
   })
 );

@@ -10,11 +10,7 @@ const port = 3001;
 require("dotenv").config();
 console.log(process.env.CLIENT_URL);
 app.use(
-  cors({
-    origin: [process.env.CLIENT_URL],
-    methods: ["POST", "GET", "PATCH", "DELETE"],
-    credentials: true,
-  })
+  cors()
 );
 app.use(bodyParser.json());
 
